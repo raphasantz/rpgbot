@@ -1,0 +1,4 @@
+[{"id":1,"nome":"Shatterspike (Quebra-Espadas)","propriedades":"Espada Longa +1. Se o portador tentar quebrar a arma ou objeto de um inimigo, o dano é sempre considerado um Crítico.","valor_ouro":2000}, 
+ {"id":2,"nome":"Cajado de Entalhe (Gulthias Staff)","propriedades":"Cajado de madeira negra. Permite ao portador usar a magia \"Emaranhar\" 1x por dia. O portador não é atacado por Ramos Secos (Twigs).","valor_ouro":1500}, 
+ {"id":3,"nome":"Fruto da Árvore Gulthias (Vermelho)","propriedades":"Maçã milagrosa. Cura todas as doenças e recupera todos os PVs instantaneamente.","valor_ouro":0}, 
+ {"id":4,"nome":"Fruto da Árvore Gulthias (Branco)","propriedades":"Maçã da Morte. Contém sementes que, se plantadas, dão origem a um novo Ramo Seco. Se ingerida, funciona como um veneno potente.","valor_ouro":0}]

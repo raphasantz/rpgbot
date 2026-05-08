@@ -1,0 +1,3 @@
+[{"id":1,"nome_item":"O Mapa de Belak","conteudo_texto":"Um rascunho em couro mostrando a conexão entre a fenda (Área 45) e o mundo exterior. Revela que o druida tinha planos de expandir o bosque para a superfície.","sala_onde_encontra":"laboratorio_35"}, 
+ {"id":2,"nome_item":"Inscrição da Árvore","conteudo_texto":"Diz a lenda que a árvore nasceu de uma estaca cravada no coração de um vampiro chamado Gulthias. O mal dele agora flui pela seiva.","sala_onde_encontra":"clareira_44"}, 
+ {"id":3,"nome_item":"Registros de Oakhurst","conteudo_texto":"Uma lista de nomes de aldeões que compraram a maçã branca nos últimos 10 anos. Muitos deles desapareceram ou \"mudaram de personalidade\".","sala_onde_encontra":"conclusao_46"}]

@@ -1,0 +1,8 @@
+[{"id":1,"nome_magia":"Mísseis Mágicos","nivel":1,"alcance":"30 metros","efeito":"Cria 3 dardos de energia que acertam automaticamente. Dano: 1d4+1 por dardo."}, 
+ {"id":2,"nome_magia":"Curar Ferimentos Leves","nivel":1,"alcance":"Toque","efeito":"Cura 1d8+1 pontos de vida de uma criatura."}, 
+ {"id":3,"nome_magia":"Emaranhar","nivel":1,"alcance":"120 metros","efeito":"Plantas prendem as criaturas em uma área. Exige teste de Reflexos (CD 13) para não ficar imóvel."}, 
+ {"id":4,"nome_magia":"Clava Mística (Shillelagh)","nivel":0,"alcance":"Toque","efeito":"Transforma um pedaço de madeira em uma arma mágica. Dano aumenta para 1d6+2."}, 
+ {"id":5,"nome_magia":"Mísseis Mágicos","nivel":1,"alcance":"30 metros","efeito":"Cria 3 dardos de energia que acertam automaticamente. Dano: 1d4+1 por dardo."}, 
+ {"id":6,"nome_magia":"Curar Ferimentos Leves","nivel":1,"alcance":"Toque","efeito":"Cura 1d8+1 pontos de vida de uma criatura."}, 
+ {"id":7,"nome_magia":"Emaranhar","nivel":1,"alcance":"120 metros","efeito":"Plantas prendem as criaturas em uma área. Exige teste de Reflexos (CD 13) para não ficar imóvel."}, 
+ {"id":8,"nome_magia":"Clava Mística (Shillelagh)","nivel":0,"alcance":"Toque","efeito":"Transforma um pedaço de madeira em uma arma mágica. Dano aumenta para 1d6+2."}]
