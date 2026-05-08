@@ -304,6 +304,38 @@ async def acao_handler(message: types.Message):
 
                 is_fuga_temp = any(p in texto_limpo_acao for p in ["fugir", "fujo", "correr", "escapar", "recuar"])
 
+                # =========================================================================
+                # --- O LEÃO DE CHÁCARA (Blindagem de Turnos e Condições) ---
+                # =========================================================================
+                acao_texto = message.text.lower()
+                
+                # 1. Trava de Movimento (Agarrado)
+                if "Agarrado" in (jogador.status_efeitos or []):
+                    if any(palavra in acao_texto for palavra in ["correr", "fugir", "andar", "ir", "norte", "sul", "leste", "oeste", "recuar"]):
+                        return await message.answer("⛓️ <b>Estás Agarrado!</b> A tua velocidade é 0. Tens de usar a tua ação numa MANOBRA para tentar escapar antes de te moveres.", parse_mode="HTML")
+
+                # 2. Trava de Spam em Combate Multiplayer (Rodízio Soft)
+                if campanha.em_combate:
+                    estado_campanha = dict(campanha.estado_salas or {})
+                    ultimo_jogador = estado_campanha.get("ultimo_jogador_acao")
+                    
+                    aliados_vivos = db.query(Jogador).filter(
+                        Jogador.party_id == campanha.party_id,
+                        Jogador.cena_atual == campanha.cena_atual,
+                        Jogador.hp_atual > 0
+                    ).all()
+                    
+                    # Se há mais de 1 jogador vivo, impede que o mesmo spamme 2 ações seguidas
+                    if len(aliados_vivos) > 1 and ultimo_jogador == user_id:
+                        # Permite apenas falar/ver inventário
+                        if not any(p in texto_limpo_acao for p in ["falar", "conversar", "dizer", "olhar", "status", "inventario"]):
+                            return await message.answer("⏳ <b>Espera a tua vez!</b>\nOutro membro do grupo precisa de agir antes de fazeres outra ação.", parse_mode="HTML")
+                    
+                    # Atualiza o último a jogar se foi uma ação real
+                    if not any(p in texto_limpo_acao for p in ["falar", "conversar", "dizer", "olhar", "status", "inventario"]):
+                        estado_campanha["ultimo_jogador_acao"] = user_id
+                        campanha.estado_salas = estado_campanha
+                # =========================================================================
                 
                 if "CURAR" in intencao or ("pocao" in texto_limpo_acao and any(p in texto_limpo_acao for p in ["beber", "tomar", "usar", "bebo", "tomo", "uso", "bebe", "usa"])) or "antidoto" in texto_limpo_acao:
                     inv_linhas = obter_inventario_limpo(jogador.inventario)
@@ -333,9 +365,6 @@ async def acao_handler(message: types.Message):
 
                 elif ("NAVEGAR" in intencao or "NAVEGAR_FURTIVO" in intencao) and (direcao_temp in conexoes_lower_temp or is_fuga_temp or len(message.text.split()) <= 3):
                     
-                    if "Agarrado" in (jogador.status_efeitos or []):
-                        return await message.answer(f"🐙 <b>Estás Agarrado!</b> A tua velocidade é 0. Não te podes mover ou fugir. Tenta uma MANOBRA para te libertares.", parse_mode="HTML")
-
                     encontros_atuais = db.query(Encontro).filter(Encontro.cod_sala == campanha.cena_atual).all()
                     estado_campanha = dict(campanha.estado_salas) if campanha.estado_salas else {}
                     encontro_bloqueio = next((e for e in encontros_atuais if not estado_campanha.get(f"derrotado_{e.id}")), None)
@@ -663,7 +692,7 @@ async def acao_handler(message: types.Message):
                                          f"<b>{obj_alvo.nome}</b> cede com um estrondo!")
                         elif not res_obj.acertou:
                             msg_destr = (f"{narracao}\n\n"
-                                         f"🎲 d20={res_obj.d20}+{jogador.modificador_ataque}={res_obj.total_ataque} vs CA {obj_alvo.ca} ❌\n"
+                                         f"🎲 d20={getattr(res_obj, 'detalhes_d20', f'[{res_obj.d20}]')}+{jogador.modificador_ataque}={res_obj.total_ataque} vs CA {obj_alvo.ca} ❌\n"
                                          f"O golpe raspou em <b>{obj_alvo.nome}</b> sem causar dano significativo.\n"
                                          f"🏚️ HP do objeto: {obj_alvo.hp_atual}/{obj_alvo.hp_max}")
                         else:
@@ -677,13 +706,13 @@ async def acao_handler(message: types.Message):
                                     if itens_reais:
                                         texto_loot = f"\n🎁 <b>Saque liberado:</b> {', '.join(itens_reais)}"
                                 msg_destr = (f"{narracao}\n\n"
-                                             f"🎲 d20={res_obj.d20}+{jogador.modificador_ataque}={res_obj.total_ataque} vs CA {obj_alvo.ca} "
+                                             f"🎲 d20={getattr(res_obj, 'detalhes_d20', f'[{res_obj.d20}]')}+{jogador.modificador_ataque}={res_obj.total_ataque} vs CA {obj_alvo.ca} "
                                              f"{'💥 CRÍTICO!' if res_obj.critico else '✅'}\n"
                                              f"💥 Dano: <b>{res_obj.dano}</b>\n"
                                              f"🔨 <b>{obj_alvo.nome} foi destruído!</b>{texto_loot}")
                             else:
                                 msg_destr = (f"{narracao}\n\n"
-                                             f"🎲 d20={res_obj.d20}+{jogador.modificador_ataque}={res_obj.total_ataque} vs CA {obj_alvo.ca} "
+                                             f"🎲 d20={getattr(res_obj, 'detalhes_d20', f'[{res_obj.d20}]')}+{jogador.modificador_ataque}={res_obj.total_ataque} vs CA {obj_alvo.ca} "
                                              f"{'💥 CRÍTICO!' if res_obj.critico else '✅'}\n"
                                              f"💥 Dano: <b>{res_obj.dano}</b>\n"
                                              f"🏚️ <b>{obj_alvo.nome}</b> HP: {res_obj.hp_restante}/{obj_alvo.hp_max}")
@@ -1018,11 +1047,11 @@ async def acao_handler(message: types.Message):
                                             else:
                                                 texto_vitoria += f"\n🌟 <b>{membro.nome.upper()} SUBIU PARA O NÍVEL {membro.nivel}!</b>"
 
-                                            if membro.classe.lower() == "monge" and "Desarmado" in getattr(membro, 'arma_equipada', ''):
-                                                if membro.nivel >= 17: membro.dano_dado = "1d10"
-                                                elif membro.nivel >= 11: membro.dano_dado = "1d8"
-                                                elif membro.nivel >= 5: membro.dano_dado = "1d6"
-                                                else: membro.dano_dado = "1d4"
+                                        if membro.classe.lower() == "monge" and "Desarmado" in getattr(membro, 'arma_equipada', ''):
+                                            if membro.nivel >= 17: membro.dano_dado = "1d10"
+                                            elif membro.nivel >= 11: membro.dano_dado = "1d8"
+                                            elif membro.nivel >= 5: membro.dano_dado = "1d6"
+                                            else: membro.dano_dado = "1d4"
 
                                     loot_combate = []
 
@@ -1274,7 +1303,7 @@ async def acao_handler(message: types.Message):
                                 
                                 return await message.answer(msg_morte, parse_mode="HTML", reply_markup=teclado_saidas(sala_atual))
 
-                        linha_ataque = f"🎲 Dados: d20={res.d20}+{jogador.modificador_ataque}={res.total_ataque} vs CA {ca_alvo} {'✅' if res.acertou else '❌'}"
+                        linha_ataque = f"🎲 Dados: d20={getattr(res, 'detalhes_d20', f'[{res.d20}]')}+{jogador.modificador_ataque}={res.total_ataque} vs CA {ca_alvo} {'✅' if res.acertou else '❌'}"
                         if "MAGIA" in intencao: linha_ataque = f"{magia_escolhida['icone']} <b>{magia_escolhida['nome']}</b> {'✅' if res.acertou else '❌'}"
 
                         linha_dano_jogador = ""

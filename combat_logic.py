@@ -1,6 +1,6 @@
 import random
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 
 @dataclass
@@ -13,6 +13,7 @@ class ResultadoAtaqueObjeto:
     destruido: bool      # True se o objeto chegou a 0 HP neste golpe
     hp_restante: int     # HP do objeto após o ataque
     quebrou_por_forca: bool  # True se foi derruíbado pelo break_threshold
+    detalhes_d20: str = ""   # Guarda os dados rolados caso tenha vantagem/desvantagem
 
 @dataclass
 class ResultadoAtaque:
@@ -21,15 +22,62 @@ class ResultadoAtaque:
     acertou: bool
     critico: bool
     dano: int
+    detalhes_d20: str = ""
 
 
 def rolar_dado(lados):
     return random.randint(1, lados)
 
 
-def processar_ataque_fisico(jogador, inimigo_ca: int) -> ResultadoAtaque:
-    # 1. Rola o d20
-    d20 = rolar_dado(20)
+def calcular_vantagem_desvantagem(atacante_status: List[str], defensor_status: List[str], tipo_ataque: str = "melee"):
+    vantagem = False
+    desvantagem = False
+
+    # --- PENALIDADES DO ATACANTE ---
+    if atacante_status:
+        if any(s in atacante_status for s in ["Envenenado", "Cego", "Assustado", "Caído"]):
+            desvantagem = True
+
+    # --- VANTAGENS CONTRA O DEFENSOR ---
+    if defensor_status:
+        if any(s in defensor_status for s in ["Cego", "Atordoado", "Paralisado"]):
+            vantagem = True
+        if "Caído" in defensor_status:
+            if tipo_ataque == "melee":
+                vantagem = True # Bater em quem está no chão com espada é fácil
+            elif tipo_ataque == "distancia":
+                desvantagem = True # Atirar flecha em quem está deitado é difícil (alvo menor)
+
+    # Anulam-se mutuamente
+    if vantagem and desvantagem:
+        return False, False
+    return vantagem, desvantagem
+
+
+def rolar_d20_combate(vantagem: bool, desvantagem: bool):
+    roll1 = rolar_dado(20)
+    roll2 = rolar_dado(20)
+    
+    if vantagem:
+        d20 = max(roll1, roll2)
+        return d20, f"[{roll1}, {roll2}] (Vantagem)"
+    elif desvantagem:
+        d20 = min(roll1, roll2)
+        return d20, f"[{roll1}, {roll2}] (Desvantagem)"
+    
+    return roll1, f"[{roll1}]"
+
+
+def processar_ataque_fisico(jogador, inimigo_ca: int, defensor_status: list = None, tipo_ataque: str = "melee") -> ResultadoAtaque:
+    if defensor_status is None:
+        defensor_status = []
+        
+    atacante_status = getattr(jogador, 'status_efeitos', [])
+    
+    # 1. Rola o d20 com Vantagem/Desvantagem
+    vantagem, desvantagem = calcular_vantagem_desvantagem(atacante_status, defensor_status, tipo_ataque)
+    d20, detalhes_d20 = rolar_d20_combate(vantagem, desvantagem)
+    
     # Usando o modificador real do banco de dados (Proficiência + Atributo)
     modificador = jogador.modificador_ataque
     total_ataque = d20 + modificador
@@ -74,7 +122,8 @@ def processar_ataque_fisico(jogador, inimigo_ca: int) -> ResultadoAtaque:
         total_ataque=total_ataque,
         acertou=acertou,
         critico=critico,
-        dano=dano
+        dano=dano,
+        detalhes_d20=detalhes_d20
     )
 
 
@@ -82,10 +131,14 @@ def processar_ataque_objeto(jogador, objeto) -> ResultadoAtaqueObjeto:
     """Processa um ataque físico contra um ObjetoDestrutivel.
     Respeita CA, HP, vulnerabilidades e break_threshold (Str).
     """
+    atacante_status = getattr(jogador, 'status_efeitos', [])
+    
     # 1. Verificar arrombamento por Força pura (Teste de Força ao invés de usar valor direto)
     quebrou_por_forca = False
     if getattr(objeto, 'break_threshold', 0) > 0:
-        d20_str = rolar_dado(20)
+        vantagem, desvantagem = calcular_vantagem_desvantagem(atacante_status, [], "melee")
+        d20_str, detalhes_str = rolar_d20_combate(vantagem, desvantagem)
+        
         mod_str = getattr(jogador, 'mod_str', 0)
         forca_total = d20_str + mod_str
         
@@ -96,11 +149,13 @@ def processar_ataque_objeto(jogador, objeto) -> ResultadoAtaqueObjeto:
             return ResultadoAtaqueObjeto(
                 d20=d20_str, total_ataque=forca_total, acertou=True,
                 critico=False, dano=dano, destruido=True,
-                hp_restante=0, quebrou_por_forca=True
+                hp_restante=0, quebrou_por_forca=True, detalhes_d20=detalhes_str
             )
 
     # 2. Rolagem de ataque normal vs. CA do objeto
-    d20 = rolar_dado(20)
+    vantagem, desvantagem = calcular_vantagem_desvantagem(atacante_status, [], "melee")
+    d20, detalhes_d20 = rolar_d20_combate(vantagem, desvantagem)
+    
     modificador = jogador.modificador_ataque
     total_ataque = d20 + modificador
 
@@ -169,5 +224,6 @@ def processar_ataque_objeto(jogador, objeto) -> ResultadoAtaqueObjeto:
         dano=dano,
         destruido=destruido,
         hp_restante=novo_hp,
-        quebrou_por_forca=False
+        quebrou_por_forca=False,
+        detalhes_d20=detalhes_d20
     )
