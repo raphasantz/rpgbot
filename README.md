@@ -2,7 +2,7 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TELEGRAM RPG BOT (REDNERDS)
 Um Mestre de Jogo automatizado, integrado ao Telegram, utilizando 
-Inteligência Artificial para narração, classificação de intenções e 
+Inteligência Artificial para narração, classificação de intenções estrita e 
 geração de imagens procedurais.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -11,17 +11,19 @@ O sistema é modular, dividido para facilitar a manutenção e escalabilidade:
 
     main.py: O coração do bot. Gerencia os manipuladores de comandos 
     (handlers), o ciclo de vida das mensagens do Aiogram e a máquina de 
-    estados (FSM) para criação de personagens. Contém o sistema de 
-    combate por turnos, navegação, economia, interações com NPCs,
-    ações táticas (Esquiva, Duas Armas, Preparar, Ajuda, Cobertura, 
-    Manobras) e lembretes de habilidades de classe.
+    estados (FSM) para criação de personagens. Delega as ações de texto 
+    para o motor de exploração.
 
-    ai_engine.py: A camada de inteligência. Utiliza o modelo GPT-4o-mini 
-    para classificar as intenções do jogador (Combate, Navegação, Cobertura, 
-    Manobra, Ajuda, Interação) e gerar narrações imersivas. Possui sistema 
-    de whitelist para validação de intenções e cache com sensibilidade ao 
-    contexto (objetos disponíveis na sala). Também gerencia a geração de 
-    imagens de salas via DALL-E 3 com sanitização de conteúdo.
+    exploracao.py: O cérebro do loop de gameplay. Intercepta as ações 
+    em texto livre do jogador e orquestra a resolução (combate, navegação, 
+    interação, uso de itens). Inclui o "Leão de Chácara" (trava de turnos/anti-spam) 
+    e delega cálculos matemáticos para o combat_logic e IA para o ai_engine.
+
+    ai_engine.py: A camada de inteligência com "Prompt Blindado". Utiliza 
+    o GPT-4o-mini estritamente como tradutor de intenções mecânicas (Combate, 
+    Navegação, etc.), zerando alucinações narrativas. Possui extração de loot 
+    nativa em JSON e cache com sensibilidade ao contexto (objetos da sala). 
+    Também gerencia a geração de imagens de salas via DALL-E 3 com sanitização de conteúdo.
 
     models.py: Define o esquema do banco de dados (SQLAlchemy), incluindo 
     tabelas para Jogadores, Campanhas, Inimigos, Cenas, Missões, Aventuras,
@@ -30,9 +32,9 @@ O sistema é modular, dividido para facilitar a manutenção e escalabilidade:
     Ameaça e Status Effects (Caído, Agarrado, Cobertura, etc.).
 
     combat_logic.py: Implementa a mecânica de dados (d20), cálculo de acertos 
-    baseados na CA (Classe de Armadura) e processamento de dano. Inclui
-    suporte a vulnerabilidades, resistências e teste de Força (d20 + mod_str)
-    para arrombamento de Objetos Destrutíveis.
+    baseados na CA (Classe de Armadura) e processamento de dano. Resolve 
+    matematicamente as Vantagens e Desvantagens geradas por Status Effects 
+    e inclui suporte a vulnerabilidades/resistências de Objetos Destrutíveis.
 
     stats_manager.py: Gerencia o rastreamento de progresso, incluindo o 
     ranking global, total de kills, danos causados e histórico de sessões.
@@ -86,11 +88,12 @@ O sistema é modular, dividido para facilitar a manutenção e escalabilidade:
     prólogo (via tabela Aventura no banco de dados) com pausa 
     dramática antes da primeira sala.
 
-    ⚔️ Combate por Turnos com Escalonamento: Sistema de iniciativa,
+    ⚔️ Combate por Turnos com Trava Anti-Spam: Sistema de iniciativa,
     habilidades de classe (Fúria, Smite, Ataque Furtivo) e revide 
     inimigo. O número de ataques por turno escala dinamicamente 
-    com o tamanho da party. Lembretes visuais com botões inline 
-    auxiliam cada jogador a usar suas habilidades no momento certo.
+    com o tamanho da party. Possui "Trava de Turno" para evitar 
+    mensagens duplicadas em conexões lentas. Lembretes visuais com 
+    botões inline auxiliam cada jogador.
 
     🛡️ Ações Táticas de Combate:
         - Esquiva (Dodge): Use seu turno para impor desvantagem 
@@ -105,11 +108,11 @@ O sistema é modular, dividido para facilitar a manutenção e escalabilidade:
         - Cobertura (+2 CA): Proteja-se atrás do cenário para 
           ganhar bónus de Classe de Armadura contra inimigos.
         - Manobras de Combate: Tente empurrar, agarrar, derrubar 
-          ou desarmar inimigos com testes de Força ou Destreza.
+          ou desarmar inimigos com testes de Força ou Destreza. 
           Sucesso deixa o inimigo vulnerável (vantagem para o grupo).
 
-    🧬 Status Effects (Condições): Sistema completo de condições 
-    táticas que afetam mecanicamente o combate:
+    🧬 Status Effects (Condições Matemáticas): Sistema completo 
+    que aplica Vantagens e Desvantagens diretas no motor de rolagem:
         - Caído (Prone): Ataques corpo a corpo contra ti têm 
           vantagem. Os teus ataques têm desvantagem. Gaste parte 
           do movimento para te levantares (ação livre narrativa).
