@@ -54,6 +54,7 @@ except Exception as e:
 
 class CriacaoPersonagem(StatesGroup):
     nome = State()
+    sexo = State()
     raca = State()
     classe = State()
     background = State()
@@ -477,6 +478,21 @@ async def iniciar_criacao(message: types.Message, state: FSMContext):
 @dp.message(CriacaoPersonagem.nome)
 async def processar_nome(message: types.Message, state: FSMContext):
     await state.update_data(nome=message.text)
+    # Criar um teclado simples para o sexo
+    teclado_sexo = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Masculino"), KeyboardButton(text="Feminino")],
+            [KeyboardButton(text="Outro")]
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True
+    )
+    await message.answer("Qual é o <b>sexo/gênero</b> do seu herói?", reply_markup=teclado_sexo, parse_mode="HTML")
+    await state.set_state(CriacaoPersonagem.sexo)
+
+@dp.message(CriacaoPersonagem.sexo)
+async def processar_sexo(message: types.Message, state: FSMContext):
+    await state.update_data(sexo=message.text)
     await message.answer("Escolha sua <b>Raça</b>:", reply_markup=menu_racas(), parse_mode="HTML")
     await state.set_state(CriacaoPersonagem.raca)
 
@@ -540,6 +556,7 @@ async def processar_atributos(message: types.Message, state: FSMContext):
 
         dados_jogador = {
             "nome": user_data['nome'], "raca": raca_escolhida, "classe": classe, "background": user_data['background'],
+            "sexo": user_data.get('sexo', 'Desconhecido'),
             "hp_maximo": hp_base + mods[2], "hp_atual": hp_base + mods[2],
             "str_val": val[0], "dex_val": val[1], "con_val": val[2], "int_val": val[3], "wis_val": val[4], "cha_val": val[5],
             "mod_str": mods[0], "mod_dex": mods[1], "mod_con": mods[2], "mod_int": mods[3], "mod_wis": mods[4], "mod_cha": mods[5],

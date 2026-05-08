@@ -12,6 +12,7 @@ class Jogador(Base):
     cena_anterior = Column(String, nullable=True)
     
     nome = Column(String)
+    sexo = Column(String, nullable=True)
     classe = Column(String)
     raca = Column(String)
     background = Column(String)
