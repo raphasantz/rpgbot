@@ -127,6 +127,7 @@ class Inimigo(Base):
     
     # ── MECÂNICA DE BOSS E LOOT ESPECIAL ──
     is_boss = Column(Boolean, default=False)
+    fase_atual = Column(Integer, default=1)
     loot_especial = Column(JSON, default=list)
 
 class Cena(Base):
