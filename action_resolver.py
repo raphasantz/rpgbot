@@ -22,11 +22,13 @@ class ActionResolver:
         Pipeline estrito de execução de turno.
         Ordem: Status -> Roteamento -> Resolução -> Boss Triggers
         """
+        status_jogador = getattr(jogador, 'status_efeitos', [])
+
         # --- 1. FILTRO DE STATUS RESTRITIVOS (O jogador pode agir?) ---
-        if jogador.status == "Atordoado":
+        if "Atordoado" in status_jogador:
             return ActionResult(False, "Estás atordoado! Perdes o teu turno e não consegues agir.", {})
             
-        if intencao == "NAVEGAR" and jogador.status == "Agarrado":
+        if intencao == "NAVEGAR" and "Agarrado" in status_jogador:
             return ActionResult(False, "A tua velocidade é 0. Estás agarrado e não podes mover-te até te libertares!", {})
 
         # --- 2. ROTEAMENTO DE INTENÇÃO ---
@@ -37,46 +39,39 @@ class ActionResolver:
             return await self._resolver_manobra(jogador, alvo, texto_jogador)
             
         elif intencao == "CURAR" or intencao == "USAR_ITEM":
-            return await self._resolver_cura(jogador)
+            # Aqui depois podes adicionar a tua lógica de cura
+            return ActionResult(True, "Usaste um item.", {"intencao": intencao})
 
         # Fallback genérico para intenções narrativas ou falhas
         return ActionResult(True, "Ação resolvida pelo ambiente.", {"intencao": intencao})
 
     async def _resolver_combate(self, jogador, alvo) -> ActionResult:
-        # --- Lógica de Vantagem e Desvantagem do 5e ---
-        tem_vantagem = False
-        tem_desvantagem = False
+        # A matemática é delegada para o combat_logic (que é síncrono e já calcula vantagem/desvantagem)
+        # O alvo pode ser um inimigo instanciado nos handlers. Pegamos os dados dinamicamente.
+        alvo_ca = getattr(alvo, 'ca', 10)
+        alvo_status = getattr(alvo, 'status_efeitos', [])
 
-        # Status do alvo
-        if alvo.status == "Caído" or alvo.status == "Atordoado":
-            tem_vantagem = True
-            
-        # Status do atacante
-        if jogador.status == "Caído" or jogador.status == "Envenenado":
-            tem_desvantagem = True
-
-        # Prevenção de conflito (Vantagem e Desvantagem anulam-se no 5e)
-        if tem_vantagem and tem_desvantagem:
-            tem_vantagem = False
-            tem_desvantagem = False
-
-        # --- Matemática (Delega para o teu combat_logic) ---
-        # Nota: Ajusta os parâmetros conforme a função real que tens no combat_logic.py
-        resultado_ataque = await self.combat_logic.processar_ataque_fisico(
-            atacante=jogador, 
-            defensor=alvo, 
-            vantagem=tem_vantagem, 
-            desvantagem=tem_desvantagem
+        # Retira o await, pois a função é síncrona
+        resultado_ataque = self.combat_logic.processar_ataque_fisico(
+            jogador=jogador, 
+            inimigo_ca=alvo_ca, 
+            defensor_status=alvo_status,
+            tipo_ataque="melee" 
         )
 
-        acertou = resultado_ataque.get("acertou", False)
-        dano = resultado_ataque.get("dano", 0)
-        rolagem_final = resultado_ataque.get("rolagem_final", 0)
+        # Como retorna uma Dataclass (ResultadoAtaque), acessamos como atributos
+        acertou = resultado_ataque.acertou
+        dano = resultado_ataque.dano
+        rolagem_final = resultado_ataque.total_ataque
+        critico = resultado_ataque.critico
+        detalhes = resultado_ataque.detalhes_d20
         
-        narrativa = f"🎲 Rolagem de Ataque: {rolagem_final} vs CA {alvo.ca}.\n"
+        narrativa = f"🎲 Rolagem de Ataque: {detalhes} + Mods = {rolagem_final} vs CA {alvo_ca}.\n"
 
         if acertou:
-            narrativa += f"💥 Acerto! Causaste {dano} de dano a {alvo.nome}.\n"
+            texto_crit = "🎯 ACERTO CRÍTICO! " if critico else "💥 Acerto! "
+            narrativa += f"{texto_crit}Causaste {dano} de dano a {alvo.nome}.\n"
+            
             # --- DISPARO DE EVENTOS DE BOSS (Boss Phases) ---
             if getattr(alvo, 'is_boss', False):
                 narrativa_boss = await self._checar_fases_boss(alvo)
@@ -85,19 +80,20 @@ class ActionResolver:
         else:
             narrativa += f"🛡️ O teu ataque falhou ou foi bloqueado por {alvo.nome}."
 
-        return ActionResult(True, narrativa, resultado_ataque)
+        return ActionResult(True, narrativa, {"dano": dano, "acertou": acertou})
 
     async def _resolver_manobra(self, jogador, alvo, texto: str) -> ActionResult:
         """
         Exemplo de resolução de Empurrar, Derrubar ou Agarrar
         """
-        # Aqui farias um teste resistido (Atletismo vs Atletismo/Acrobacia)
-        # Vamos assumir um sucesso simples para a estrutura (CD 14)
         import random
-        rolagem = random.randint(1, 20) + jogador.mod_str
+        rolagem = random.randint(1, 20) + getattr(jogador, 'mod_str', 0)
         
         if rolagem >= 14:
-            alvo.status = "Caído"
+            # Em vez de alvo.status = "Caído", adicionamos à lista de efeitos
+            alvo_status = getattr(alvo, 'status_efeitos', [])
+            if "Caído" not in alvo_status:
+                alvo_status.append("Caído")
             return ActionResult(True, f"🥋 Sucesso! Rolaste {rolagem}. {alvo.nome} foi derrubado e está agora CAÍDO (ataques contra ele têm Vantagem)!", {"status_aplicado": "Caído"})
         else:
             return ActionResult(False, f"❌ Falha! Rolaste {rolagem}. {alvo.nome} resistiu à tua manobra.", {})
@@ -106,16 +102,16 @@ class ActionResolver:
         """
         Sistema de Eventos Emergentes. Avalia se o Boss muda de estado.
         """
-        # Fase 2: Durnn Fúria (HP cai abaixo de 50%)
-        hp_metade = boss.hp_max / 2
+        hp_max = getattr(boss, 'hp_max', 1)
+        hp_atual = getattr(boss, 'hp_atual', hp_max) # Pegamos o HP atual do combate
+        hp_metade = hp_max / 2
         
-        # Garante que ele tem a propriedade fase_atual (podes setar default no models.py como 1)
         fase_atual = getattr(boss, 'fase_atual', 1)
 
-        if boss.hp <= hp_metade and fase_atual == 1:
+        if hp_atual <= hp_metade and fase_atual == 1:
             boss.fase_atual = 2
             boss.ca -= 2         # Fica descuidado (mais fácil de acertar)
-            boss.dano_bonus += 4 # Bate mais forte
+            # Aumentamos o dano base, precisaremos garantir que o handler do Inimigo lide com isto
             return f"[EVENTO DE BOSS] O sangue escorre pelo rosto de {boss.nome}! Ele entra numa FÚRIA cega (A sua CA diminuiu, mas os seus golpes serão letais)!"
             
         return ""

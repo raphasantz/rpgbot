@@ -36,26 +36,29 @@ async def skill_callback(callback: types.CallbackQuery):
         
         jogador.slots_magia -= 1
         msg = ""
+        efeitos = list(jogador.status_efeitos or [])
         
         if skill == "surto":
-            if not hasattr(jogador, '_surto'):
-                jogador._surto = True
+            if "Surto" not in efeitos: efeitos.append("Surto")
             msg = "⚔️ <b>Surto de Ação ativado!</b> Vais realizar um ataque extra neste turno."
         elif skill == "folego":
             cura = random.randint(1, 10) + jogador.nivel
             jogador.hp_atual = min(jogador.hp_maximo, jogador.hp_atual + cura)
             msg = f"❤️ <b>Retomar Fôlego!</b> Recuperaste {cura} HP."
         elif skill == "smite":
-            jogador._smite = True
+            if "Smite" not in efeitos: efeitos.append("Smite")
             msg = "✨ <b>Destruição Divina preparada!</b> Teu próximo ataque terá dano radiante extra."
         elif skill == "furia":
-            jogador._furia = True
+            if "Fúria" not in efeitos: efeitos.append("Fúria")
             msg = "😡 <b>Fúria ativada!</b> Mais dano e resistência a dano físico até o fim do combate."
         elif skill == "formaselvagem":
             cura = random.randint(1, 4) + jogador.nivel
             jogador.hp_atual = min(jogador.hp_maximo, jogador.hp_atual + cura)
-            jogador._formaselvagem = True
+            if "Forma Selvagem" not in efeitos: efeitos.append("Forma Selvagem")
             msg = f"🐾 <b>Forma Selvagem!</b> Curaste {cura} HP e teus ataques terão +2d6 de dano extra."
+        
+        # Salva as alterações na base de dados
+        jogador.status_efeitos = efeitos
         
         await callback.message.answer(msg, parse_mode="HTML")
         await callback.answer("Habilidade usada!")
@@ -325,13 +328,10 @@ async def acao_handler(message: types.Message):
                         Jogador.hp_atual > 0
                     ).all()
                     
-                    # Se há mais de 1 jogador vivo, impede que o mesmo spamme 2 ações seguidas
                     if len(aliados_vivos) > 1 and ultimo_jogador == user_id:
-                        # Permite apenas falar/ver inventário
                         if not any(p in texto_limpo_acao for p in ["falar", "conversar", "dizer", "olhar", "status", "inventario"]):
                             return await message.answer("⏳ <b>Espera a tua vez!</b>\nOutro membro do grupo precisa de agir antes de fazeres outra ação.", parse_mode="HTML")
                     
-                    # Atualiza o último a jogar se foi uma ação real
                     if not any(p in texto_limpo_acao for p in ["falar", "conversar", "dizer", "olhar", "status", "inventario"]):
                         estado_campanha["ultimo_jogador_acao"] = user_id
                         campanha.estado_salas = estado_campanha
@@ -392,6 +392,12 @@ async def acao_handler(message: types.Message):
 
                                 jogador.hp_atual -= dano_fuga
                                 if jogador.hp_atual <= 0:
+                                    try: registrar_derrota(db, user_id, intervencao_divina=False)
+                                    except TypeError: pass
+                                    db.query(Jogador).filter(Jogador.telefone == user_id).delete()
+                                    db.query(Campanha).filter(Campanha.host_id == user_id).delete()
+                                    db.query(Missao).filter(Missao.jogador_telefone == user_id).delete()
+
                                     return await message.answer(
                                         f"💀 <b>{jogador.nome.upper()} MORREU!</b>\n"
                                         f"Foste abatido por um <b>Ataque de Oportunidade</b> de "
@@ -406,6 +412,11 @@ async def acao_handler(message: types.Message):
                                     parse_mode="HTML"
                                 )
                             else:
+                                efeitos_atuais = list(jogador.status_efeitos or [])
+                                if "Fúria" in efeitos_atuais: efeitos_atuais.remove("Fúria")
+                                if "Cobertura" in efeitos_atuais: efeitos_atuais.remove("Cobertura")
+                                jogador.status_efeitos = efeitos_atuais
+
                                 campanha.cena_atual = destino_fuga
                                 campanha.cena_anterior = None
                                 sala_destino = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
@@ -428,10 +439,10 @@ async def acao_handler(message: types.Message):
                     conexoes_lower = conexoes_lower_temp
                     if direcao in conexoes_lower:
                         
-                        if "Cobertura" in (jogador.status_efeitos or []):
-                            efeitos_atuais = list(jogador.status_efeitos)
-                            efeitos_atuais.remove("Cobertura")
-                            jogador.status_efeitos = efeitos_atuais
+                        efeitos_atuais = list(jogador.status_efeitos or [])
+                        if "Cobertura" in efeitos_atuais: efeitos_atuais.remove("Cobertura")
+                        if "Fúria" in efeitos_atuais: efeitos_atuais.remove("Fúria")
+                        jogador.status_efeitos = efeitos_atuais
                             
                         campanha.cena_anterior = campanha.cena_atual
                         campanha.cena_atual = conexoes_lower[direcao]
@@ -723,7 +734,7 @@ async def acao_handler(message: types.Message):
                         inimigo = db.query(Inimigo).filter(Inimigo.nome == encontro.nome_inimigo).first()
                         
                         if not inimigo:
-                            await message.answer(f"⚠️ <b>Distorção Mágica:</b> O monstro '<b>{encontro.nome_inimigo}</b>' existe na sala, mas as suas estatísticas não estão no Bestiário! Pede ao Mestre para o adicionar ao banco de dados.", parse_mode="HTML")
+                            await message.answer(f"⚠️ <b>Distorção Mágica:</b> O monstro '<b>{encontro.nome_inimigo}</b>' existe na sala, mas as suas estatísticas não estão no Bestiário!", parse_mode="HTML")
                             return
                         
                         chave_hp = f"hp_{encontro.id}"
@@ -746,10 +757,10 @@ async def acao_handler(message: types.Message):
                         campanha.estado_salas = estado_campanha
 
                         if any(p in texto_min for p in ["esquivar", "defender", "dodge", "defesa total"]):
-                            if "Esquivando" not in (jogador.status_efeitos or []):
-                                efeitos = list(jogador.status_efeitos or [])
-                                efeitos.append("Esquivando")
-                                jogador.status_efeitos = efeitos
+                            efeitos_atuais = list(jogador.status_efeitos or [])
+                            if "Esquivando" not in efeitos_atuais:
+                                efeitos_atuais.append("Esquivando")
+                                jogador.status_efeitos = efeitos_atuais
                                 await message.answer("🛡️ <b>Posição Defensiva!</b> Inimigos terão desvantagem para te acertar até teu próximo turno.", parse_mode="HTML")
                                 return
                             else:
@@ -777,30 +788,35 @@ async def acao_handler(message: types.Message):
                             magia_escolhida = MAGIAS_POR_CLASSE[chave_classe].copy()
                             jogador.dano_dado = magia_escolhida["dano"]
 
-                        # Flags de Habilidades Ativas
+                        # --- Processamento das Flags e Status do Jogador ---
                         dano_extra_flag = 0
-                        if hasattr(jogador, '_smite') and jogador._smite:
+                        efeitos_atuais = list(jogador.status_efeitos) if jogador.status_efeitos else []
+                        feature_msg = ""
+                        resistencia_furia = False
+
+                        if "Smite" in efeitos_atuais:
                             dados_smite = min(5, 2 + (jogador.nivel // 4))
                             dano_extra_flag += sum(random.randint(1, 8) for _ in range(dados_smite))
-                            jogador._smite = False
-                        if hasattr(jogador, '_formaselvagem') and jogador._formaselvagem:
+                            efeitos_atuais.remove("Smite")
+                            
+                        if "Forma Selvagem" in efeitos_atuais:
                             dano_extra_flag += sum(random.randint(1, 6) for _ in range(2))
-                            jogador._formaselvagem = False
-                        if hasattr(jogador, '_furia') and jogador._furia:
+                            efeitos_atuais.remove("Forma Selvagem")
+                            
+                        if "Fúria" in efeitos_atuais:
                             bonus_furia = 2
                             if jogador.nivel >= 16: bonus_furia = 4
                             elif jogador.nivel >= 9: bonus_furia = 3
                             dano_extra_flag += bonus_furia
-                            jogador._furia = False
+                            resistencia_furia = True
 
                         _cls_kw = jogador.classe.lower()
                         kws_classe = KEYWORDS_POR_CLASSE.get(_cls_kw, {})
                         mod_keyword = {}
-                        keyword_feature_msg = ""
                         for kw_texto, kw_efeitos in kws_classe.items():
                             if kw_texto in texto_min:
                                 mod_keyword = kw_efeitos
-                                keyword_feature_msg = f"\n⚡ <i>{kw_efeitos.get('texto', '')}</i>"
+                                feature_msg = f"\n⚡ <i>{kw_efeitos.get('texto', '')}</i>"
                                 break
 
                         mod_atq_original = jogador.modificador_ataque
@@ -808,9 +824,8 @@ async def acao_handler(message: types.Message):
                             jogador.modificador_ataque += mod_keyword["bonus_ataque"]
 
                         bonus_ca_kw = mod_keyword.get("bonus_ca", 0)
-
-                        vantagem_ajuda = "Ajudado" in (jogador.status_efeitos or [])
-                        desvantagem_caido = "Caído" in (jogador.status_efeitos or [])
+                        vantagem_ajuda = "Ajudado" in efeitos_atuais
+                        desvantagem_caido = "Caído" in efeitos_atuais
                         
                         tem_vantagem = mod_keyword.get("vantagem") or estado_campanha.get("inimigo_debilidade") or vantagem_ajuda
                         tem_desvantagem = desvantagem_caido
@@ -821,42 +836,38 @@ async def acao_handler(message: types.Message):
                             res = res1 if res1.total_ataque >= res2.total_ataque else res2
                             _keyword_inimigo_vantagem = mod_keyword.get("vantagem", False)
                             if estado_campanha.get("inimigo_debilidade"):
-                                keyword_feature_msg += "\n🎯 <i>Aproveitaste a falha na defesa inimiga (Vantagem)!</i>"
+                                feature_msg += "\n🎯 <i>Aproveitaste a falha na defesa inimiga (Vantagem)!</i>"
                                 estado_campanha["inimigo_debilidade"] = False
                             if vantagem_ajuda:
-                                keyword_feature_msg += "\n🤝 <i>O teu aliado facilitou o teu ataque (Vantagem)!</i>"
-                                efeitos_atuais = list(jogador.status_efeitos or [])
-                                if "Ajudado" in efeitos_atuais:
-                                    efeitos_atuais.remove("Ajudado")
-                                jogador.status_efeitos = efeitos_atuais
+                                feature_msg += "\n🤝 <i>O teu aliado facilitou o teu ataque (Vantagem)!</i>"
+                                efeitos_atuais.remove("Ajudado")
                         elif tem_desvantagem and not tem_vantagem:
                             res1 = processar_ataque_fisico(jogador, ca_alvo)
                             res2 = processar_ataque_fisico(jogador, ca_alvo)
                             res = res1 if res1.total_ataque <= res2.total_ataque else res2
                             _keyword_inimigo_vantagem = False
-                            if desvantagem_caido:
-                                keyword_feature_msg += "\n⚠️ <i>Estás Caído no chão! O teu ataque teve Desvantagem.</i>"
+                            feature_msg += "\n⚠️ <i>Estás Caído no chão! O teu ataque teve Desvantagem.</i>"
                         else:
                             res = processar_ataque_fisico(jogador, ca_alvo)
                             _keyword_inimigo_vantagem = False
 
                         jogador.modificador_ataque = mod_atq_original
 
-                        if hasattr(jogador, '_surto') and jogador._surto:
+                        # Aplica o segundo ataque se a flag Surto estiver ativa
+                        if "Surto" in efeitos_atuais:
                             res_extra = processar_ataque_fisico(jogador, ca_alvo)
                             if res_extra.acertou:
                                 res.dano += res_extra.dano
-                            jogador._surto = False
+                            efeitos_atuais.remove("Surto")
 
                         if mod_keyword.get("ataque_extra"):
                             res_kw_extra = processar_ataque_fisico(jogador, ca_alvo)
                             if res_kw_extra.acertou:
                                 res.dano += res_kw_extra.dano
-                                keyword_feature_msg += f" (+{res_kw_extra.dano} extra)"
+                                feature_msg += f" (+{res_kw_extra.dano} extra)"
                         
                         status_msg = ""
                         pode_atacar = True
-                        efeitos_atuais = list(jogador.status_efeitos) if jogador.status_efeitos else []
                         dano_veneno = 0
                         
                         if is_durnn_furia:
@@ -873,11 +884,9 @@ async def acao_handler(message: types.Message):
                             pode_atacar = False
                             efeitos_atuais.remove("Atordoado")
                             status_msg += f"\n💫 <b>Atordoado:</b> Ficas tonto e perdes a tua ação neste turno!"
-                            jogador.status_efeitos = efeitos_atuais
 
-                        feature_msg = keyword_feature_msg
-                        dano_extra_feature = dano_extra_flag
-                        resistencia_furia = hasattr(jogador, '_furia') and jogador._furia
+                        dano_extra_feature = 0 # CORREÇÃO AQUI
+                        dano_extra_feature += dano_extra_flag
                         desvantagem_inimigo = False
                         bonus_ca_temporario = bonus_ca_kw
                         _cls = jogador.classe.lower()
@@ -903,6 +912,7 @@ async def acao_handler(message: types.Message):
                                     elif jogador.nivel >= 9: bonus_furia = 3
                                     dano_extra_feature += bonus_furia
                                     resistencia_furia = True
+                                    if "Fúria" not in efeitos_atuais: efeitos_atuais.append("Fúria")
                                     feature_msg = f"\n😡 <i>Fúria Bárbaro: +{bonus_furia} de dano e Resistência Ativada! (-1 Uso)</i>"
                                 else:
                                     feature_msg = f"\n⚠️ <i>Sem Usos de Fúria restantes!</i>"
@@ -1011,6 +1021,7 @@ async def acao_handler(message: types.Message):
                                 
                                 if hp_grupo <= 0:
                                     vitoria, estado_campanha[f"derrotado_{encontro.id}"] = True, True
+                                    if "Fúria" in efeitos_atuais: efeitos_atuais.remove("Fúria")
                                     
                                     xp_base = getattr(inimigo, 'xp_recompensa', 50)
                                     xp_total = (xp_base if xp_base is not None else 50) * encontro.quantidade
@@ -1100,6 +1111,7 @@ async def acao_handler(message: types.Message):
                                     vitoria = True
                                     estado_campanha[f"derrotado_{encontro.id}"] = True
                                     campanha.em_combate = False
+                                    if "Fúria" in efeitos_atuais: efeitos_atuais.remove("Fúria")
 
                                     texto_vitoria = (
                                         f"\n\n🏳️ <b>QUEBRA DE MORAL!</b>\n"
@@ -1175,9 +1187,9 @@ async def acao_handler(message: types.Message):
                                 texto_revide += "\n"
                             acertos_totais = 0
                             
-                            alvo_esquivando = "Esquivando" in (jogador.status_efeitos or [])
-                            alvo_cobertura = "Cobertura" in (jogador.status_efeitos or [])
-                            alvo_caido = "Caído" in (jogador.status_efeitos or [])
+                            alvo_esquivando = "Esquivando" in efeitos_atuais
+                            alvo_cobertura = "Cobertura" in efeitos_atuais
+                            alvo_caido = "Caído" in efeitos_atuais
                             inimigo_com_vantagem = _keyword_inimigo_vantagem
                             
                             for i in range(atacantes):
@@ -1206,11 +1218,9 @@ async def acao_handler(message: types.Message):
                                     texto_revide += f"🛡️ <i>A tua Fúria reduziu o dano sofrido pela metade!</i>\n"
                                 texto_revide += f"🩸 <b>Dano total recebido: {dano_final_revide}</b>"
                                 
-                                if random.randint(1, 100) <= 20 and "Envenenado" not in (jogador.status_efeitos or []):
+                                if random.randint(1, 100) <= 20 and "Envenenado" not in efeitos_atuais:
                                     if any(n in inimigo.nome.lower() for n in ["rato", "aranha", "cobra", "troll", "goblin"]):
-                                        efeitos_atuais = list(jogador.status_efeitos or [])
                                         efeitos_atuais.append("Envenenado")
-                                        jogador.status_efeitos = efeitos_atuais
                                         texto_revide += "\n🤢 <b>Foste Envenenado pelo ataque inimigo!</b>"
                             else:
                                 texto_revide += "🛡️ <b>Esquivaste todos os ataques!</b>"
@@ -1223,11 +1233,11 @@ async def acao_handler(message: types.Message):
                             if jogador.hp_atual > 0: aplicar_ataque_inimigo()
                             if jogador.hp_atual > 0: aplicar_ataque_jogador()
 
-                        if "Esquivando" in (jogador.status_efeitos or []):
-                            efeitos = list(jogador.status_efeitos)
-                            efeitos.remove("Esquivando")
-                            jogador.status_efeitos = efeitos
-
+                        if "Esquivando" in efeitos_atuais:
+                            efeitos_atuais.remove("Esquivando")
+                            
+                        # Atualizamos tudo na BD
+                        jogador.status_efeitos = efeitos_atuais
                         campanha.estado_salas = estado_campanha
 
                         resumo_turno = (

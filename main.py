@@ -482,7 +482,7 @@ async def processar_nome(message: types.Message, state: FSMContext):
     teclado_sexo = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="Masculino"), KeyboardButton(text="Feminino")],
-            [KeyboardButton(text="Outro")]
+            [KeyboardButton(text="Não Binário")]
         ],
         resize_keyboard=True,
         one_time_keyboard=True
