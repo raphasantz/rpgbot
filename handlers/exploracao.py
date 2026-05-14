@@ -419,6 +419,12 @@ async def acao_handler(message: types.Message):
 
                                 campanha.cena_atual = destino_fuga
                                 campanha.cena_anterior = None
+                                
+                                # CORREÇÃO: Sincronizando a sala de todos os membros da Party
+                                membros_na_party = db.query(Jogador).filter(Jogador.party_id == campanha.party_id).all()
+                                for membro in membros_na_party:
+                                    membro.cena_atual = campanha.cena_atual
+                                
                                 sala_destino = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
 
                                 if not sala_destino.imagem_url:
@@ -446,6 +452,12 @@ async def acao_handler(message: types.Message):
                             
                         campanha.cena_anterior = campanha.cena_atual
                         campanha.cena_atual = conexoes_lower[direcao]
+                        
+                        # CORREÇÃO: Sincronizando a sala de todos os membros da Party
+                        membros_na_party = db.query(Jogador).filter(Jogador.party_id == campanha.party_id).all()
+                        for membro in membros_na_party:
+                            membro.cena_atual = campanha.cena_atual
+                        
                         nova_sala = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
                         alerta = ""
                         encontros_novos = db.query(Encontro).filter(Encontro.cod_sala == nova_sala.cod_sala).all()
@@ -767,7 +779,7 @@ async def acao_handler(message: types.Message):
                                 await message.answer("⚠️ Já estás em posição defensiva.", parse_mode="HTML")
                                 return
 
-                        if any(p in texto_min for p in ["preparar", "mirar", "aguardar", "ready"]):
+                        if any(p in texto_min for p in ["preparar", "miram", "aguardar", "ready"]):
                             jogador.acao_preparada = {
                                 "tipo": "ataque",
                                 "gatilho": texto_min.replace("preparar", "").replace("mirar", "").replace("aguardar", "").strip(),
@@ -1320,7 +1332,7 @@ async def acao_handler(message: types.Message):
                         if res.acertou and (jogador_primeiro or jogador.hp_atual > 0):
                             linha_dano_jogador = f"\n💥 Dano: {dano_causado} (💀 {mortos_no_golpe} eliminado!)" if mortos_no_golpe > 0 else f"\n💥 Dano: {dano_causado}"
                             linha_dano_jogador += feature_msg
-                        elif not res.acertou and (jogador_primeiro or jogador.hp_atual > 0):
+                        elif not res.acertou and (jogador_primeiro ou jogador.hp_atual > 0):
                             linha_dano_jogador = f"\n💨 Ataque falhou" + feature_msg
                             
                         bloco_jogador = ""
