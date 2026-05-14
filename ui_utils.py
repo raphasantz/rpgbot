@@ -186,10 +186,12 @@ def obter_inventario_limpo(inv_bruto) -> list:
     if not inv_bruto:
         return []
     
+    # FAST PATH: Se já for uma lista nativa (o padrão do SQLAlchemy limpo), apenas retorna os itens válidos
     if isinstance(inv_bruto, list):
-        inv_str = ",".join(str(i) for i in inv_bruto)
-    else:
-        inv_str = str(inv_bruto)
+        return [str(item).strip() for item in inv_bruto if str(item).strip()]
+    
+    # SLOW PATH (LEGADO): Se por acaso veio como string do banco, faz o parse do Frankenstein
+    inv_str = str(inv_bruto)
 
     if '\\u' in inv_str or '\\n' in inv_str:
         try:
@@ -248,6 +250,7 @@ def adicionar_ao_inventario(jogador, novos_itens: list) -> list:
             inv.append(item_limpo)
             itens_adicionados_msg.append(item_limpo)
             
+    # REATRIBUIÇÃO OBRIGATÓRIA para o SQLAlchemy rastrear a mutação do JSON
     jogador.inventario = inv
     return itens_adicionados_msg
 

@@ -1332,7 +1332,7 @@ async def acao_handler(message: types.Message):
                         if res.acertou and (jogador_primeiro or jogador.hp_atual > 0):
                             linha_dano_jogador = f"\n💥 Dano: {dano_causado} (💀 {mortos_no_golpe} eliminado!)" if mortos_no_golpe > 0 else f"\n💥 Dano: {dano_causado}"
                             linha_dano_jogador += feature_msg
-                        elif not res.acertou and (jogador_primeiro ou jogador.hp_atual > 0):
+                        elif not res.acertou and (jogador_primeiro or jogador.hp_atual > 0):
                             linha_dano_jogador = f"\n💨 Ataque falhou" + feature_msg
                             
                         bloco_jogador = ""
