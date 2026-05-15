@@ -15,6 +15,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, ErrorEvent
 from aiogram import F
+from sqlalchemy import select, delete, func
 
 from handlers.menus import router as menus_router
 from handlers.exploracao import router as exploracao_router, lock_garbage_collector
@@ -126,15 +127,22 @@ async def callback_abrir_guia(callback: types.CallbackQuery):
 
 @dp.message(CommandStart())
 async def start_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        jogador = result.scalars().first()
         if not jogador:
             await message.answer("🎲 Bem-vindo! Use /criar para começar.", reply_markup=ReplyKeyboardRemove())
             return
         
-        campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first() if jogador.party_id else None
+        if jogador.party_id:
+            result_campanha = await db.execute(select(Campanha).filter(Campanha.party_id == jogador.party_id))
+            campanha = result_campanha.scalars().first()
+        else:
+            campanha = None
+
         if campanha:
-            sala_atual = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
+            result_sala = await db.execute(select(Cena).filter(Cena.cod_sala == campanha.cena_atual))
+            sala_atual = result_sala.scalars().first()
             if sala_atual:
                 if not sala_atual.imagem_url:
                     msg_temp = await message.answer("🎨 <i>O Mestre está a visualizar o local...</i>", parse_mode="HTML")
@@ -150,7 +158,6 @@ async def start_handler(message: types.Message):
                        f"{texto_saidas(sala_atual)}\n{resumo_status(jogador)}")
                 await message.answer(msg, parse_mode="HTML", reply_markup=teclado_saidas(sala_atual))
 
-                # Botão inline do guia
                 teclado_inline = InlineKeyboardMarkup(inline_keyboard=[
                     [InlineKeyboardButton(text="📜 Ler Guia do Aventureiro", callback_data="abrir_guia")]
                 ])
@@ -170,13 +177,15 @@ async def falar_handler(message: types.Message):
     mensagem_off = texto_mensagem[1]
     user_id = str(message.from_user.id)
 
-    with get_db_session() as db:
-        jogador_atual = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador_atual = result.scalars().first()
         
         if not jogador_atual or not jogador_atual.party_id:
             return await message.answer("⚠️ Precisas de estar numa Party para usar o chat!")
 
-        membros_party = db.query(Jogador).filter(Jogador.party_id == jogador_atual.party_id).all()
+        result_membros = await db.execute(select(Jogador).filter(Jogador.party_id == jogador_atual.party_id))
+        membros_party = result_membros.scalars().all()
         
         if len(membros_party) <= 1:
             return await message.answer("🗣️ <i>Estás a falar sozinho... Não há mais ninguém na tua Party.</i>", parse_mode="HTML")
@@ -197,8 +206,9 @@ async def party_handler(message: types.Message):
     args = message.text.split()
     user_id = str(message.from_user.id)
     
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Cria um personagem primeiro com /criar.")
         
         if len(args) < 2:
@@ -227,17 +237,20 @@ async def party_handler(message: types.Message):
             if len(args) < 3: return await message.answer("⚠️ Qual é o código? Ex: <code>/party entrar PTY-A1B2C</code>", parse_mode="HTML")
             codigo_alvo = args[2].upper()
             
-            campanha = db.query(Campanha).filter(Campanha.party_id == codigo_alvo).first()
+            result_campanha = await db.execute(select(Campanha).filter(Campanha.party_id == codigo_alvo))
+            campanha = result_campanha.scalars().first()
             if not campanha: return await message.answer("❌ Código de Party inválido ou não existe.")
             
-            # --- NOVA CHECAGEM DE LIMITE DE JOGADORES ---
-            membros_atuais = db.query(Jogador).filter(Jogador.party_id == codigo_alvo).count()
+            # --- CHECAGEM DE LIMITE DE JOGADORES ---
+            result_count = await db.execute(select(func.count()).select_from(Jogador).filter(Jogador.party_id == codigo_alvo))
+            membros_atuais = result_count.scalar()
             if membros_atuais >= 5:
                 return await message.answer("🚫 <b>A Taverna está cheia!</b> Esta party já atingiu o limite máximo de 5 jogadores.", parse_mode="HTML")
             # -------------------------------------------
             
             # ─── INÍCIO: SISTEMA DE NIVELAMENTO POR PARTY ───
-            membros_existentes = db.query(Jogador).filter(Jogador.party_id == codigo_alvo, Jogador.telefone != user_id).all()
+            result_existentes = await db.execute(select(Jogador).filter(Jogador.party_id == codigo_alvo, Jogador.telefone != user_id))
+            membros_existentes = result_existentes.scalars().all()
             
             if membros_existentes:
                 xp_medio = sum([m.xp for m in membros_existentes]) // len(membros_existentes)
@@ -262,7 +275,6 @@ async def party_handler(message: types.Message):
                             jogador.proficiencia = nova_proficiencia
                             jogador.modificador_ataque = jogador.mod_dano + jogador.proficiencia
                         
-                        # Correção de escala do Monge ao subir de nível pelo nivelamento
                         if jogador.classe.lower() == "monge" and "Desarmado" in getattr(jogador, 'arma_equipada', ''):
                             if jogador.nivel >= 17: jogador.dano_dado = "1d10"
                             elif jogador.nivel >= 11: jogador.dano_dado = "1d8"
@@ -278,7 +290,8 @@ async def party_handler(message: types.Message):
             jogador.party_id = codigo_alvo
             jogador.cena_atual = campanha.cena_atual
             
-            membros = db.query(Jogador).filter(Jogador.party_id == codigo_alvo).all()
+            result_membros = await db.execute(select(Jogador).filter(Jogador.party_id == codigo_alvo))
+            membros = result_membros.scalars().all()
             for membro in membros:
                 if membro.telefone != user_id:
                     await bot.send_message(chat_id=membro.telefone, text=f"📯 <b>O experiente {jogador.classe} {jogador.nome} juntou-se à vossa Party!</b>", parse_mode="HTML")
@@ -289,7 +302,8 @@ async def party_handler(message: types.Message):
             try:
                 from models import Aventura
                 aventura_id = getattr(campanha, 'aventura_ativa', 'cidadela')
-                aventura = db.query(Aventura).filter(Aventura.id == aventura_id).first()
+                result_aventura = await db.execute(select(Aventura).filter(Aventura.id == aventura_id))
+                aventura = result_aventura.scalars().first()
                 if aventura and aventura.prologo:
                     intro = aventura.prologo
             except Exception:
@@ -298,7 +312,8 @@ async def party_handler(message: types.Message):
             await message.answer(f"📖 {intro}", parse_mode="HTML")
             await asyncio.sleep(2)
             
-            sala_party = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
+            result_sala = await db.execute(select(Cena).filter(Cena.cod_sala == campanha.cena_atual))
+            sala_party = result_sala.scalars().first()
             if sala_party:
                 if not sala_party.imagem_url:
                     msg_temp = await message.answer("🎨 <i>O Mestre está a visualizar o local...</i>", parse_mode="HTML")
@@ -320,8 +335,9 @@ async def party_handler(message: types.Message):
 @dp.message(Command("codigo", "party_id", "convite"))
 async def codigo_handler(message: types.Message):
     user_id = str(message.from_user.id)
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         
         if not jogador or not jogador.party_id:
             return await message.answer("⚠️ Ainda não estás num grupo. Usa <code>/party criar</code> primeiro.", parse_mode="HTML")
@@ -341,8 +357,9 @@ async def codigo_handler(message: types.Message):
 @dp.message(Command("r", "roll"))
 async def rolar_dados_handler(message: types.Message):
     user_id = str(message.from_user.id)
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         if not jogador or not jogador.party_id:
             await message.answer("⚠️ Precisas de estar numa party para rolar dados.")
             return
@@ -362,7 +379,6 @@ async def rolar_dados_handler(message: types.Message):
         sinal = match.group(3)
         bonus = int(match.group(4)) if match.group(4) else 0
 
-        # BLINDAGEM DE ROLAGEM AQUI
         if not (1 <= qtd <= 100) or not (2 <= faces <= 1000):
             await message.answer("⚠️ Use no mínimo 1 dado e máximo 100 dados. As faces devem ser entre 2 e 1000.")
             return
@@ -381,7 +397,8 @@ async def rolar_dados_handler(message: types.Message):
         else:
             texto += f"\n✨ Total: {total}"
 
-        membros = db.query(Jogador).filter(Jogador.party_id == jogador.party_id).all()
+        result_membros = await db.execute(select(Jogador).filter(Jogador.party_id == jogador.party_id))
+        membros = result_membros.scalars().all()
         for m in membros:
             try:
                 await bot.send_message(chat_id=m.telefone, text=texto, parse_mode="HTML")
@@ -391,20 +408,23 @@ async def rolar_dados_handler(message: types.Message):
 
 @dp.message(Command("descansar", "descanso"))
 async def descansar_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Não tens nenhum personagem ativo. Usa /criar.")
         
-        campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first() if getattr(jogador, 'party_id', None) else None
+        if getattr(jogador, 'party_id', None):
+            result_campanha = await db.execute(select(Campanha).filter(Campanha.party_id == jogador.party_id))
+            campanha = result_campanha.scalars().first()
+        else:
+            campanha = None
         
         if campanha and campanha.cena_atual != "carvalhal":
-            # Descanso Curto usando Hit Dice
             if jogador.hit_dice_atual > 0:
                 jogador.hit_dice_atual -= 1
                 cura = max(1, (jogador.hp_maximo // 4) + jogador.mod_con)
                 jogador.hp_atual = min(jogador.hp_maximo, jogador.hp_atual + cura)
                 
-                # O Guerreiro recupera as suas habilidades com Descansos Curtos
                 if jogador.classe.lower() == "guerreiro":
                     jogador.slots_magia = min(jogador.slots_magia_max, jogador.slots_magia + 1)
                 
@@ -412,7 +432,6 @@ async def descansar_handler(message: types.Message):
             else:
                 await message.answer("⚠️ <b>Exausto!</b> Não tens mais Hit Dice (Dados de Vida) para gastar! Precisas de regressar à Vila de Carvalhal para um Descanso Longo.", parse_mode="HTML")
         else:
-            # Descanso Longo Seguro na Vila
             jogador.hp_atual = jogador.hp_maximo
             jogador.slots_magia = jogador.slots_magia_max
             jogador.hit_dice_atual = getattr(jogador, 'hit_dice_max', 1)
@@ -421,12 +440,13 @@ async def descansar_handler(message: types.Message):
 
 @dp.message(Command("dashboard", "stats", "estatisticas"))
 async def dashboard_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Use /criar para começar.")
-        stats = get_or_create_estatisticas(db, str(message.from_user.id))
-        rank = get_rank_jogador(db, str(message.from_user.id))
-        ultimas_partidas = get_ultimas_partidas(db, str(message.from_user.id), limite=3)
+        stats = await get_or_create_estatisticas(db, str(message.from_user.id))
+        rank = await get_rank_jogador(db, str(message.from_user.id))
+        ultimas_partidas = await get_ultimas_partidas(db, str(message.from_user.id), limite=3)
         taxa_acerto = calcular_taxa_sucesso(stats)
         taxa_testes = calcular_taxa_sucesso_testes(stats)
         total_ataques = stats.total_ataques_acertados + stats.total_ataques_errados
@@ -454,12 +474,12 @@ async def reset_handler(message: types.Message):
 @dp.callback_query(F.data == "confirmar_reset")
 async def callback_confirmar_reset(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
-    with get_db_session() as db:
-        db.query(Jogador).filter(Jogador.telefone == user_id).delete()
-        db.query(Campanha).filter(Campanha.host_id == user_id).delete()
-        db.query(EstatisticasJogador).filter(EstatisticasJogador.jogador_telefone == user_id).delete()
-        db.query(HistoricoPartida).filter(HistoricoPartida.jogador_telefone == user_id).delete()
-        db.query(Missao).filter(Missao.jogador_telefone == user_id).delete()
+    async with get_db_session() as db:
+        await db.execute(delete(Missao).filter(Missao.jogador_telefone == user_id))
+        await db.execute(delete(HistoricoPartida).filter(HistoricoPartida.jogador_telefone == user_id))
+        await db.execute(delete(EstatisticasJogador).filter(EstatisticasJogador.jogador_telefone == user_id))
+        await db.execute(delete(Campanha).filter(Campanha.host_id == user_id))
+        await db.execute(delete(Jogador).filter(Jogador.telefone == user_id))
     
     await bot.send_message(chat_id=user_id, text="🌩️ <b>Dados e Estatísticas resetados.</b>\nA tua lenda chegou ao fim. Usa /criar para recomeçar.", parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
     await callback.message.delete()
@@ -478,7 +498,6 @@ async def iniciar_criacao(message: types.Message, state: FSMContext):
 @dp.message(CriacaoPersonagem.nome)
 async def processar_nome(message: types.Message, state: FSMContext):
     await state.update_data(nome=message.text)
-    # Criar um teclado simples para o sexo
     teclado_sexo = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="Masculino"), KeyboardButton(text="Feminino")],
@@ -572,8 +591,9 @@ async def processar_atributos(message: types.Message, state: FSMContext):
             "cena_atual": "carvalhal", "cena_anterior": None
         }
 
-        with get_db_session() as db:
-            jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+        async with get_db_session() as db:
+            result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+            jogador = result.scalars().first()
             if jogador:
                 for key, value in dados_jogador.items(): setattr(jogador, key, value)
             else:
@@ -597,9 +617,10 @@ async def processar_atributos(message: types.Message, state: FSMContext):
             )
             db.add(nova_campanha)
 
-            iniciar_sessao(db, user_id)
-            registrar_sala_visitada(db, user_id, "carvalhal")
-            sala = db.query(Cena).filter(Cena.cod_sala == "carvalhal").first()
+            await iniciar_sessao(db, user_id)
+            await registrar_sala_visitada(db, user_id, "carvalhal")
+            result_sala = await db.execute(select(Cena).filter(Cena.cod_sala == "carvalhal"))
+            sala = result_sala.scalars().first()
             await state.clear()
             
             dica_classe = ""

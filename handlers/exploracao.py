@@ -5,6 +5,7 @@ import unicodedata
 import logging
 from aiogram import Router, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
+from sqlalchemy import select, delete, func
 
 from database import get_db_session
 from models import Jogador, Campanha, Cena, Npc, EncontroAleatorio, Interativo, ObjetoDestrutivel, Missao, Encontro, Inimigo
@@ -28,8 +29,9 @@ async def skill_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
     skill = callback.data.replace("skill_", "")
     
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         if not jogador or jogador.slots_magia <= 0:
             await callback.answer("Sem usos disponíveis!", show_alert=True)
             return
@@ -57,7 +59,6 @@ async def skill_callback(callback: types.CallbackQuery):
             if "Forma Selvagem" not in efeitos: efeitos.append("Forma Selvagem")
             msg = f"🐾 <b>Forma Selvagem!</b> Curaste {cura} HP e teus ataques terão +2d6 de dano extra."
         
-        # Salva as alterações na base de dados
         jogador.status_efeitos = efeitos
         
         await callback.message.answer(msg, parse_mode="HTML")
@@ -67,12 +68,14 @@ async def skill_callback(callback: types.CallbackQuery):
 @router.callback_query(F.data == "ataque_secundario")
 async def ataque_secundario_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         if not jogador:
             return await callback.answer("Personagem não encontrado.", show_alert=True)
         
-        campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first()
+        result_camp = await db.execute(select(Campanha).filter(Campanha.party_id == jogador.party_id))
+        campanha = result_camp.scalars().first()
         if not campanha or not campanha.em_combate:
             return await callback.answer("Não estás em combate.", show_alert=True)
         
@@ -225,8 +228,9 @@ async def acao_handler(message: types.Message):
     processing_users.add(user_id)
     
     try:
-        with get_db_session() as db:
-            jogador_temp = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+        async with get_db_session() as db:
+            result_temp = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+            jogador_temp = result_temp.scalars().first()
             party_id = jogador_temp.party_id if jogador_temp else None
 
         if party_id:
@@ -235,9 +239,15 @@ async def acao_handler(message: types.Message):
             lock = party_locks.setdefault(f"solo_{user_id}", asyncio.Lock())
 
         async with lock:
-            with get_db_session() as db:
-                jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
-                campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first() if jogador and jogador.party_id else None
+            async with get_db_session() as db:
+                result_jog = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+                jogador = result_jog.scalars().first()
+                
+                if jogador and jogador.party_id:
+                    result_camp = await db.execute(select(Campanha).filter(Campanha.party_id == jogador.party_id))
+                    campanha = result_camp.scalars().first()
+                else:
+                    campanha = None
                 
                 if not jogador:
                     return await message.answer("⚠️ Não tens personagem. Usa /criar para começares a tua lenda.")
@@ -250,11 +260,13 @@ async def acao_handler(message: types.Message):
                         parse_mode="HTML"
                     )
                 
-                sala_atual = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
+                result_sala = await db.execute(select(Cena).filter(Cena.cod_sala == campanha.cena_atual))
+                sala_atual = result_sala.scalars().first()
                 if not sala_atual:
                     return await message.answer("⚠️ Erro: Sala atual não encontrada no banco de dados.")
                 
-                encontro_ale = db.query(EncontroAleatorio).filter(EncontroAleatorio.cod_sala == campanha.cena_atual).first()
+                result_enc_ale = await db.execute(select(EncontroAleatorio).filter(EncontroAleatorio.cod_sala == campanha.cena_atual))
+                encontro_ale = result_enc_ale.scalars().first()
                 if encontro_ale and random.randint(1, 100) <= encontro_ale.chance:
                     if not campanha.em_combate:
                         estado_campanha = dict(campanha.estado_salas or {})
@@ -266,23 +278,26 @@ async def acao_handler(message: types.Message):
                             quantidade = encontro_ale.quantidade
                         )
                         db.add(encontro_temp)
-                        db.flush()
+                        await db.flush()
                         
                         await message.answer(f"⚡ <b>Emboscada!</b> {encontro_ale.quantidade}x {encontro_ale.nome_inimigo} surgem das sombras!")
                         campanha.em_combate = True
                 
-                interativos = db.query(Interativo).filter(Interativo.cod_sala == campanha.cena_atual).all()
-                objetos_destrutiveis = db.query(ObjetoDestrutivel).filter(
+                result_inter = await db.execute(select(Interativo).filter(Interativo.cod_sala == campanha.cena_atual))
+                interativos = result_inter.scalars().all()
+                result_obj = await db.execute(select(ObjetoDestrutivel).filter(
                     ObjetoDestrutivel.cod_sala == campanha.cena_atual,
                     ObjetoDestrutivel.ativo == True
-                ).all()
+                ))
+                objetos_destrutiveis = result_obj.scalars().all()
+                
                 nomes_interativos = ", ".join([i.nome for i in interativos]) if interativos else "Nenhum"
                 nomes_destrutiveis = ", ".join([o.nome for o in objetos_destrutiveis]) if objetos_destrutiveis else ""
                 contexto_objetos = nomes_interativos + (", " + nomes_destrutiveis if nomes_destrutiveis else "")
                 
                 intencao = await interpretar_acao(message.text, interativos_disponiveis=contexto_objetos)
                 
-                try: atualizar_estatistica(db, user_id, 'tempo_jogo_minutos', 1)
+                try: await atualizar_estatistica(db, user_id, 'tempo_jogo_minutos', 1)
                 except Exception: pass
 
                 texto_min = message.text.lower()
@@ -322,11 +337,12 @@ async def acao_handler(message: types.Message):
                     estado_campanha = dict(campanha.estado_salas or {})
                     ultimo_jogador = estado_campanha.get("ultimo_jogador_acao")
                     
-                    aliados_vivos = db.query(Jogador).filter(
+                    result_aliados = await db.execute(select(Jogador).filter(
                         Jogador.party_id == campanha.party_id,
                         Jogador.cena_atual == campanha.cena_atual,
                         Jogador.hp_atual > 0
-                    ).all()
+                    ))
+                    aliados_vivos = result_aliados.scalars().all()
                     
                     if len(aliados_vivos) > 1 and ultimo_jogador == user_id:
                         if not any(p in texto_limpo_acao for p in ["falar", "conversar", "dizer", "olhar", "status", "inventario"]):
@@ -365,7 +381,8 @@ async def acao_handler(message: types.Message):
 
                 elif ("NAVEGAR" in intencao or "NAVEGAR_FURTIVO" in intencao) and (direcao_temp in conexoes_lower_temp or is_fuga_temp or len(message.text.split()) <= 3):
                     
-                    encontros_atuais = db.query(Encontro).filter(Encontro.cod_sala == campanha.cena_atual).all()
+                    result_enc_atuais = await db.execute(select(Encontro).filter(Encontro.cod_sala == campanha.cena_atual))
+                    encontros_atuais = result_enc_atuais.scalars().all()
                     estado_campanha = dict(campanha.estado_salas) if campanha.estado_salas else {}
                     encontro_bloqueio = next((e for e in encontros_atuais if not estado_campanha.get(f"derrotado_{e.id}")), None)
 
@@ -392,11 +409,11 @@ async def acao_handler(message: types.Message):
 
                                 jogador.hp_atual -= dano_fuga
                                 if jogador.hp_atual <= 0:
-                                    try: registrar_derrota(db, user_id, intervencao_divina=False)
+                                    try: await registrar_derrota(db, user_id, intervencao_divina=False)
                                     except TypeError: pass
-                                    db.query(Jogador).filter(Jogador.telefone == user_id).delete()
-                                    db.query(Campanha).filter(Campanha.host_id == user_id).delete()
-                                    db.query(Missao).filter(Missao.jogador_telefone == user_id).delete()
+                                    await db.execute(delete(Jogador).filter(Jogador.telefone == user_id))
+                                    await db.execute(delete(Campanha).filter(Campanha.host_id == user_id))
+                                    await db.execute(delete(Missao).filter(Missao.jogador_telefone == user_id))
 
                                     return await message.answer(
                                         f"💀 <b>{jogador.nome.upper()} MORREU!</b>\n"
@@ -420,12 +437,13 @@ async def acao_handler(message: types.Message):
                                 campanha.cena_atual = destino_fuga
                                 campanha.cena_anterior = None
                                 
-                                # CORREÇÃO: Sincronizando a sala de todos os membros da Party
-                                membros_na_party = db.query(Jogador).filter(Jogador.party_id == campanha.party_id).all()
+                                result_membros = await db.execute(select(Jogador).filter(Jogador.party_id == campanha.party_id))
+                                membros_na_party = result_membros.scalars().all()
                                 for membro in membros_na_party:
                                     membro.cena_atual = campanha.cena_atual
                                 
-                                sala_destino = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
+                                result_sala_dest = await db.execute(select(Cena).filter(Cena.cod_sala == campanha.cena_atual))
+                                sala_destino = result_sala_dest.scalars().first()
 
                                 if not sala_destino.imagem_url:
                                     msg_temp = await message.answer("🎨 <i>O Mestre está a visualizar o local...</i>", parse_mode="HTML")
@@ -453,14 +471,16 @@ async def acao_handler(message: types.Message):
                         campanha.cena_anterior = campanha.cena_atual
                         campanha.cena_atual = conexoes_lower[direcao]
                         
-                        # CORREÇÃO: Sincronizando a sala de todos os membros da Party
-                        membros_na_party = db.query(Jogador).filter(Jogador.party_id == campanha.party_id).all()
+                        result_membros_nav = await db.execute(select(Jogador).filter(Jogador.party_id == campanha.party_id))
+                        membros_na_party = result_membros_nav.scalars().all()
                         for membro in membros_na_party:
                             membro.cena_atual = campanha.cena_atual
                         
-                        nova_sala = db.query(Cena).filter(Cena.cod_sala == campanha.cena_atual).first()
+                        result_nova_sala = await db.execute(select(Cena).filter(Cena.cod_sala == campanha.cena_atual))
+                        nova_sala = result_nova_sala.scalars().first()
                         alerta = ""
-                        encontros_novos = db.query(Encontro).filter(Encontro.cod_sala == nova_sala.cod_sala).all()
+                        result_enc_novos = await db.execute(select(Encontro).filter(Encontro.cod_sala == nova_sala.cod_sala))
+                        encontros_novos = result_enc_novos.scalars().all()
                         ameacas_vivas = []
                         for enc in encontros_novos:
                             if not estado_campanha.get(f"derrotado_{enc.id}"):
@@ -492,7 +512,8 @@ async def acao_handler(message: types.Message):
 
                 elif any(p in texto_limpo_acao for p in ["falar", "conversar", "perguntar", "ferreiro", "missao"]):
                     
-                    npcs_na_sala = db.query(Npc).filter(Npc.cod_sala == campanha.cena_atual).all()
+                    result_npcs = await db.execute(select(Npc).filter(Npc.cod_sala == campanha.cena_atual))
+                    npcs_na_sala = result_npcs.scalars().all()
                     if npcs_na_sala:
                         for npc in npcs_na_sala:
                             nome_npc_limpo = unicodedata.normalize('NFKD', npc.nome).encode('ASCII', 'ignore').decode('utf-8').lower()
@@ -507,13 +528,15 @@ async def acao_handler(message: types.Message):
                         nomes_npcs = ", ".join([n.nome for n in npcs_na_sala])
                         return await message.answer(f"👥 Podes falar com: <b>{nomes_npcs}</b>.", parse_mode="HTML")
                     
-                    missoes_globais = db.query(Missao).filter(Missao.jogador_telefone == "MULTI").all()
+                    result_miss_globais = await db.execute(select(Missao).filter(Missao.jogador_telefone == "MULTI"))
+                    missoes_globais = result_miss_globais.scalars().all()
                     for mg in missoes_globais:
                         nome_npc_limpo = unicodedata.normalize('NFKD', mg.npc_nome).encode('ASCII', 'ignore').decode('utf-8').lower()
                         primeiro_nome_npc = nome_npc_limpo.split()[0] if nome_npc_limpo else ""
                         
                         if primeiro_nome_npc and (primeiro_nome_npc in texto_limpo_acao or nome_npc_limpo in texto_limpo_acao):
-                            existe = db.query(Missao).filter(Missao.jogador_telefone == user_id, Missao.titulo == mg.titulo).first()
+                            result_existe = await db.execute(select(Missao).filter(Missao.jogador_telefone == user_id, Missao.titulo == mg.titulo))
+                            existe = result_existe.scalars().first()
                             if not existe:
                                 nova_missao = Missao(
                                     jogador_telefone=user_id, npc_nome=mg.npc_nome, titulo=mg.titulo,
@@ -528,7 +551,8 @@ async def acao_handler(message: types.Message):
                                 jogador.reputacao = rep
 
                     if campanha.cena_atual == "carvalhal" and any(p in texto_limpo_acao for p in ["ferreiro", "falar", "conversar"]):
-                        missao = db.query(Missao).filter(Missao.jogador_telefone == user_id, Missao.npc_nome == "Ferreiro de Carvalhal").first()
+                        result_miss_ferreiro = await db.execute(select(Missao).filter(Missao.jogador_telefone == user_id, Missao.npc_nome == "Ferreiro de Carvalhal"))
+                        missao = result_miss_ferreiro.scalars().first()
                         inv = obter_inventario_limpo(jogador.inventario)
                         qtd_item = sum(1 for i in inv if "Dente de Goblin" in i)
                         
@@ -615,7 +639,8 @@ async def acao_handler(message: types.Message):
                             narracao = await narrar_ambiente(jogador.nome, message.text, sala_atual.descricao_visual)
                             return await message.answer(f"{narracao}\n\n👀 <b>Encontraste algo escondido na sala!</b>\n🎁 <b>Saque:</b> {lista}\n{resumo_status(jogador)}", parse_mode="HTML")
 
-                    interativos_ativos = db.query(Interativo).filter(Interativo.cod_sala == sala_atual.cod_sala, Interativo.ativo == True).all()
+                    result_inter_at = await db.execute(select(Interativo).filter(Interativo.cod_sala == sala_atual.cod_sala, Interativo.ativo == True))
+                    interativos_ativos = result_inter_at.scalars().all()
                     interagiu = False
                     
                     for obj in interativos_ativos:
@@ -663,12 +688,13 @@ async def acao_handler(message: types.Message):
                         return
 
                 elif "AJUDAR" in intencao:
-                    aliados = db.query(Jogador).filter(
+                    result_aliados_aj = await db.execute(select(Jogador).filter(
                         Jogador.party_id == jogador.party_id,
                         Jogador.cena_atual == campanha.cena_atual,
                         Jogador.hp_atual > 0,
                         Jogador.telefone != user_id
-                    ).all()
+                    ))
+                    aliados = result_aliados_aj.scalars().all()
 
                     if not aliados:
                         await message.answer("🤝 Não há aliados na sala para ajudar.")
@@ -688,7 +714,8 @@ async def acao_handler(message: types.Message):
                     return
 
                 elif "COMBATE" in intencao or "MAGIA" in intencao:
-                    encontros = db.query(Encontro).filter(Encontro.cod_sala == campanha.cena_atual).all()
+                    result_encontros = await db.execute(select(Encontro).filter(Encontro.cod_sala == campanha.cena_atual))
+                    encontros = result_encontros.scalars().all()
                     estado_campanha = dict(campanha.estado_salas) if campanha.estado_salas else {}
                     encontros_vivos = [e for e in encontros if not estado_campanha.get(f"derrotado_{e.id}")]
                     encontro = encontros_vivos[0] if encontros_vivos else None
@@ -743,7 +770,8 @@ async def acao_handler(message: types.Message):
                         return await message.answer(f"{msg_destr}\n{resumo_status(jogador)}", parse_mode="HTML")
 
                     if encontro:
-                        inimigo = db.query(Inimigo).filter(Inimigo.nome == encontro.nome_inimigo).first()
+                        result_inimigo = await db.execute(select(Inimigo).filter(Inimigo.nome == encontro.nome_inimigo))
+                        inimigo = result_inimigo.scalars().first()
                         
                         if not inimigo:
                             await message.answer(f"⚠️ <b>Distorção Mágica:</b> O monstro '<b>{encontro.nome_inimigo}</b>' existe na sala, mas as suas estatísticas não estão no Bestiário!", parse_mode="HTML")
@@ -865,7 +893,6 @@ async def acao_handler(message: types.Message):
 
                         jogador.modificador_ataque = mod_atq_original
 
-                        # Aplica o segundo ataque se a flag Surto estiver ativa
                         if "Surto" in efeitos_atuais:
                             res_extra = processar_ataque_fisico(jogador, ca_alvo)
                             if res_extra.acertou:
@@ -897,7 +924,7 @@ async def acao_handler(message: types.Message):
                             efeitos_atuais.remove("Atordoado")
                             status_msg += f"\n💫 <b>Atordoado:</b> Ficas tonto e perdes a tua ação neste turno!"
 
-                        dano_extra_feature = 0 # CORREÇÃO AQUI
+                        dano_extra_feature = 0
                         dano_extra_feature += dano_extra_flag
                         desvantagem_inimigo = False
                         bonus_ca_temporario = bonus_ca_kw
@@ -1019,7 +1046,7 @@ async def acao_handler(message: types.Message):
                                 except Exception:
                                     pass
 
-                        def aplicar_ataque_jogador():
+                        async def aplicar_ataque_jogador():
                             nonlocal hp_grupo, vitoria, texto_vitoria, mortos_no_golpe, dano_causado
                             if not pode_atacar: return
                             
@@ -1040,7 +1067,8 @@ async def acao_handler(message: types.Message):
                                     ouro_base = getattr(inimigo, 'ouro_recompensa', 5)
                                     ouro_total = (ouro_base if ouro_base is not None else 5) * encontro.quantidade
                                     
-                                    membros_party = db.query(Jogador).filter(Jogador.party_id == jogador.party_id).all()
+                                    result_membros_party = await db.execute(select(Jogador).filter(Jogador.party_id == jogador.party_id))
+                                    membros_party = result_membros_party.scalars().all()
                                     qtd_membros = len(membros_party)
                                     xp_por_jogador = max(1, xp_total // qtd_membros)
                                     ouro_por_jogador = max(1, ouro_total // qtd_membros)
@@ -1081,10 +1109,11 @@ async def acao_handler(message: types.Message):
                                     if getattr(inimigo, 'loot_especial', None):
                                         loot_combate.extend(inimigo.loot_especial)
 
-                                    missoes_ativas = db.query(Missao).filter(
+                                    result_miss_at = await db.execute(select(Missao).filter(
                                         Missao.jogador_telefone == user_id,
                                         Missao.concluida == False
-                                    ).all()
+                                    ))
+                                    missoes_ativas = result_miss_at.scalars().all()
                                     itens_quest_garantidos = []
                                     for missao_ativa in missoes_ativas:
                                         if not missao_ativa.objetivo_item:
@@ -1136,7 +1165,8 @@ async def acao_handler(message: types.Message):
                                     ouro_base = getattr(inimigo, 'ouro_recompensa', 5)
                                     ouro_total = (ouro_base if ouro_base is not None else 5) * encontro.quantidade
 
-                                    membros_party = db.query(Jogador).filter(Jogador.party_id == jogador.party_id).all()
+                                    result_membros_morale = await db.execute(select(Jogador).filter(Jogador.party_id == jogador.party_id))
+                                    membros_party = result_membros_morale.scalars().all()
                                     qtd_membros = len(membros_party)
                                     xp_por_jogador = max(1, xp_total // qtd_membros)
                                     ouro_por_jogador = max(1, ouro_total // qtd_membros)
@@ -1164,13 +1194,14 @@ async def acao_handler(message: types.Message):
                                             else:
                                                 texto_vitoria += f"\n🌟 <b>{membro.nome.upper()} SUBIU PARA O NÍVEL {membro.nivel}!</b>"
 
-                        def aplicar_ataque_inimigo():
+                        async def aplicar_ataque_inimigo():
                             nonlocal texto_revide, dano_final_revide, hp_grupo
                             vivos_agora = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
                             if vivos_agora == 0: return
 
                             if hasattr(Jogador, 'acao_preparada'):
-                                for membro in db.query(Jogador).filter(Jogador.party_id == jogador.party_id, Jogador.acao_preparada != None).all():
+                                result_prep = await db.execute(select(Jogador).filter(Jogador.party_id == jogador.party_id, Jogador.acao_preparada != None))
+                                for membro in result_prep.scalars().all():
                                     prep = membro.acao_preparada
                                     if prep["tipo"] == "ataque":
                                         dano_original = membro.mod_dano
@@ -1182,11 +1213,12 @@ async def acao_handler(message: types.Message):
                                             hp_grupo -= res_prep.dano
                                     membro.acao_preparada = None
 
-                            jogadores_vivos = db.query(Jogador).filter(
+                            result_vivos_count = await db.execute(select(func.count()).select_from(Jogador).filter(
                                 Jogador.party_id == jogador.party_id,
                                 Jogador.hp_atual > 0,
                                 Jogador.cena_atual == campanha.cena_atual
-                            ).count()
+                            ))
+                            jogadores_vivos = result_vivos_count.scalar()
 
                             limite_ataques = jogadores_vivos + (getattr(encontro, 'multiplicador_ameaca', 1) or 1)
                             atacantes = min(vivos_agora, limite_ataques)
@@ -1239,16 +1271,15 @@ async def acao_handler(message: types.Message):
                             jogador.hp_atual -= dano_final_revide
 
                         if jogador_primeiro:
-                            aplicar_ataque_jogador()
-                            if not vitoria and jogador.hp_atual > 0: aplicar_ataque_inimigo()
+                            await aplicar_ataque_jogador()
+                            if not vitoria and jogador.hp_atual > 0: await aplicar_ataque_inimigo()
                         else:
-                            if jogador.hp_atual > 0: aplicar_ataque_inimigo()
-                            if jogador.hp_atual > 0: aplicar_ataque_jogador()
+                            if jogador.hp_atual > 0: await aplicar_ataque_inimigo()
+                            if jogador.hp_atual > 0: await aplicar_ataque_jogador()
 
                         if "Esquivando" in efeitos_atuais:
                             efeitos_atuais.remove("Esquivando")
                             
-                        # Atualizamos tudo na BD
                         jogador.status_efeitos = efeitos_atuais
                         campanha.estado_salas = estado_campanha
 
@@ -1262,19 +1293,19 @@ async def acao_handler(message: types.Message):
 
                         if jogador.hp_atual <= 0:
                             nome_final = jogador.nome
-                            stats = get_or_create_estatisticas(db, user_id)
+                            stats = await get_or_create_estatisticas(db, user_id)
                             is_fumble = (res.d20 == 1)
 
                             dano_total_sofrido = dano_final_revide + dano_veneno
                             texto_golpe_letal = f"🩸 <b>{inimigo.nome}</b> desferiu um golpe letal, causando <b>{dano_total_sofrido} de dano</b>!\n\n" if dano_total_sofrido > 0 else f"🩸 O ataque envenenado de <b>{inimigo.nome}</b> foi letal!\n\n"
 
                             if is_fumble or stats.intervencoes_divinas >= 1:
-                                try: registrar_derrota(db, user_id, intervencao_divina=False)
+                                try: await registrar_derrota(db, user_id, intervencao_divina=False)
                                 except TypeError: pass
                                     
-                                db.query(Jogador).filter(Jogador.telefone == user_id).delete()
-                                db.query(Campanha).filter(Campanha.host_id == user_id).delete()
-                                db.query(Missao).filter(Missao.jogador_telefone == user_id).delete()
+                                await db.execute(delete(Jogador).filter(Jogador.telefone == user_id))
+                                await db.execute(delete(Campanha).filter(Campanha.host_id == user_id))
+                                await db.execute(delete(Missao).filter(Missao.jogador_telefone == user_id))
                                 
                                 motivoTexto = "🎲 <b>O d20 rolou 1. Os deuses não salvam tolos.</b>" if is_fumble else "<b>Os deuses já te salvaram uma vez. Desta vez viraram as costas.</b>"
                                 
@@ -1309,8 +1340,8 @@ async def acao_handler(message: types.Message):
                                     ouro_perdido_qnt = ouro_antes - jogador.gold
                                     stats.ouro_perdido_total += ouro_perdido_qnt
 
-                                try: registrar_derrota(db, user_id, intervencao_divina=True, ouro_perdido=ouro_perdido_qnt)
-                                except TypeError: registrar_derrota(db, user_id, intervencao_divina=True)
+                                try: await registrar_derrota(db, user_id, intervencao_divina=True, ouro_perdido=ouro_perdido_qnt)
+                                except TypeError: await registrar_derrota(db, user_id, intervencao_divina=True)
 
                                 item_perdido_nome = ""
                                 if perder_item:
@@ -1358,7 +1389,12 @@ async def acao_handler(message: types.Message):
                         await message.answer(f"{narracao}\n\n⚠️ <i>Não há inimigos nem alvos destrutíveis nesta sala.</i>\n{resumo_status(jogador)}", parse_mode="HTML")
 
                 elif "DESCANSO" in intencao or any(p in message.text.lower() for p in ["descansar", "descanso", "curar feridas", "dormir"]):
-                    campanha_desc = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first() if getattr(jogador, 'party_id', None) else None
+                    if getattr(jogador, 'party_id', None):
+                        result_camp_desc = await db.execute(select(Campanha).filter(Campanha.party_id == jogador.party_id))
+                        campanha_desc = result_camp_desc.scalars().first()
+                    else:
+                        campanha_desc = None
+
                     if campanha_desc and campanha_desc.cena_atual != "carvalhal":
                         if jogador.hit_dice_atual > 0:
                             jogador.hit_dice_atual -= 1

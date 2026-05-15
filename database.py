@@ -1,32 +1,43 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from contextlib import contextmanager
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
 # Pegamos a URL do banco que você colocou no .env
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# O 'engine' é o motor que realmente faz o barulho de conexão
-engine = create_engine(DATABASE_URL)
+# 1. Ajuste de Segurança: Garantir que a URL use o driver asyncpg
+if DATABASE_URL and "+asyncpg" not in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
 
-# A 'Session' é como uma conversa aberta com o banco
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# 2. O motor agora é assíncrono (echo=False em produção para não poluir logs)
+engine = create_async_engine(DATABASE_URL, echo=False)
 
-# A 'Base' é a semente de onde todos os nossos modelos vão nascer
+# 3. A fábrica de sessões agora cria AsyncSessions
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False # Importante: mantém os objetos acessíveis após o commit assíncrono
+)
+
+# A 'Base' continua a mesma
 Base = declarative_base()
 
-@contextmanager
-def get_db_session():
-    """Context manager que abre, commita/rollback e fecha a sessão automaticamente."""
-    db = SessionLocal()
+# 4. O Context Manager agora é ASSÍNCRONO (async with)
+@asynccontextmanager
+async def get_db_session():
+    """Context manager assíncrono que abre, commita/rollback e fecha a sessão."""
+    db = AsyncSessionLocal()
     try:
         yield db
-        db.commit()  # Sucesso → confirma todas as alterações
+        await db.commit()  # Commit assíncrono
     except Exception:
-        db.rollback()  # Erro → desfaz qualquer alteração pendente
-        raise  # Relança a exceção para o código que chamou
+        await db.rollback()  # Rollback assíncrono
+        raise
     finally:
-        db.close()
+        await db.close()  # Close assíncrono

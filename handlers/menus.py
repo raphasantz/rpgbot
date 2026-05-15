@@ -14,6 +14,7 @@ from stats_manager import (
     get_or_create_estatisticas, get_rank_jogador, get_ultimas_partidas,
     calcular_taxa_sucesso, calcular_taxa_sucesso_testes
 )
+from sqlalchemy import select
 
 router = Router()
 
@@ -24,8 +25,9 @@ async def equipar_handler(message: types.Message):
         return await message.answer("⚠️ Digita o nome do item que queres equipar. Ex: <code>/equipar Espada Longa</code> ou <code>/equipar Cota de Malha</code>", parse_mode="HTML")
 
     user_id = str(message.from_user.id)
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Cria um personagem primeiro.")
 
         inv_limpo = obter_inventario_limpo(jogador.inventario)
@@ -131,9 +133,12 @@ async def equipar_handler(message: types.Message):
 
 @router.message(Command("loja"))
 async def loja_interativa_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
-        campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first() if jogador and getattr(jogador, 'party_id', None) else None
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        jogador = result.scalars().first()
+        
+        result_campanha = await db.execute(select(Campanha).filter(Campanha.party_id == jogador.party_id)) if jogador and getattr(jogador, 'party_id', None) else None
+        campanha = result_campanha.scalars().first() if result_campanha else None
         
         if not campanha or not jogador: return await message.answer("⚠️ Cria um personagem e entra numa /party primeiro.")
         if campanha.cena_atual != "carvalhal": return await message.answer("⚠️ Estás no meio de uma masmorra! A loja fica na vila.")
@@ -165,8 +170,9 @@ async def comprar_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
     item_nome_parcial = callback.data.replace("buy_", "")
     
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         if not jogador: return await callback.answer("⚠️ Erro de jogador.", show_alert=True)
         
         item_encontrado, nome_oficial = None, None
@@ -195,9 +201,12 @@ async def comprar_callback(callback: types.CallbackQuery):
 
 @router.message(Command("vender"))
 async def vender_interativo_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
-        campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first() if jogador and getattr(jogador, 'party_id', None) else None
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        jogador = result.scalars().first()
+        
+        result_campanha = await db.execute(select(Campanha).filter(Campanha.party_id == jogador.party_id)) if jogador and getattr(jogador, 'party_id', None) else None
+        campanha = result_campanha.scalars().first() if result_campanha else None
         
         if not campanha or campanha.cena_atual != "carvalhal": return await message.answer("⚠️ Só podes vender itens na Vila.")
         
@@ -224,8 +233,9 @@ async def vender_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
     item_nome_parcial = callback.data.replace("sell_", "")
     
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         inv_linhas = obter_inventario_limpo(jogador.inventario)
         
         item_para_vender = next((i for i in inv_linhas if item_nome_parcial.lower() in i.lower()), None)
@@ -243,12 +253,13 @@ async def vender_callback(callback: types.CallbackQuery):
 
 @router.message(Command("inventario"))
 async def inventario_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
-        if not jogador: return await message.answer("⚠️ Cria um personagem primeiro com /criar.")
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        joueur = result.scalars().first()
+        if not joueur: return await message.answer("⚠️ Cria um personagem primeiro com /criar.")
 
-        inv_limpo = obter_inventario_limpo(jogador.inventario)
-        texto_inventario = formatar_inventario_para_display(inv_limpo)
+        inv_limpo = obter_inventario_limpo(joueur.inventario)
+        texte_inventario = formatar_inventario_para_display(inv_limpo)
         
         botoes = []
         itens_unicos = set(inv_limpo)
@@ -271,7 +282,7 @@ async def inventario_handler(message: types.Message):
         teclado = InlineKeyboardMarkup(inline_keyboard=botoes) if botoes else None
 
         await message.answer(
-            f"🎒 <b>INVENTÁRIO - {jogador.nome}</b>\n━━━━━━━━━━━━━━━━━━━━\n{texto_inventario}\n━━━━━━━━━━━━━━━━━━━━\n💰 <b>Ouro:</b> {jogador.gold} PO", 
+            f"🎒 <b>INVENTÁRIO - {joueur.nome}</b>\n━━━━━━━━━━━━━━━━━━━━\n{texte_inventario}\n━━━━━━━━━━━━━━━━━━━━\n💰 <b>Ouro:</b> {joueur.gold} PO", 
             parse_mode="HTML",
             reply_markup=teclado
         )
@@ -279,16 +290,17 @@ async def inventario_handler(message: types.Message):
 @router.callback_query(F.data.startswith("inveq_") | F.data.startswith("invuso_"))
 async def inventario_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
-    comando = callback.data
+    commande = callback.data
     
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == user_id).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
+        jogador = result.scalars().first()
         if not jogador: return await callback.answer("⚠️ Personagem não encontrado.", show_alert=True)
         
         inv_limpo = obter_inventario_limpo(jogador.inventario)
         
-        if comando.startswith("invuso_"):
-            tipo_uso = comando.replace("invuso_", "")
+        if commande.startswith("invuso_"):
+            tipo_uso = commande.replace("invuso_", "")
             
             if tipo_uso == "antidoto":
                 antidoto = next((i for i in inv_limpo if "antídoto" in i.lower() or "antidoto" in i.lower()), None)
@@ -317,8 +329,8 @@ async def inventario_callback(callback: types.CallbackQuery):
                 await callback.message.delete()
                 return await callback.answer()
 
-        elif comando.startswith("inveq_"):
-            item_nome_parcial = comando.replace("inveq_", "")
+        elif commande.startswith("inveq_"):
+            item_nome_parcial = commande.replace("inveq_", "")
             item_no_inv = next((i for i in inv_limpo if item_nome_parcial.lower() in i.lower()), None)
             
             if not item_no_inv: return await callback.answer("❌ Não tens mais este item!", show_alert=True)
@@ -357,9 +369,9 @@ async def inventario_callback(callback: types.CallbackQuery):
                     atr = arma_dados["atributo"]
                 
                 mod_escolhido = 0
-                if atr == "STR": mod_escolhido = jogador.mod_str
-                elif atr == "DEX": mod_escolhido = jogador.mod_dex
-                elif atr == "FINESSE": mod_escolhido = max(jogador.mod_str, jogador.mod_dex)
+                if atr == "STR": mod_escolhido = joueur.mod_str
+                elif atr == "DEX": mod_escolhido = joueur.mod_dex
+                elif atr == "FINESSE": mod_escolhido = max(jogador.mod_str, joueur.mod_dex)
 
                 jogador.mod_dano = mod_escolhido
                 jogador.modificador_ataque = mod_escolhido + jogador.proficiencia
@@ -395,8 +407,9 @@ async def inventario_callback(callback: types.CallbackQuery):
 
 @router.message(Command("missoes", "quests"))
 async def missoes_handler(message: types.Message):
-    with get_db_session() as db:
-        missoes = db.query(Missao).filter(Missao.jogador_telefone == str(message.from_user.id)).all()
+    async with get_db_session() as db:
+        result = await db.execute(select(Missao).filter(Missao.jogador_telefone == str(message.from_user.id)))
+        missoes = result.scalars().all()
         if not missoes:
             return await message.answer("📜 Não tens missões ativas no momento.", parse_mode="HTML")
         texto = "📜 <b>DIÁRIO DE MISSÕES</b>\n\n"
@@ -407,23 +420,24 @@ async def missoes_handler(message: types.Message):
 
 @router.message(Command("perfil", "hp", "ficha"))
 async def perfil_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        jogador = result.scalars().first()
         if jogador:
             coracao = "❤️" if jogador.hp_atual > (jogador.hp_maximo / 2) else "⚠️"
             arma_eq = getattr(jogador, 'arma_equipada', 'Desarmado')
             armadura_eq = getattr(jogador, 'armadura_equipada', 'Trajes Comuns')
             
             pericias_bg = BACKGROUND_SKILLS.get(jogador.background, [])
-            texto_pericias = ", ".join(pericias_bg) if pericias_bg else "Nenhuma"
+            texte_pericias = ", ".join(pericias_bg) if pericias_bg else "Nenhuma"
 
             status_str = ""
             if hasattr(jogador, 'status_efeitos') and jogador.status_efeitos:
                 status_str = f"\n⚠️ <b>Status Ativos:</b> {', '.join(jogador.status_efeitos)}"
 
-            texto = (f"👤 <b>{jogador.nome}</b> (Nível {jogador.nivel} | {jogador.raca} {jogador.classe})\n"
+            texte = (f"👤 <b>{jogador.nome}</b> (Nível {jogador.nivel} | {jogador.raca} {jogador.classe})\n"
                      f"<b>Background:</b> {jogador.background}\n"
-                     f"🧠 <b>Perícias:</b> {texto_pericias} (+{jogador.proficiencia})\n"
+                     f"🧠 <b>Perícias:</b> {texte_pericias} (+{jogador.proficiencia})\n"
                      f"━━━━━━━━━━━━━━━━━━━━\n"
                      f"{coracao} <b>HP:</b> {jogador.hp_atual}/{jogador.hp_maximo} | 🛡️ <b>CA:</b> {jogador.modificador_defesa} | ✨ <b>Usos:</b> {jogador.slots_magia}/{jogador.slots_magia_max}{status_str}\n"
                      f"🌟 <b>XP:</b> {jogador.xp}\n"
@@ -438,26 +452,27 @@ async def perfil_handler(message: types.Message):
                      f"WIS: {jogador.wis_val} ({jogador.mod_wis:+d}) | CHA: {jogador.cha_val} ({jogador.mod_cha:+d})\n"
                      f"━━━━━━━━━━━━━━━━━━━━\n"
                      f"💰 <b>Ouro:</b> {jogador.gold} PO")
-            await message.answer(texto, parse_mode="HTML")
+            await message.answer(texte, parse_mode="HTML")
 
 @router.message(Command("dashboard", "stats", "estatisticas"))
 async def dashboard_handler(message: types.Message):
-    with get_db_session() as db:
-        jogador = db.query(Jogador).filter(Jogador.telefone == str(message.from_user.id)).first()
-        if not jogador: return await message.answer("⚠️ Use /criar para começar.")
-        stats = get_or_create_estatisticas(db, str(message.from_user.id))
-        rank = get_rank_jogador(db, str(message.from_user.id))
-        ultimas_partidas = get_ultimas_partidas(db, str(message.from_user.id), limite=3)
+    async with get_db_session() as db:
+        result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
+        jogador = result.scalars().first()
+        if not joueur: return await message.answer("⚠️ Use /criar para começar.")
+        stats = await get_or_create_estatisticas(db, str(message.from_user.id))
+        rank = await get_rank_jogador(db, str(message.from_user.id))
+        ultimas_partidas = await get_ultimas_partidas(db, str(message.from_user.id), limite=3)
         taxa_acerto = calcular_taxa_sucesso(stats)
         
         total_ataques = stats.total_ataques_acertados + stats.total_ataques_errados
         progresso = min(100, int(((jogador.xp - XP_POR_NIVEL.get(jogador.nivel, 0)) / (XP_POR_NIVEL.get(jogador.nivel + 1, 355000) - XP_POR_NIVEL.get(jogador.nivel, 0))) * 100)) if (XP_POR_NIVEL.get(jogador.nivel + 1, 355000) - XP_POR_NIVEL.get(jogador.nivel, 0)) > 0 else 100
         barras = int(progresso / 10)
         barra_progresso = "█" * barras + "░" * (10 - barras)
-        texto = (f"📊 <b>DASHBOARD DE {jogador.nome.upper()}</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                 f"📈 <b>PROGRESSO</b>\nNível: {jogador.nivel}\nXP: {jogador.xp} [{barra_progresso}] {progresso}%\nOuro: {jogador.gold} PO\n\n"
+        texte = (f"📊 <b>DASHBOARD DE {jogador.nom.upper()}</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                 f"📈 <b>PROGRESSO</b>\nNível: {jogador.niveau}\nXP: {jogador.xp} [{barra_progresso}] {progresso}%\nOuro: {jogador.gold} PO\n\n"
                  f"🏆 <b>RANKING</b>\nPosição: #{rank['posicao']} de {rank['total_jogadores']}\n\n"
                  f"⚔️ <b>ESTATÍSTICAS</b>\nKills: {stats.inimigos_derrotados}\nAtaques: {stats.total_ataques_acertados}/{total_ataques} ({taxa_acerto:.1f}%)\nCríticos: {stats.criticos_acertados} | Dano: {stats.danos_causados_total}\n\n")
         if ultimas_partidas:
-            texto += "📜 <b>HISTÓRICO</b>\n" + "".join([f"{'🏆' if p.resultado=='vitoria' else '💀'} {p.resultado.title()} - {p.inimigos_derrotados} kills\n" for p in ultimas_partidas])
-        await message.answer(texto, parse_mode="HTML")
+            texte += "📜 <b>HISTÓRICO</b>\n" + "".join([f"{'🏆' if p.resultado=='vitoria' else '💀'} {p.resultado.title()} - {p.inimigos_derrotados} kills\n" for p in ultimas_partidas])
+        await message.answer(texte, parse_mode="HTML")
