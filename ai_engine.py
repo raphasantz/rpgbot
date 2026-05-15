@@ -1,5 +1,6 @@
 import os
 import json
+from typing import Dict, Any
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
@@ -15,16 +16,104 @@ load_dotenv()
 # Cliente assíncrono — não bloqueia o event loop do aiogram
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+async def interpretar_acao_json(texto_jogador: str, contexto_sala: str = "Nenhum") -> Dict[str, Any]:
+    """
+    Envia a ação do jogador para o GPT-4o-mini e retorna um JSON estruturado com a intenção e parâmetros mecânicos.
+    Usa o response_format nativo para garantir um JSON válido.
+    """
+    acao_limpa = texto_jogador.strip().lower()
+    chave_cache = f"json_{acao_limpa}|{contexto_sala}"
+    
+    if chave_cache in CACHE_INTENCOES:
+        print(f"⚡ [CACHE HIT] Intenção JSON recuperada: {CACHE_INTENCOES[chave_cache]}")
+        return CACHE_INTENCOES[chave_cache]
+
+    system_prompt = (
+        "És um motor de extração de intenções estrito para um RPG de texto baseado em D&D 5e.\n"
+        "A tua ÚNICA função é ler a entrada do jogador e extrair a intenção mecânica num formato JSON pré-definido.\n\n"
+        "REGRAS ABSOLUTAS:\n"
+        "1. NUNCA narres ou decidas o resultado da ação (sucesso/falha).\n"
+        "2. Extraia APENAS os dados mecânicos solicitados.\n"
+        "3. Se o jogador descrever algo épico, traduza para a intenção mais próxima (ex: 'decapitar' -> COMBATE, estilo 'agressivo').\n"
+        "4. Responda APENAS com o objeto JSON válido.\n\n"
+        "ESQUEMA JSON EXIGIDO:\n"
+        "{\n"
+        '  "intencao": "COMBATE | MAGIA | MANOBRA | NAVEGAR | INTERACAO | DESCANSAR | OUTRO",\n'
+        '  "alvo": "Nome do inimigo, objeto ou NPC visado (string ou null)",\n'
+        '  "estilo": "furtivo | temerario | agressivo | defesa | null",\n'
+        '  "magia_usada": "Nome exato da magia se intencao for MAGIA (string ou null)",\n'
+        '  "manobra": "empurrar | agarrar | derrubar | desarmar | levantar | null",\n'
+        '  "item": "Nome do item a ser usado/pegado (string ou null)",\n'
+        '  "direcao": "norte | sul | leste | oeste | dentro | fora | null"\n'
+        "}\n\n"
+        "MAPEAMENTO DE INTENÇÕES:\n"
+        "- COMBATE: Atacar fisicamente, golpear, atirar.\n"
+        "- MAGIA: Lançar um feitiço específico ofensivo, defensivo ou de utilidade.\n"
+        "- MANOBRA: Ações de combate não letais (empurrar, agarrar, derrubar, desarmar).\n"
+        "- NAVEGAR: Mover-se para outra sala, fugir, andar.\n"
+        "- INTERACAO: Examinar, abrir baús, desarmar armadilhas, falar com NPCs, pegar itens.\n"
+        "- DESCANSAR: Dormir, montar acampamento, curar feridas, descanso curto/longo.\n"
+        "- OUTRO: Qualquer ação livre, conversa, observação que não se encaixe acima.\n\n"
+        f"Entrada do Jogador: '{texto_jogador}'\n"
+        f"Contexto da Sala: {contexto_sala}"
+    )
+
+    fallback_json = {
+        "intencao": "OUTRO", "alvo": None, "estilo": None, 
+        "magia_usada": None, "manobra": None, "item": None, "direcao": None
+    }
+
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "system", "content": system_prompt}],
+            temperature=0,
+            response_format={"type": "json_object"}
+        )
+        
+        conteudo = response.choices[0].message.content.strip()
+        dados_json = json.loads(conteudo)
+        
+        # Validação e Sanitização Estrita
+        INTENCOES_VALIDAS = {"COMBATE", "MAGIA", "MANOBRA", "NAVEGAR", "INTERACAO", "DESCANSAR", "OUTRO"}
+        intencao = dados_json.get("intencao", "OUTRO").upper()
+        
+        if intencao not in INTENCOES_VALIDAS:
+            print(f"⚠️ [IA JSON] Intenção inválida '{intencao}'. Fallback para OUTRO.")
+            intencao = "OUTRO"
+            
+        resultado = {
+            "intencao": intencao,
+            "alvo": dados_json.get("alvo"),
+            "estilo": dados_json.get("estilo"),
+            "magia_usada": dados_json.get("magia_usada"),
+            "manobra": dados_json.get("manobra"),
+            "item": dados_json.get("item"),
+            "direcao": dados_json.get("direcao")
+        }
+        
+        CACHE_INTENCOES[chave_cache] = resultado
+        print(f"🧠 [IA JSON PROCESSADO] {resultado}")
+        return resultado
+        
+    except json.JSONDecodeError as e:
+        print(f"❌ [IA JSON] Falha ao parsear JSON: {e} - Resposta: {conteudo}")
+        return fallback_json
+    except Exception as e:
+        print(f"❌ [IA JSON] Erro crítico: {e}")
+        return fallback_json
+
+# =====================================================================
+# FUNÇÕES LEGADAS E NARRATIVAS (MANTIDAS INTACTAS)
+# =====================================================================
+
 async def interpretar_acao(acao_jogador, interativos_disponiveis="Nenhum"):
     """
-    Envia a ação do jogador para o GPT-4o-mini e retorna a intenção classificada.
-    Usa um sistema de cache em memória para economizar tokens e acelerar respostas repetidas.
+    [LEGADO] Envia a ação do jogador para o GPT-4o-mini e retorna a intenção classificada como string.
     """
-    # 1. Limpa a string para o cache ser preciso e adiciona contexto
     acao_limpa = acao_jogador.strip().lower()
     chave_cache = f"{acao_limpa}|{interativos_disponiveis}"
     
-    # 2. Verifica se a IA já pensou sobre isso antes neste mesmo contexto
     if chave_cache in CACHE_INTENCOES:
         print(f"⚡ [CACHE HIT] Intenção recuperada da memória: {CACHE_INTENCOES[chave_cache]}")
         return CACHE_INTENCOES[chave_cache]
@@ -58,14 +147,11 @@ async def interpretar_acao(acao_jogador, interativos_disponiveis="Nenhum"):
     try:
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-            ],
+            messages=[{"role": "system", "content": system_prompt}],
             temperature=0,
         )
         intencao = response.choices[0].message.content.strip().upper()
         
-        # Validação Estrita (Whitelist)
         INTENCOES_VALIDAS = {
             "COMBATE", "MAGIA", "NAVEGAR", "TESTE", "NARRATIVA", 
             "PEGAR", "USAR_ITEM", "DESCANSO", "NAVEGAR_FURTIVO", 
@@ -76,7 +162,6 @@ async def interpretar_acao(acao_jogador, interativos_disponiveis="Nenhum"):
             print(f"⚠️ [IA FALHOU] Intenção inválida detectada: {intencao}. Fallback para NARRATIVA.")
             intencao = "NARRATIVA"
         
-        # 3. Salva a resposta no cache para o futuro com o contexto
         CACHE_INTENCOES[chave_cache] = intencao
         print(f"🧠 [IA PROCESSOU] Nova intenção aprendida: {intencao}")
         return intencao
@@ -127,7 +212,6 @@ async def decidir_atributo_teste(acao_jogador):
             temperature=0
         )
         atr = response.choices[0].message.content.strip().upper()
-        # Validação Estrita (Whitelist) — evita atributos fantasmas
         if atr not in ATRIBUTOS_VALIDOS:
             print(f"⚠️ [IA] Atributo inválido '{atr}' ignorado. Fallback: INT.")
             return "INT"
@@ -187,7 +271,7 @@ async def extrair_itens_da_narracao(narracao: str) -> list:
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
-            response_format={"type": "json_object"}  # Garante JSON válido nativamente
+            response_format={"type": "json_object"}
         )
         
         conteudo = response.choices[0].message.content.strip()
@@ -206,7 +290,6 @@ async def sanitizar_descricao_para_dalle(descricao_sala):
     """
     Usa o GPT para reescrever a descrição da sala removendo conteúdo
     que viola as políticas do DALL-E (gore, violência explícita, ossos, sangue).
-    Retorna uma versão segura e visualmente descritiva.
     """
     prompt = (
         f"Reescreva a seguinte descrição de cenário de fantasia para ser adequada para geração de imagem. "
@@ -224,14 +307,13 @@ async def sanitizar_descricao_para_dalle(descricao_sala):
         return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"[FILTRO DALLE] Erro ao sanitizar: {e}")
-        return descricao_sala  # Fallback: usa a original mesmo
+        return descricao_sala
 
 async def gerar_imagem_sala(nome_sala, descricao_sala):
     """
     Gera uma imagem da sala usando DALL-E 3.
     Retorna a URL da imagem ou None em caso de erro.
     """
-    # Sanitiza a descrição antes de enviar ao DALL-E
     descricao_limpa = await sanitizar_descricao_para_dalle(descricao_sala)
 
     prompt_imagem = (

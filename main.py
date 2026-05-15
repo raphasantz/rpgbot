@@ -61,17 +61,6 @@ class CriacaoPersonagem(StatesGroup):
     background = State()
     atributos = State()
 
-Base.metadata.create_all(bind=engine)
-
-from sqlalchemy import text
-try:
-    with engine.begin() as conn:
-        conn.execute(text("ALTER TABLE jogadores ADD COLUMN IF NOT EXISTS hit_dice_max INTEGER DEFAULT 1"))
-        conn.execute(text("ALTER TABLE jogadores ADD COLUMN IF NOT EXISTS hit_dice_atual INTEGER DEFAULT 1"))
-    print("✅ Auto-migration: Colunas hit_dice verificadas/adicionadas.")
-except Exception as e:
-    print(f"⚠️ Aviso ao auto-migrar DB: {e}")
-
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 bot = Bot(token=TOKEN)
@@ -691,7 +680,23 @@ async def global_error_handler(event: ErrorEvent):
     except Exception as fallback_error:
         logging.error(f"Falha ao enviar mensagem de erro para o usuário: {fallback_error}")
 
+async def init_db():
+    from sqlalchemy import text
+    try:
+        async with engine.begin() as conn:
+            # Cria as tabelas de forma assíncrona
+            await conn.run_sync(Base.metadata.create_all)
+            # Roda as migrações de forma assíncrona
+            await conn.execute(text("ALTER TABLE jogadores ADD COLUMN IF NOT EXISTS hit_dice_max INTEGER DEFAULT 1"))
+            await conn.execute(text("ALTER TABLE jogadores ADD COLUMN IF NOT EXISTS hit_dice_atual INTEGER DEFAULT 1"))
+        print("✅ Banco de dados inicializado e auto-migrado com sucesso!")
+    except Exception as e:
+        print(f"⚠️ Aviso ao inicializar/migrar DB: {e}")
+
 async def main():
+    # Inicializa o banco ANTES de ligar o bot
+    await init_db()
+    
     asyncio.create_task(lock_garbage_collector())
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
