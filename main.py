@@ -138,6 +138,7 @@ async def start_handler(message: types.Message):
                     img_url = await gerar_imagem_sala(sala_atual.nome_sala, sala_atual.descricao_visual)
                     if img_url:
                         sala_atual.imagem_url = img_url
+                        await db.flush() # CORREÇÃO: Salva a URL da imagem imediatamente
                     await msg_temp.delete()
 
                 if sala_atual.imagem_url:
@@ -264,6 +265,7 @@ async def party_handler(message: types.Message):
                             jogador.proficiencia = nova_proficiencia
                             jogador.modificador_ataque = jogador.mod_dano + jogador.proficiencia
                         
+                        # CORREÇÃO: Escala o dado do monge ao entrar em party de nível alto
                         if jogador.classe.lower() == "monge" and "Desarmado" in getattr(jogador, 'arma_equipada', ''):
                             if jogador.nivel >= 17: jogador.dano_dado = "1d10"
                             elif jogador.nivel >= 11: jogador.dano_dado = "1d8"
@@ -309,6 +311,7 @@ async def party_handler(message: types.Message):
                     img_url = await gerar_imagem_sala(sala_party.nome_sala, sala_party.descricao_visual)
                     if img_url:
                         sala_party.imagem_url = img_url
+                        await db.flush() # CORREÇÃO: Salva a URL da imagem imediatamente
                     await msg_temp.delete()
 
                 if sala_party.imagem_url:
@@ -332,7 +335,7 @@ async def codigo_handler(message: types.Message):
             return await message.answer("⚠️ Ainda não estás num grupo. Usa <code>/party criar</code> primeiro.", parse_mode="HTML")
             
         teclado_inline = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🔄 Compartilhar Código", switch_inline_query=f"Junta-te à minha party no RPG! Código: {jogador.party_id}")]
+            [InlineKeyboardButton(text="🔄 Compartilhar Código", switch_inline_query=f"Junta-se à minha party no RPG! Código: {jogador.party_id}")]
         ])
         
         await message.answer(
@@ -464,11 +467,12 @@ async def reset_handler(message: types.Message):
 async def callback_confirmar_reset(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
     async with get_db_session() as db:
-        await db.execute(delete(Missao).filter(Missao.jogador_telefone == user_id))
-        await db.execute(delete(HistoricoPartida).filter(HistoricoPartida.jogador_telefone == user_id))
-        await db.execute(delete(EstatisticasJogador).filter(EstatisticasJogador.jogador_telefone == user_id))
-        await db.execute(delete(Campanha).filter(Campanha.host_id == user_id))
-        await db.execute(delete(Jogador).filter(Jogador.telefone == user_id))
+        # CORREÇÃO: Alterado de .filter para .where (Padrão SQLAlchemy 2.0 para deletes)
+        await db.execute(delete(Missao).where(Missao.jogador_telefone == user_id))
+        await db.execute(delete(HistoricoPartida).where(HistoricoPartida.jogador_telefone == user_id))
+        await db.execute(delete(EstatisticasJogador).where(EstatisticasJogador.jogador_telefone == user_id))
+        await db.execute(delete(Campanha).where(Campanha.host_id == user_id))
+        await db.execute(delete(Jogador).where(Jogador.telefone == user_id))
     
     await bot.send_message(chat_id=user_id, text="🌩️ <b>Dados e Estatísticas resetados.</b>\nA tua lenda chegou ao fim. Usa /criar para recomeçar.", parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
     await callback.message.delete()
@@ -648,6 +652,7 @@ async def processar_atributos(message: types.Message, state: FSMContext):
                     img_url = await gerar_imagem_sala(sala.nome_sala, sala.descricao_visual)
                     if img_url:
                         sala.imagem_url = img_url
+                        await db.flush() # CORREÇÃO: Salva a URL da imagem imediatamente
                     await msg_temp.delete()
                     
                 if sala.imagem_url:

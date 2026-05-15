@@ -277,13 +277,14 @@ async def acao_handler(message: types.Message):
                         await message.answer("⚠️ Erro ao carregar a nova sala.", parse_mode="HTML")
                         return
                     
-                    # DALL-E E IMAGENS (Com proteção extra)
+                    # DALL-E E IMAGENS (Com proteção extra e SALVAMENTO FORÇADO)
                     try:
                         if not nova_sala.imagem_url:
                             msg_temp = await message.answer("🎨 <i>O Mestre está a visualizar o local...</i>", parse_mode="HTML")
                             img_url = await gerar_imagem_sala(nova_sala.nome_sala, nova_sala.descricao_visual)
                             if img_url: 
                                 nova_sala.imagem_url = img_url
+                                await db.flush() # <-- CORREÇÃO APLICADA AQUI: Garante que a URL salva no banco na hora!
                             await msg_temp.delete()
                     except Exception as e:
                         logging.error(f"Erro DALL-E: {e}")

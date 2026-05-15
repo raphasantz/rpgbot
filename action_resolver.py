@@ -12,7 +12,7 @@ from ui_utils import MAGIAS_POR_CLASSE, XP_POR_NIVEL, HP_POR_CLASSE, gerar_loot_
 @dataclass
 class ActionResult:
     sucesso: bool
-    tipo_acao: str  # "combate", "magia", "manobra", "navegacao", "interacao", "descanso", "outro"
+    tipo_acao: str  # "combate", "magia", "manobra", "navegacao", "interacao", "descanso", "outro", "status"
     narrativa_mecanica: str
     dados_extras: Dict[str, Any] = field(default_factory=dict)
 
@@ -61,8 +61,35 @@ class ActionResolver:
         elif intencao == "DESCANSAR":
             return await self._resolver_descanso(jogador, campanha, cena_atual, texto_jogador)
 
-        # --- 3. INTERCEPTAÇÃO DE TESTES MANUAIS ---
-        if intencao in ["INTERACAO", "OUTRO", "TESTE"] and any(palavra in texto_jogador.lower() for palavra in ["teste", "rolar", "perceção", "percepção", "história", "arcanismo", "escutar"]):
+        # --- 3. INTERCEPTAÇÃO DE AÇÕES TÁTICAS E TESTES ---
+        texto_low = texto_jogador.lower()
+        
+        # Ações Táticas Reimplantadas
+        if any(p in texto_low for p in ["esquivar", "defender", "dodge", "defesa total"]):
+            efeitos = list(getattr(jogador, 'status_efeitos', []))
+            if "Esquivando" not in efeitos:
+                efeitos.append("Esquivando")
+                jogador.status_efeitos = efeitos
+                return ActionResult(True, "status", "🛡️ <b>Posição Defensiva!</b> Inimigos terão desvantagem para te acertar até teu próximo turno.", {})
+            return ActionResult(False, "status", "⚠️ Já estás em posição defensiva.", {})
+
+        if intencao == "COBERTURA" or any(p in texto_low for p in ["cobertura", "esconder", "proteger"]):
+            efeitos = list(getattr(jogador, 'status_efeitos', []))
+            if "Cobertura" not in efeitos:
+                efeitos.append("Cobertura")
+                jogador.status_efeitos = efeitos
+                return ActionResult(True, "status", "🧱 <b>Cobertura!</b> Protegeste-te. Ganhaste +2 de CA contra os próximos ataques.", {})
+            return ActionResult(False, "status", "⚠️ Já estás protegido em cobertura.", {})
+
+        if intencao == "AJUDAR" or any(p in texto_low for p in ["ajudar", "ajudo", "suportar"]):
+            efeitos = list(getattr(jogador, 'status_efeitos', []))
+            if "Ajudado" not in efeitos:
+                efeitos.append("Ajudado")
+                jogador.status_efeitos = efeitos
+                return ActionResult(True, "status", "🤝 Posicionaste-te para dar suporte! O próximo ataque do grupo terá Vantagem.", {})
+
+        # Testes Manuais
+        if intencao in ["INTERACAO", "OUTRO", "TESTE"] and any(palavra in texto_low for palavra in ["teste", "rolar", "perceção", "percepção", "história", "arcanismo", "escutar"]):
             return await self._resolver_teste(jogador, cena_atual, texto_jogador)
 
         # Fallback narrativo
@@ -164,15 +191,47 @@ class ActionResolver:
                 acertou_ataque = True
                 texto_crit = "💥 ACERTO CRÍTICO!" if resultado_ataque.critico else "✅ Acerto!"
                 
+                # --- CONSUMO DE HABILIDADES (SMITE, FÚRIA, FORMA SELVAGEM) ---
+                efeitos_jogador = list(getattr(jogador, 'status_efeitos', []))
+                dano_habilidade = 0
+                
+                if "Smite" in efeitos_jogador:
+                    dados_smite = min(5, 2 + (jogador.nivel // 4))
+                    dano_habilidade += sum(random.randint(1, 8) for _ in range(dados_smite))
+                    efeitos_jogador.remove("Smite")
+                    
+                if "Forma Selvagem" in efeitos_jogador:
+                    dano_habilidade += sum(random.randint(1, 6) for _ in range(2))
+                    efeitos_jogador.remove("Forma Selvagem")
+                    
+                if "Fúria" in efeitos_jogador:
+                    bonus_furia = 2
+                    if jogador.nivel >= 16: bonus_furia = 4
+                    elif jogador.nivel >= 9: bonus_furia = 3
+                    dano_habilidade += bonus_furia
+                    # Fúria NÃO é removida aqui, só no fim do combate ou ao mover
+
+                dano_causado += dano_habilidade
+                jogador.status_efeitos = efeitos_jogador # Salva a limpeza dos status
+
+                # Lógica de Furtivo
                 if estilo == "furtivo" and jogador.classe.lower() == "ladino":
                     dados_furtivo = math.ceil(jogador.nivel / 2)
                     dano_extra = sum(random.randint(1, 6) for _ in range(dados_furtivo))
                     dano_causado += dano_extra
 
+                # --- VULNERABILIDADE GULTHIAS (ÁRVORE) AO FOGO ---
+                if alvo_nome and ("árvore" in alvo_nome.lower() or "arvore" in alvo_nome.lower() or "gulthias" in alvo_nome.lower()):
+                    if any(p in texto.lower() for p in ["fogo", "ardente", "chamas", "bola"]):
+                        dano_causado *= 2
+                        narrativa += "🔥 VULNERÁVEL! O fogo causa o dobro do dano!\n"
+
                 narrativa += f"🎲 Dados: d20={dados_str} {str_vantagem}+{mod_calc}={resultado_ataque.total_ataque} vs CA {ca_alvo} ✅\n"
                 narrativa += f"🗡️ {texto_crit} Causaste {dano_causado} de dano."
                 if dano_extra > 0:
                     narrativa += f" (Inclui +{dano_extra} Furtivo)"
+                if dano_habilidade > 0:
+                    narrativa += f" (+{dano_habilidade} de Habilidades)"
                 narrativa += "\n"
 
                 vivos_antes = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
@@ -188,11 +247,37 @@ class ActionResolver:
                     jogador.xp += xp_total
                     jogador.gold += ouro_total
                     narrativa += f"🌟 +{xp_total} XP, +{ouro_total} PO.\n"
+                    
+                    # --- GERAÇÃO DE LOOT REIMPLANTADA ---
+                    loot_gerado = gerar_loot_inimigo_comum()
+                    if loot_gerado:
+                        itens_reais = adicionar_ao_inventario(jogador, loot_gerado)
+                        if itens_reais:
+                            narrativa += f"🎁 Saque: {', '.join(itens_reais)}\n"
+
+                    # --- LEVEL UP COMPLETO REIMPLANTADO ---
                     if jogador.xp >= XP_POR_NIVEL.get(jogador.nivel + 1, 999999):
                         jogador.nivel += 1
                         jogador.hp_maximo += HP_POR_CLASSE.get(jogador.classe, 8) + jogador.mod_con
                         jogador.hp_atual = jogador.hp_maximo
-                        narrativa += f"🌟 Subiste para o Nível {jogador.nivel}!\n"
+                        
+                        jogador.slots_magia_max += 1
+                        jogador.slots_magia = jogador.slots_magia_max
+                        jogador.hit_dice_max = getattr(jogador, 'hit_dice_max', 1) + 1
+                        jogador.hit_dice_atual = jogador.hit_dice_max
+
+                        nova_proficiencia = 2 + ((jogador.nivel - 1) // 4)
+                        if nova_proficiencia > jogador.proficiencia:
+                            jogador.proficiencia = nova_proficiencia
+                            jogador.modificador_ataque = jogador.mod_dano + jogador.proficiencia
+                            
+                        if jogador.classe.lower() == "monge" and "Desarmado" in getattr(jogador, 'arma_equipada', ''):
+                            if jogador.nivel >= 17: jogador.dano_dado = "1d10"
+                            elif jogador.nivel >= 11: jogador.dano_dado = "1d8"
+                            elif jogador.nivel >= 5: jogador.dano_dado = "1d6"
+                            else: jogador.dano_dado = "1d4"
+                            
+                        narrativa += f"🌟 Subiste para o Nível {jogador.nivel}! HP, Magia e Hit Dice atualizados!\n"
                 else:
                     if is_durnn_furia:
                         narrativa += "😡 O Boss entrou em Fúria Sanguinária!\n"
@@ -559,7 +644,19 @@ class ActionResolver:
         for obj in interativos:
             if (alvo_nome and alvo_nome.lower() in obj.nome.lower()) or (obj.tipo.lower() in texto_low):
                 mod = getattr(jogador, f"mod_{obj.atributo_teste.lower()}", 0)
-                total = random.randint(1, 20) + mod + jogador.proficiencia
+                
+                # --- PROFICIÊNCIA DE BACKGROUND REIMPLANTADA ---
+                bonus_prof = 0
+                pericias = BACKGROUND_SKILLS.get(jogador.background, [])
+                if obj.atributo_teste == "DEX" and any(p in pericias for p in ["Furtividade", "Acrobacia"]): bonus_prof = jogador.proficiencia
+                if obj.atributo_teste == "INT" and any(p in pericias for p in ["Arcanismo", "História", "Investigação"]): bonus_prof = jogador.proficiencia
+                if obj.atributo_teste == "WIS" and any(p in pericias for p in ["Percepção", "Intuição", "Sobrevivência"]): bonus_prof = jogador.proficiencia
+                if obj.atributo_teste == "STR" and any(p in pericias for p in ["Atletismo"]): bonus_prof = jogador.proficiencia
+                if obj.atributo_teste == "CHA" and any(p in pericias for p in ["Persuasão", "Enganação", "Intimidação"]): bonus_prof = jogador.proficiencia
+                
+                total = random.randint(1, 20) + mod + bonus_prof
+                # -----------------------------------------------
+                
                 if total >= obj.cd_teste:
                     obj.ativo = False
                     loot = obj.recompensa if obj.recompensa else []
