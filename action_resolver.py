@@ -2,7 +2,7 @@ import random
 import math
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Jogador, Campanha, Cena, Encontro, Inimigo, ObjetoDestrutivel, Npc, Interativo, Missao
@@ -87,76 +87,189 @@ class ActionResolver:
             return ActionResult(False, "combate", f"O monstro {encontro.nome_inimigo} não tem ficha no bestiário!", {})
 
         chave_hp = f"hp_{encontro.id}"
-        hp_grupo = estado.get(chave_hp, inimigo.hp_max * encontro.quantidade)
+        hp_max_inimigo = inimigo.hp_max if inimigo.hp_max is not None else 10
+        hp_grupo = estado.get(chave_hp, hp_max_inimigo * encontro.quantidade)
         ca_alvo = inimigo.ca
-
-        if getattr(inimigo, 'is_boss', False) and hp_grupo <= (inimigo.hp_max / 2) and hp_grupo > 0:
+        
+        is_durnn_furia = False
+        if getattr(inimigo, 'is_boss', False) and hp_grupo <= (hp_max_inimigo / 2) and hp_grupo > 0:
+            is_durnn_furia = True
             ca_alvo = max(10, ca_alvo - 2)
 
-        atacante_status = getattr(jogador, 'status_efeitos', [])
-        defensor_status = []
+        # Salva CA no estado para o Ataque Secundário do botão
+        estado["ca_alvo"] = ca_alvo
+        campanha.estado_salas = estado
+
+        atacante_status = list(getattr(jogador, 'status_efeitos', []))
+        efeitos_atuais = atacante_status
         vantagem = False
         desvantagem = False
+        str_vantagem = ""
 
         if estilo == "furtivo" or estilo == "temerario":
             vantagem = True
-        if "Caído" in atacante_status or "Caido" in atacante_status:
+            str_vantagem = "(Vantagem)"
+        if "Caido" in atacante_status or "Caído" in atacante_status:
             desvantagem = True
+            str_vantagem = "(Desvantagem)"
         if "Ajudado" in atacante_status:
             vantagem = True
-            atacante_status.remove("Ajudado")
+            str_vantagem = "(Vantagem)"
+            if "Ajudado" in atacante_status: atacante_status.remove("Ajudado")
             jogador.status_efeitos = atacante_status
 
-        resultado_ataque = processar_ataque_fisico(
-            jogador=jogador, inimigo_ca=ca_alvo, defensor_status=defensor_status, tipo_ataque="melee"
-        )
-
+        # --- INICIATIVA ---
+        ini_jogador = random.randint(1, 20) + jogador.mod_dex
+        ini_inimigo = random.randint(1, 20) + getattr(inimigo, 'mod_destreza', 0)
+        narrativa = f"⚡ INICIATIVA: {jogador.nome} {ini_jogador} vs {inimigo.nome} {ini_inimigo}\n\n"
+        
+        inimigo_primeiro = ini_inimigo >= ini_jogador
+        jogador_pode_atacar = True
         dano_causado = 0
-        narrativa = f"🎲 Rolagem: {resultado_ataque.detalhes_d20} + Mod = {resultado_ataque.total_ataque} vs CA {ca_alvo}. "
-
-        if resultado_ataque.acertou:
-            dano_causado = resultado_ataque.dano
-            if estilo == "furtivo" and jogador.classe.lower() == "ladino":
-                dados_furtivo = math.ceil(jogador.nivel / 2)
-                dano_extra = sum(random.randint(1, 6) for _ in range(dados_furtivo))
-                dano_causado += dano_extra
-                narrativa += f"🗡️ Ataque Furtivo! +{dano_extra} dano. "
-
-            texto_crit = "💥 ACERTO CRÍTICO! " if resultado_ataque.critico else "✅ Acerto! "
-            narrativa += f"{texto_crit}Causaste {dano_causado} de dano."
-
-            hp_grupo -= dano_causado
-            estado[chave_hp] = hp_grupo
-            campanha.estado_salas = estado
-
-            if hp_grupo <= 0:
-                estado[f"derrotado_{encontro.id}"] = True
-                campanha.estado_salas = estado
-                campanha.em_combate = False
-                narrativa += f"\n🏆 VITÓRIA! {encontro.quantidade}x {inimigo.nome} derrotados!"
+        acertou_ataque = False
+        
+        # Se o inimigo venceu a iniciativa, ele ataca primeiro
+        if inimigo_primeiro:
+            texto_revide, dano_revide, efeitos_atuais = await self._resolver_revide_inimigo(jogador, campanha, encontro, inimigo, hp_grupo, hp_max_inimigo, efeitos_atuais, is_durnn_furia)
+            narrativa += texto_revide
+            if jogador.hp_atual <= 0:
+                jogador_pode_atacar = False
+        
+        # Turno do Jogador (se não morreu no revide)
+        if jogador_pode_atacar:
+            resultado_ataque = processar_ataque_fisico(jogador=jogador, inimigo_ca=ca_alvo, defensor_status=[], tipo_ataque="melee")
+            dano_extra = 0
+            
+            # Formatação segura dos dados
+            detalhes = resultado_ataque.detalhes_d20
+            mod_calc = "?"
+            try:
+                if isinstance(detalhes, list):
+                    dados_str = f"[{', '.join(map(str, detalhes))}]"
+                    max_roll = max(detalhes) if vantagem else min(detalhes)
+                elif isinstance(detalhes, int):
+                    dados_str = f"[{detalhes}]"
+                    max_roll = detalhes
+                else:
+                    dados_str = f"[{detalhes}]"
+                    max_roll = int(str(detalhes).split(',')[-1].strip().replace('[','').replace(']',''))
                 
-                xp_total = getattr(inimigo, 'xp_recompensa', 50) * encontro.quantidade
-                ouro_total = getattr(inimigo, 'ouro_recompensa', 5) * encontro.quantidade
-                jogador.xp += xp_total
-                jogador.gold += ouro_total
-                narrativa += f" +{xp_total} XP, +{ouro_total} PO."
+                if isinstance(max_roll, int):
+                    mod_calc = resultado_ataque.total_ataque - max_roll
+            except Exception:
+                dados_str = f"[{detalhes}]"
+
+            if resultado_ataque.acertou:
+                dano_causado = resultado_ataque.dano
+                acertou_ataque = True
+                texto_crit = "💥 ACERTO CRÍTICO!" if resultado_ataque.critico else "✅ Acerto!"
                 
-                # Check de Missão de Eliminação / Drop Automático
-                missoes = (await self.db.execute(select(Missao).filter(Missao.jogador_telefone == jogador.telefone, Missao.concluida == False))).scalars().all()
-                for missao in missoes:
-                    if missao.objetivo_item and inimigo.nome.lower() in missao.objetivo_item.lower():
-                        adicionar_ao_inventario(jogador, [missao.objetivo_item])
-                        narrativa += f"\n🎁 Obtiveste: {missao.objetivo_item} (Item de Missão)."
+                if estilo == "furtivo" and jogador.classe.lower() == "ladino":
+                    dados_furtivo = math.ceil(jogador.nivel / 2)
+                    dano_extra = sum(random.randint(1, 6) for _ in range(dados_furtivo))
+                    dano_causado += dano_extra
 
-                if jogador.xp >= XP_POR_NIVEL.get(jogador.nivel + 1, 999999):
-                    jogador.nivel += 1
-                    jogador.hp_maximo += HP_POR_CLASSE.get(jogador.classe, 8) + jogador.mod_con
-                    jogador.hp_atual = jogador.hp_maximo
-                    narrativa += f" 🌟 Subiste para o Nível {jogador.nivel}!"
-        else:
-            narrativa += "❌ O teu ataque falhou."
+                narrativa += f"🎲 Dados: d20={dados_str} {str_vantagem}+{mod_calc}={resultado_ataque.total_ataque} vs CA {ca_alvo} ✅\n"
+                narrativa += f"🗡️ {texto_crit} Causaste {dano_causado} de dano."
+                if dano_extra > 0:
+                    narrativa += f" (Inclui +{dano_extra} Furtivo)"
+                narrativa += "\n"
 
-        return ActionResult(True, "combate", narrativa, {"dano": dano_causado, "acertou": resultado_ataque.acertou})
+                vivos_antes = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
+                hp_grupo -= dano_causado
+                estado[chave_hp] = hp_grupo
+
+                if hp_grupo <= 0:
+                    estado[f"derrotado_{encontro.id}"] = True
+                    campanha.em_combate = False
+                    narrativa += f"🏆 VITÓRIA! {encontro.quantidade}x {inimigo.nome} derrotados!\n"
+                    xp_total = getattr(inimigo, 'xp_recompensa', 50) * encontro.quantidade
+                    ouro_total = getattr(inimigo, 'ouro_recompensa', 5) * encontro.quantidade
+                    jogador.xp += xp_total
+                    jogador.gold += ouro_total
+                    narrativa += f"🌟 +{xp_total} XP, +{ouro_total} PO.\n"
+                    if jogador.xp >= XP_POR_NIVEL.get(jogador.nivel + 1, 999999):
+                        jogador.nivel += 1
+                        jogador.hp_maximo += HP_POR_CLASSE.get(jogador.classe, 8) + jogador.mod_con
+                        jogador.hp_atual = jogador.hp_maximo
+                        narrativa += f"🌟 Subiste para o Nível {jogador.nivel}!\n"
+                else:
+                    if is_durnn_furia:
+                        narrativa += "😡 O Boss entrou em Fúria Sanguinária!\n"
+            else:
+                acertou_ataque = False
+                narrativa += f"🎲 Dados: d20={dados_str} {str_vantagem}+{mod_calc}={resultado_ataque.total_ataque} vs CA {ca_alvo} ❌\n"
+                narrativa += "💨 Ataque falhou\n"
+                
+            # Se o jogador atacou primeiro e o inimigo sobreviveu, o inimigo ataca agora
+            if not inimigo_primeiro and campanha.em_combate and hp_grupo > 0 and jogador.hp_atual > 0:
+                texto_revide, dano_revide, efeitos_atuais = await self._resolver_revide_inimigo(jogador, campanha, encontro, inimigo, hp_grupo, hp_max_inimigo, efeitos_atuais, is_durnn_furia)
+                narrativa += texto_revide
+
+        # --- VENENO NO FIM DO TURNO ---
+        if "Envenenado" in efeitos_atuais:
+            dano_veneno = random.randint(1, 4)
+            jogador.hp_atual -= dano_veneno
+            narrativa += f"🤢 Veneno: Sofres {dano_veneno} de dano direto!\n"
+            if jogador.hp_atual <= 0:
+                narrativa += f"💀 {jogador.nome} sucumbiu ao veneno!\n"
+
+        # Limpeza de status e estado
+        if "Esquivando" in efeitos_atuais: efeitos_atuais.remove("Esquivando")
+        jogador.status_efeitos = efeitos_atuais
+        campanha.estado_salas = estado
+        
+        narrativa += f"\n❤️ {jogador.nome}: {jogador.hp_atual}/{jogador.hp_maximo} HP"
+        
+        return ActionResult(True, "combate", narrativa, {"dano": dano_causado, "acertou": acertou_ataque})
+
+    async def _resolver_revide_inimigo(self, jogador: Jogador, campanha: Campanha, encontro: Encontro, inimigo: Inimigo, hp_grupo: int, hp_max_inimigo: int, efeitos_atuais: list, is_durnn_furia: bool) -> tuple[str, int, list]:
+        """Calcula e formata o revide do inimigo. Retorna (narrativa, dano_total, efeitos_atualizados)"""
+        narrativa = ""
+        dano_final_revide = 0
+        
+        if campanha.em_combate and hp_grupo > 0:
+            vivos_agora = math.ceil(hp_grupo / hp_max_inimigo)
+            mod_inimigo = int(str(inimigo.ataque).replace('+', '')) if '+' in str(inimigo.ataque) else 0
+            
+            result_vivos_count = await self.db.execute(select(func.count()).select_from(Jogador).filter(
+                Jogador.party_id == campanha.party_id, Jogador.hp_atual > 0, Jogador.cena_atual == campanha.cena_atual
+            ))
+            jogadores_vivos = result_vivos_count.scalar()
+            limite_ataques = jogadores_vivos + (getattr(encontro, 'multiplicador_ameaca', 1) or 1)
+            atacantes = min(vivos_agora, limite_ataques)
+            
+            narrativa += f"⚠️ ATAQUE INIMIGO: {atacantes}x {inimigo.nome} atacam! (De {vivos_agora} vivos)\n"
+            acertos_totais = 0
+            
+            for i in range(atacantes):
+                d20_inimigo = random.randint(1, 20)
+                if is_durnn_furia: d20_inimigo = max(d20_inimigo, random.randint(1, 20))
+                
+                if d20_inimigo + mod_inimigo >= jogador.modificador_defesa or d20_inimigo == 20:
+                    acertos_totais += 1
+                    dano_base = random.randint(1, 4)
+                    if is_durnn_furia: dano_base += 2
+                    if d20_inimigo == 20: dano_base *= 2
+                    dano_final_revide += dano_base
+                    narrativa += f"🗡️ Atk {i+1}: Hit ({dano_base} dano)\n"
+                else:
+                    narrativa += f"💨 Atk {i+1}: Miss\n"
+
+            if acertos_totais > 0:
+                narrativa += f"🩸 Dano total recebido: {dano_final_revide}\n\n"
+            else:
+                narrativa += "🛡️ Esquivaste todos os ataques!\n\n"
+            
+            jogador.hp_atual -= dano_final_revide
+
+            # Tentativa de Envenenamento
+            if random.randint(1, 100) <= 20 and "Envenenado" not in efeitos_atuais:
+                if any(n in inimigo.nome.lower() for n in ["rato", "aranha", "cobra", "troll", "goblin"]):
+                    efeitos_atuais.append("Envenenado")
+                    narrativa += "🤢 Foste Envenenado pelo ataque inimigo!\n\n"
+                    
+        return narrativa, dano_final_revide, efeitos_atuais
 
     async def _resolver_ataque_objeto(self, jogador: Jogador, cena: Cena, alvo_nome: Optional[str], texto: str) -> ActionResult:
         objs = (await self.db.execute(select(ObjetoDestrutivel).filter(ObjetoDestrutivel.cod_sala == cena.cod_sala, ObjetoDestrutivel.ativo == True))).scalars().all()
@@ -218,8 +331,9 @@ class ActionResolver:
         efeitos = list(getattr(jogador, 'status_efeitos', []))
         
         if manobra and "levantar" in manobra.lower():
-            if "Caído" in efeitos:
-                efeitos.remove("Caído")
+            if "Caído" in efeitos or "Caido" in efeitos:
+                if "Caído" in efeitos: efeitos.remove("Caído")
+                if "Caido" in efeitos: efeitos.remove("Caido")
                 jogador.status_efeitos = efeitos
                 return ActionResult(True, "manobra", "🏃 Levantaste-te! Já não estás Caído.", {})
             return ActionResult(False, "manobra", "Já estás de pé.", {})
@@ -277,24 +391,53 @@ class ActionResolver:
 
         # --- 2. DESCOBERTA DA DIREÇÃO ---
         if not is_fuga:
-            if not direcao:
+            direcao_ia = direcao
+            if not direcao_ia:
                 from mapa_engine import extrair_direcao
-                direcao = await extrair_direcao(texto, cena.conexoes)
-                if not direcao:
+                direcao_ia = await extrair_direcao(texto, cena.conexoes)
+                if not direcao_ia or "invalido" in direcao_ia.lower():
                     return ActionResult(False, "navegacao", "Para onde desejas ir? Direção não reconhecida.", {})
 
-            direcao = direcao.lower().strip()
+            direcao_ia = direcao_ia.lower().strip()
             conexoes = cena.conexoes or {}
-            mapa_dir = {"norte": "norte", "sul": "sul", "leste": "leste", "oeste": "oeste", "cima": "cima", "baixo": "baixo", "dentro": "dentro", "fora": "fora"}
-            alvo_sala = conexoes.get(mapa_dir.get(direcao, direcao))
+            alvo_sala = None
+            
+            # 1. Tentar correspondência exata ou parcial
+            for k, v in conexoes.items():
+                if direcao_ia in k.lower() or k.lower() in direcao_ia:
+                    alvo_sala = v
+                    break
+                    
+            # 2. Sinónimos caso o JSON Mode tenha generalizado (Descer -> Baixo)
             if not alvo_sala:
-                for k, v in conexoes.items():
-                    if direcao in k.lower():
-                        alvo_sala = v
-                        break
+                sinonimos = {
+                    "baixo": ["baixo", "descer", "descida", "poço", "buraco"],
+                    "cima": ["cima", "subir", "subida", "escada"],
+                    "dentro": ["dentro", "entrar", "porta"],
+                    "fora": ["fora", "sair", "rua"]
+                }
+                for grupo in sinonimos.values():
+                    if direcao_ia in grupo:
+                        for k, v in conexoes.items():
+                            if any(s in k.lower() for s in grupo):
+                                alvo_sala = v
+                                break
+                        if alvo_sala: break
+
+            # 3. FALLBACK DE SEGURANÇA
+            if not alvo_sala:
+                from mapa_engine import extrair_direcao
+                dir_salvacao = await extrair_direcao(texto, cena.conexoes)
+                if dir_salvacao and "invalido" not in dir_salvacao.lower():
+                    for k, v in conexoes.items():
+                        if dir_salvacao in k.lower():
+                            alvo_sala = v
+                            break
 
             if not alvo_sala:
-                return ActionResult(False, "navegacao", f"Caminho bloqueado ou inexistente para '{direcao}'.", {})
+                return ActionResult(False, "navegacao", f"Caminho bloqueado ou inexistente para '{texto}'.", {})
+            
+            direcao = direcao_ia
         else:
             alvo_sala = direcao
 
@@ -353,7 +496,7 @@ class ActionResolver:
         if any(p in texto_low for p in ["vasculhar", "procurar", "sala", "chão"]) and cena.loot_fixo:
             itens_encontrados = cena.loot_fixo
             itens_reais = adicionar_ao_inventario(jogador, itens_encontrados)
-            cena.loot_fixo = [] # Limpa a sala
+            cena.loot_fixo = []
             return ActionResult(True, "interacao", f"👀 Vasculhaste a sala e encontraste: {', '.join(itens_reais)}.", {})
 
         # 2. Usar Item (Poções / Antídotos)

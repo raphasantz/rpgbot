@@ -215,17 +215,19 @@ async def acao_handler(message: types.Message):
                 nomes_destrutiveis = ", ".join([o.nome for o in objetos_destrutiveis]) if objetos_destrutiveis else ""
                 contexto_objetos = nomes_interativos + (", " + nomes_destrutiveis if nomes_destrutiveis else "")
                 
+                texto_min = message.text.lower()
+                texto_limpo_acao = unicodedata.normalize('NFKD', message.text).encode('ASCII', 'ignore').decode('utf-8').lower()
+                
                 # --- FASE 1: CHAMADA AO JSON MODE DA IA ---
-                json_ia = await interpretar_acao_json(message.text, contexto_objetos)
+                is_fuga_temp = any(p in texto_limpo_acao for p in ["fugir", "fujo", "correr", "escapar", "recuar"])
+                texto_contexto_ia = f"{message.text} [FUJA]" if is_fuga_temp and campanha.em_combate else message.text
+                json_ia = await interpretar_acao_json(texto_contexto_ia, contexto_objetos)
                 intencao = json_ia.get("intencao", "OUTRO").upper()
                 
                 try: await atualizar_estatistica(db, user_id, 'tempo_jogo_minutos', 1)
                 except Exception: pass
 
-                texto_min = message.text.lower()
-                texto_limpo_acao = unicodedata.normalize('NFKD', message.text).encode('ASCII', 'ignore').decode('utf-8').lower()
-                
-                # --- BLINDAGEM DE TURNO (Leão de Chácara) ---
+                # --- BLINDAGEM DE TURNO ---
                 efeitos_jogador = list(jogador.status_efeitos or [])
                 
                 if "Atordoado" in efeitos_jogador:
@@ -274,15 +276,23 @@ async def acao_handler(message: types.Message):
                     if not nova_sala:
                         await message.answer("⚠️ Erro ao carregar a nova sala.", parse_mode="HTML")
                         return
-                        
-                    if not nova_sala.imagem_url:
-                        msg_temp = await message.answer("🎨 <i>O Mestre está a visualizar o local...</i>", parse_mode="HTML")
-                        img_url = await gerar_imagem_sala(nova_sala.nome_sala, nova_sala.descricao_visual)
-                        if img_url: nova_sala.imagem_url = img_url
-                        await msg_temp.delete()
+                    
+                    # DALL-E E IMAGENS (Com proteção extra)
+                    try:
+                        if not nova_sala.imagem_url:
+                            msg_temp = await message.answer("🎨 <i>O Mestre está a visualizar o local...</i>", parse_mode="HTML")
+                            img_url = await gerar_imagem_sala(nova_sala.nome_sala, nova_sala.descricao_visual)
+                            if img_url: 
+                                nova_sala.imagem_url = img_url
+                            await msg_temp.delete()
+                    except Exception as e:
+                        logging.error(f"Erro DALL-E: {e}")
                         
                     if nova_sala.imagem_url:
-                        await message.answer_photo(photo=nova_sala.imagem_url)
+                        try:
+                            await message.answer_photo(photo=nova_sala.imagem_url)
+                        except Exception:
+                            await message.answer("🎨 <i>A névoa obscurece a tua visão... (Falha ao carregar imagem)</i>", parse_mode="HTML")
 
                     sobreviveu = await verificar_hazards(message, jogador, nova_sala)
                     if not sobreviveu:
@@ -295,21 +305,21 @@ async def acao_handler(message: types.Message):
                     ameacas_vivas = [f"{enc.quantidade}x {enc.nome_inimigo}" for enc in encontros_novos if not estado_campanha.get(f"derrotado_{enc.id}")]
                     alerta = f"\n\n⚠️ <b>AMEAÇAS NA SALA:</b> " + " | ".join(ameacas_vivas) if ameacas_vivas else ""
 
-                    await message.answer(f"👣 {action_result.narrativa_mecanica}\n\n📍 <b>{nova_sala.nome_sala}</b>\n{nova_sala.descricao_visual}{alerta}\n{texto_saidas(nova_sala)}\n{resumo_status(jogador)}", parse_mode="HTML", reply_markup=teclado_saidas(nova_sala))
+                    narracao = await narrar_ambiente(jogador.nome, message.text, nova_sala.descricao_visual)
+
+                    await message.answer(f"👣 {action_result.narrativa_mecanica}\n\n📍 <b>{nova_sala.nome_sala}</b>\n{narracao}{alerta}\n\n{texto_saidas(nova_sala)}\n{resumo_status(jogador)}", parse_mode="HTML", reply_markup=teclado_saidas(nova_sala))
                     return
 
-                # Narrativas genéricas para ações que não exigem o bloco complexo de combate
+                # Narrativas genéricas
                 if action_result.tipo_acao in ["manobra", "interacao", "descanso", "status"]:
                     narracao = await narrar_ambiente(jogador.nome, message.text, sala_atual.descricao_visual)
                     await message.answer(f"{narracao}\n\n{action_result.narrativa_mecanica}\n{resumo_status(jogador)}", parse_mode="HTML")
                     return
 
-                # Combate e Magia fluem para a narração dinâmica
+                # Combate e Magia: Narração da IA no topo + Bloco Mecânico Limpo
                 if action_result.tipo_acao in ["combate", "magia"]:
-                    # O Resolver já aplicou a matemática. Aqui só formatamos a UI e narramos.
-                    narracao = await narrar_combate(jogador.nome, message.text, action_result.narrativa_mecanica, sala_atual.descricao_visual)
-                    
-                    msg_final = f"{narracao}\n\n━━━━━━━━━━━━━━━━\n{action_result.narrativa_mecanica}\n\n❤️ {jogador.nome}: {jogador.hp_atual}/{jogador.hp_maximo} HP\n━━━━━━━━━━━━━━━━"
+                    narracao_combate = await narrar_combate(jogador.nome, message.text, action_result.narrativa_mecanica, sala_atual.descricao_visual)
+                    msg_final = f"{narracao_combate}\n\n{action_result.narrativa_mecanica}"
                     reply_markup = teclado_saidas(sala_atual) if not campanha.em_combate else None
                     await message.answer(msg_final, parse_mode="HTML", reply_markup=reply_markup)
                     return
