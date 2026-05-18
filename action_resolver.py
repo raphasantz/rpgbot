@@ -167,6 +167,34 @@ class ActionResolver:
             resultado_ataque = processar_ataque_fisico(jogador=jogador, inimigo_ca=ca_alvo, defensor_status=[], tipo_ataque="melee")
             dano_extra = 0
             
+            # --- REIMPLANTAÇÃO: PALAVRAS-CHAVE DE CLASSE ---
+            _cls_kw = jogador.classe.lower()
+            texto_low_kw = texto.lower()
+            mod_keyword = {}
+            keyword_feature_msg = ""
+            KEYWORDS_POR_CLASSE = {
+                "artífice": {"explosão arcana": {"bonus_dano": 4}, "infusão": {"bonus_ca": 2}},
+                "guerreiro": {"estocar": {"bonus_ataque": 2}, "defesa total": {"bonus_ca": 4}},
+                "paladino": {"aura": {"bonus_ca": 3}, "abjurar": {"bonus_ca": 5}},
+                "monge": {"flurry": {"ataque_extra": True}, "torrente": {"ataque_extra": True}, "ki": {"bonus_ataque": 2}},
+                "patrulheiro": {"marca": {"bonus_dano": 6}, "marca do caçador": {"bonus_dano": 6}},
+                "bardo": {"zombaria": {"desvantagem_inimigo": True}},
+            }
+            kws_classe = KEYWORDS_POR_CLASSE.get(_cls_kw, {})
+            for kw_texto, kw_efeitos in kws_classe.items():
+                if kw_texto in texto_low_kw:
+                    mod_keyword = kw_efeitos
+                    if kw_efeitos.get("bonus_dano"): dano_extra += kw_efeitos["bonus_dano"]
+                    if kw_efeitos.get("bonus_ataque"): jogador.modificador_ataque += kw_efeitos["bonus_ataque"]
+                    if kw_efeitos.get("bonus_ca"): jogador.modificador_defesa += kw_efeitos["bonus_ca"]
+                    if kw_efeitos.get("desvantagem_inimigo"):
+                        estado_kw = dict(campanha.estado_salas or {})
+                        estado_kw["inimigo_debilidade"] = True
+                        campanha.estado_salas = estado_kw
+                    keyword_feature_msg = f"\n⚡ <i>{kw_texto.title()} ativado!</i>"
+                    break
+            # ------------------------------------------------
+            
             # Formatação segura dos dados
             detalhes = resultado_ataque.detalhes_d20
             mod_calc = "?"
@@ -204,21 +232,25 @@ class ActionResolver:
                     dano_habilidade += sum(random.randint(1, 6) for _ in range(2))
                     efeitos_jogador.remove("Forma Selvagem")
                     
+                texto_furia = ""
                 if "Fúria" in efeitos_jogador:
                     bonus_furia = 2
                     if jogador.nivel >= 16: bonus_furia = 4
                     elif jogador.nivel >= 9: bonus_furia = 3
                     dano_habilidade += bonus_furia
                     # Fúria NÃO é removida aqui, só no fim do combate ou ao mover
+                    texto_furia = f"\n😡 <b>Fúria Bárbaro:</b> +{bonus_furia} de dano e Resistência Ativada!"
 
-                dano_causado += dano_habilidade
+                dano_causado += dano_habilidade + dano_extra
                 jogador.status_efeitos = efeitos_jogador # Salva a limpeza dos status
 
                 # Lógica de Furtivo
                 if estilo == "furtivo" and jogador.classe.lower() == "ladino":
                     dados_furtivo = math.ceil(jogador.nivel / 2)
-                    dano_extra = sum(random.randint(1, 6) for _ in range(dados_furtivo))
-                    dano_causado += dano_extra
+                    dano_extra_furtivo = sum(random.randint(1, 6) for _ in range(dados_furtivo))
+                    dano_causado += dano_extra_furtivo
+                else:
+                    dano_extra_furtivo = 0
 
                 # --- VULNERABILIDADE GULTHIAS (ÁRVORE) AO FOGO ---
                 if alvo_nome and ("árvore" in alvo_nome.lower() or "arvore" in alvo_nome.lower() or "gulthias" in alvo_nome.lower()):
@@ -228,10 +260,14 @@ class ActionResolver:
 
                 narrativa += f"🎲 Dados: d20={dados_str} {str_vantagem}+{mod_calc}={resultado_ataque.total_ataque} vs CA {ca_alvo} ✅\n"
                 narrativa += f"🗡️ {texto_crit} Causaste {dano_causado} de dano."
-                if dano_extra > 0:
-                    narrativa += f" (Inclui +{dano_extra} Furtivo)"
+                if dano_extra_furtivo > 0:
+                    narrativa += f" (Inclui +{dano_extra_furtivo} Furtivo)"
                 if dano_habilidade > 0:
                     narrativa += f" (+{dano_habilidade} de Habilidades)"
+                if dano_extra > 0:
+                    narrativa += f" (+{dano_extra} de Classe)"
+                narrativa += texto_furia
+                narrativa += keyword_feature_msg
                 narrativa += "\n"
 
                 vivos_antes = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
@@ -281,6 +317,33 @@ class ActionResolver:
                 else:
                     if is_durnn_furia:
                         narrativa += "😡 O Boss entrou em Fúria Sanguinária!\n"
+                        
+                    # --- REIMPLANTAÇÃO: SURTO DE AÇÃO DO GUERREIRO ---
+                    efeitos_jogador = list(getattr(jogador, 'status_efeitos', []))
+                    if "Surto" in efeitos_jogador and hp_grupo > 0:
+                        efeitos_jogador.remove("Surto")
+                        jogador.status_efeitos = efeitos_jogador
+                        
+                        res_surto = processar_ataque_fisico(jogador=jogador, inimigo_ca=ca_alvo, defensor_status=[], tipo_ataque="melee")
+                        dano_surto = res_surto.dano
+                        
+                        if res_surto.acertou:
+                            hp_grupo -= dano_surto
+                            estado[chave_hp] = hp_grupo
+                            texto_crit_surto = "💥 CRÍTICO!" if res_surto.critico else "✅ Acerto!"
+                            narrativa += f"\n⚔️ <b>Surto de Ação!</b> Ataque extra! {texto_crit_surto} Causaste {dano_surto} de dano."
+                            
+                            if hp_grupo <= 0:
+                                estado[f"derrotado_{encontro.id}"] = True
+                                campanha.em_combate = False
+                                narrativa += f"\n🏆 VITÓRIA pelo Surto! {encontro.quantidade}x {inimigo.nome} derrotados!"
+                                xp_total = getattr(inimigo, 'xp_recompensa', 50) * encontro.quantidade
+                                jogador.xp += xp_total
+                                jogador.gold += getattr(inimigo, 'ouro_recompensa', 5) * encontro.quantidade
+                                narrativa += f"\n🌟 +{xp_total} XP."
+                        else:
+                            narrativa += f"\n⚔️ <b>Surto de Ação!</b> Ataque extra falhou!"
+                    # ------------------------------------------------
             else:
                 acertou_ataque = False
                 narrativa += f"🎲 Dados: d20={dados_str} {str_vantagem}+{mod_calc}={resultado_ataque.total_ataque} vs CA {ca_alvo} ❌\n"
@@ -342,6 +405,13 @@ class ActionResolver:
                     narrativa += f"💨 Atk {i+1}: Miss\n"
 
             if acertos_totais > 0:
+                # --- MECÂNICA DE RESISTÊNCIA DA FÚRIA DO BÁRBARO ---
+                if "Fúria" in efeitos_atuais:
+                    dano_original_revide = dano_final_revide
+                    dano_final_revide = max(1, dano_final_revide // 2)
+                    narrativa += f"🛡️ A tua Fúria reduziu o dano sofrido pela metade! (Original: {dano_original_revide})\n"
+                # --------------------------------------------------
+
                 narrativa += f"🩸 Dano total recebido: {dano_final_revide}\n\n"
             else:
                 narrativa += "🛡️ Esquivaste todos os ataques!\n\n"
@@ -568,7 +638,7 @@ class ActionResolver:
                 jogador.hp_atual -= dano_total
                 narrativa_hazard += f"\n❌ <b>{descricao}!</b> Foste atingido (Teste {rolagem} vs CD {cd}). Sofreste {dano_total} de dano!"
 
-        texto_final = f"👣 Moveste-te para {direcao if not is_fuga else 'uma área segura'}. O grupo chegou a {nome_sala}."
+        texto_final = f"👣 Segues para {direcao if not is_fuga else 'uma área segura'}."
         if narrativa_fuga: texto_final = f"{narrativa_fuga}\n\n{texto_final}"
         if narrativa_hazard: texto_final = f"{texto_final}\n{narrativa_hazard}"
 
