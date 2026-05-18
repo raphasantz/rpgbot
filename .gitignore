@@ -4,37 +4,69 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Logs and temp files
-*.log
-*.tmp
-
-# Environment
+.Python
+env/
+venv/
+.venv/
+.ENV
 .env
 .env.local
-*.env.*
+.env.*
+requirements.txt.bak
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Editors
+# Logs
+*.log
+*.log.*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+coverage/
+htmlcov/
+.nyc_output
+coverage-final.json
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Dependencies
-.venv/
-venv/
-*.egg-info/
-dist/
+# Distribution / packaging
+.Python
 build/
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # MyPy
 .mypy_cache/
+.dmypy.json
+dmypy.json
 
 # PyTest
 .pytest_cache/
+
+# Coverage
+.coverage*
 ```

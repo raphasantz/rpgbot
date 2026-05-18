@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 
 print("🔄 Carregando módulos do projeto...")
 try:
-    from database import get_db_session, engine, Base
+    from database import get_async_db, engine, Base
     import models
     from models import Jogador, Campanha, Encontro, Inimigo, Cena, EstatisticasJogador, HistoricoPartida, Interativo, Missao, Npc, EncontroAleatorio, ObjetoDestrutivel
     from ai_engine import interpretar_acao, narrar_combate, decidir_atributo_teste, narrar_ambiente, gerar_imagem_sala
@@ -45,7 +45,7 @@ try:
         registrar_combate_resultado, registrar_vitoria, registrar_derrota,
         registrar_teste, registrar_descanso_curto, calcular_taxa_sucesso,
         calcular_taxa_sucesso_testes, get_ultimas_partidas, calcular_tempo_jogo_formatado,
-        get_rank_jogador, atualizar_estatistica
+        get_rank_jogador_async as get_rank_jogador, atualizar_estatistica
     )
     print("✅ Módulos carregados com sucesso!")
 except Exception as e:
@@ -116,7 +116,7 @@ async def callback_abrir_guia(callback: types.CallbackQuery):
 
 @dp.message(CommandStart())
 async def start_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         if not jogador:
@@ -167,7 +167,7 @@ async def falar_handler(message: types.Message):
     mensagem_off = texto_mensagem[1]
     user_id = str(message.from_user.id)
 
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador_atual = result.scalars().first()
         
@@ -196,7 +196,7 @@ async def party_handler(message: types.Message):
     args = message.text.split()
     user_id = str(message.from_user.id)
     
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Cria um personagem primeiro com /criar.")
@@ -327,7 +327,7 @@ async def party_handler(message: types.Message):
 @dp.message(Command("codigo", "party_id", "convite"))
 async def codigo_handler(message: types.Message):
     user_id = str(message.from_user.id)
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         
@@ -349,7 +349,7 @@ async def codigo_handler(message: types.Message):
 @dp.message(Command("r", "roll"))
 async def rolar_dados_handler(message: types.Message):
     user_id = str(message.from_user.id)
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador or not jogador.party_id:
@@ -400,7 +400,7 @@ async def rolar_dados_handler(message: types.Message):
 
 @dp.message(Command("descansar", "descanso"))
 async def descansar_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Não tens nenhum personagem ativo. Usa /criar.")
@@ -432,7 +432,7 @@ async def descansar_handler(message: types.Message):
 
 @dp.message(Command("dashboard", "stats", "estatisticas"))
 async def dashboard_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Use /criar para começar.")
@@ -466,7 +466,7 @@ async def reset_handler(message: types.Message):
 @dp.callback_query(F.data == "confirmar_reset")
 async def callback_confirmar_reset(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         # CORREÇÃO: Alterado de .filter para .where (Padrão SQLAlchemy 2.0 para deletes)
         await db.execute(delete(Missao).where(Missao.jogador_telefone == user_id))
         await db.execute(delete(HistoricoPartida).where(HistoricoPartida.jogador_telefone == user_id))
@@ -584,7 +584,7 @@ async def processar_atributos(message: types.Message, state: FSMContext):
             "cena_atual": "carvalhal", "cena_anterior": None
         }
 
-        async with get_db_session() as db:
+        async with get_async_db() as db:
             result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
             jogador = result.scalars().first()
             if jogador:

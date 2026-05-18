@@ -2,7 +2,7 @@ import hashlib # ADICIONADO: Para hashes determinísticos
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
-from database import get_db_session
+from database import get_async_db
 from models import Jogador, Campanha, Cena, Encontro, Inimigo, Interativo, ObjetoDestrutivel, Npc
 from combat_logic import processar_ataque_fisico, processar_ataque_objeto
 import random
@@ -150,7 +150,7 @@ def ler_status_servidor():
 
 @app.post("/api/login", response_model=ActionResponse)
 def login_godot(req: LoginRequest):
-    with get_db_session() as db:
+    async with get_async_db() as db:
         jogador = db.query(Jogador).filter(Jogador.telefone == req.codigo_acesso).first()
         if not jogador: raise HTTPException(status_code=404, detail="Aventureiro não encontrado.")
         campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first()
@@ -166,7 +166,7 @@ def login_godot(req: LoginRequest):
 
 @app.get("/api/scene/{telegram_id}", response_model=SceneState)
 def get_current_scene(telegram_id: str):
-    with get_db_session() as db:
+    async with get_async_db() as db:
         jogador = db.query(Jogador).filter(Jogador.telefone == telegram_id).first()
         if not jogador: raise HTTPException(404, "Jogador não encontrado")
         campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first()
@@ -176,7 +176,7 @@ def get_current_scene(telegram_id: str):
 @app.get("/api/sync/{telegram_id}")
 def get_sync_state(telegram_id: str):
     """Endpoint leve para o Smart Polling do Godot."""
-    with get_db_session() as db:
+    async with get_async_db() as db:
         jogador = db.query(Jogador).filter(Jogador.telefone == telegram_id).first()
         if not jogador: raise HTTPException(404, "Jogador não encontrado")
         campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first()
@@ -190,7 +190,7 @@ def get_sync_state(telegram_id: str):
 
 @app.post("/api/action/{telegram_id}", response_model=ActionResponse)
 def execute_action(telegram_id: str, req: ActionRequest):
-    with get_db_session() as db:
+    async with get_async_db() as db:
         jogador = db.query(Jogador).filter(Jogador.telefone == telegram_id).first()
         if not jogador: raise HTTPException(404, "Jogador não encontrado")
         campanha = db.query(Campanha).filter(Campanha.party_id == jogador.party_id).first()
