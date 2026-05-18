@@ -1,7 +1,6 @@
 import random
-from dataclasses import dataclass
-from typing import Optional, List
-
+from dataclasses import dataclass, field
+from typing import Optional, List, Any
 
 @dataclass
 class ResultadoAtaqueObjeto:
@@ -13,7 +12,7 @@ class ResultadoAtaqueObjeto:
     destruido: bool      # True se o objeto chegou a 0 HP neste golpe
     hp_restante: int     # HP do objeto após o ataque
     quebrou_por_forca: bool  # True se foi derruíbado pelo break_threshold
-    detalhes_d20: str = ""   # Guarda os dados rolados caso tenha vantagem/desvantagem
+    detalhes_d20: list = field(default_factory=list)   # Guarda os dados rolados caso tenha vantagem/desvantagem
 
 @dataclass
 class ResultadoAtaque:
@@ -22,7 +21,7 @@ class ResultadoAtaque:
     acertou: bool
     critico: bool
     dano: int
-    detalhes_d20: str = ""
+    detalhes_d20: list = field(default_factory=list)
 
 
 def rolar_dado(lados):
@@ -59,16 +58,14 @@ def rolar_d20_combate(vantagem: bool, desvantagem: bool):
     roll2 = rolar_dado(20)
     
     if vantagem:
-        d20 = max(roll1, roll2)
-        return d20, f"[{roll1}, {roll2}] (Vantagem)"
+        return max(roll1, roll2), [roll1, roll2]
     elif desvantagem:
-        d20 = min(roll1, roll2)
-        return d20, f"[{roll1}, {roll2}] (Desvantagem)"
+        return min(roll1, roll2), [roll1, roll2]
     
-    return roll1, f"[{roll1}]"
+    return roll1, [roll1]
 
 
-def processar_ataque_fisico(jogador, inimigo_ca: int, defensor_status: list = None, tipo_ataque: str = "melee") -> ResultadoAtaque:
+def processar_ataque_fisico(jogador, inimigo_ca: int, defensor_status: list = None, tipo_ataque: str = "melee", vantagem_extra: bool = False, desvantagem_extra: bool = False) -> ResultadoAtaque:
     if defensor_status is None:
         defensor_status = []
         
@@ -76,6 +73,14 @@ def processar_ataque_fisico(jogador, inimigo_ca: int, defensor_status: list = No
     
     # 1. Rola o d20 com Vantagem/Desvantagem
     vantagem, desvantagem = calcular_vantagem_desvantagem(atacante_status, defensor_status, tipo_ataque)
+    
+    if vantagem_extra: vantagem = True
+    if desvantagem_extra: desvantagem = True
+    
+    if vantagem and desvantagem:
+        vantagem = False
+        desvantagem = False
+        
     d20, detalhes_d20 = rolar_d20_combate(vantagem, desvantagem)
     
     # Usando o modificador real do banco de dados (Proficiência + Atributo)

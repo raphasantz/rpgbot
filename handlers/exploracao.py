@@ -320,7 +320,20 @@ async def acao_handler(message: types.Message):
                 # Combate e Magia: Narração da IA no topo + Bloco Mecânico Limpo
                 if action_result.tipo_acao in ["combate", "magia"]:
                     narracao_combate = await narrar_combate(jogador.nome, message.text, action_result.narrativa_mecanica, sala_atual.descricao_visual)
-                    msg_final = f"{narracao_combate}\n\n{action_result.narrativa_mecanica}"
+                    
+                    # Gera a string bonita de saídas com inicial maiúscula (Ex: "Subir, Oeste")
+                    saidas_str = ", ".join([k.capitalize() for k in sala_atual.conexoes.keys()]) if sala_atual.conexoes else "Nenhuma"
+                    
+                    msg_final = (
+                        f"{narracao_combate}\n\n"
+                        f"━━━━━━━━━━━━━━━━\n"
+                        f"{action_result.narrativa_mecanica}\n\n"
+                        f"━━━━━━━━━━━━━━━━\n"
+                        f"🗺️ Saídas: {saidas_str}\n"
+                        f"❓ O que você faz?\n\n"
+                        f"❤️ {jogador.nome}: {jogador.hp_atual}/{jogador.hp_maximo} HP\n"
+                        f"━━━━━━━━━━━━━━━━"
+                    )
                     reply_markup = teclado_saidas(sala_atual) if not campanha.em_combate else None
                     await message.answer(msg_final, parse_mode="HTML", reply_markup=reply_markup)
                     return
