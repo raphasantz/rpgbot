@@ -1,13 +1,30 @@
 import random
 import math
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Set
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Jogador, Campanha, Cena, Encontro, Inimigo, ObjetoDestrutivel, Npc, Interativo, Missao
 from combat_logic import processar_ataque_fisico, processar_ataque_objeto
 from ui_utils import MAGIAS_POR_CLASSE, XP_POR_NIVEL, HP_POR_CLASSE, gerar_loot_inimigo_comum, adicionar_ao_inventario, obter_inventario_limpo, BACKGROUND_SKILLS, gerar_loot_bau
+
+# Pre-compiled constants for performance
+KEYWORDS_POR_CLASSE = {
+    "bárbaro": {"fúria": {}},
+    "artífice": {"explosão arcana": {"bonus_dano": 4}, "infusão": {"bonus_ca": 2}},
+    "guerreiro": {"estocar": {"bonus_ataque": 2}, "defesa total": {"bonus_ca": 4}},
+    "paladino": {"aura": {"bonus_ca": 3}, "abjurar": {"bonus_ca": 5}},
+    "monge": {"flurry": {"ataque_extra": True}, "torrente": {"ataque_extra": True}, "ki": {"bonus_ataque": 2}},
+    "patrulheiro": {"marca": {"bonus_dano": 6}, "marca do caçador": {"bonus_dano": 6}},
+    "bardo": {"zombaria": {"desvantagem_inimigo": True}},
+}
+
+TATICAS_DEFENSIVAS = frozenset(["esquivar", "defender", "dodge", "defesa total"])
+TATICAS_COBERTURA = frozenset(["cobertura", "esconder", "proteger"])
+TATICAS_AJUDAR = frozenset(["ajudar", "ajudo", "suportar"])
+TESTE_PALAVRAS = frozenset(["teste", "rolar", "perceção", "percepção", "história", "arcanismo", "escutar"])
+FOGO_PALAVRAS = frozenset(["fogo", "ardente", "chamas", "bola"])
 
 @dataclass
 class ActionResult:
@@ -21,6 +38,8 @@ class ActionResolver:
     O Cérebro Determinístico do RedNerds.
     Roteia o JSON da IA, aplica regras de status e invoca o motor de dados.
     """
+    __slots__ = ['db']
+    
     def __init__(self, db_session: AsyncSession):
         self.db = db_session
 
@@ -64,8 +83,8 @@ class ActionResolver:
         # --- 3. INTERCEPTAÇÃO DE AÇÕES TÁTICAS E TESTES ---
         texto_low = texto_jogador.lower()
         
-        # Ações Táticas Reimplantadas
-        if any(p in texto_low for p in ["esquivar", "defender", "dodge", "defesa total"]):
+        # Ações Táticas Reimplantadas - usando frozenset para lookup mais rápido
+        if any(p in texto_low for p in TATICAS_DEFENSIVAS):
             efeitos = list(getattr(jogador, 'status_efeitos', []))
             if "Esquivando" not in efeitos:
                 efeitos.append("Esquivando")
@@ -73,7 +92,7 @@ class ActionResolver:
                 return ActionResult(True, "status", "🛡️ <b>Posição Defensiva!</b> Inimigos terão desvantagem para te acertar até teu próximo turno.", {})
             return ActionResult(False, "status", "⚠️ Já estás em posição defensiva.", {})
 
-        if intencao == "COBERTURA" or any(p in texto_low for p in ["cobertura", "esconder", "proteger"]):
+        if intencao == "COBERTURA" or any(p in texto_low for p in TATICAS_COBERTURA):
             efeitos = list(getattr(jogador, 'status_efeitos', []))
             if "Cobertura" not in efeitos:
                 efeitos.append("Cobertura")
@@ -81,7 +100,7 @@ class ActionResolver:
                 return ActionResult(True, "status", "🧱 <b>Cobertura!</b> Protegeste-te. Ganhaste +2 de CA contra os próximos ataques.", {})
             return ActionResult(False, "status", "⚠️ Já estás protegido em cobertura.", {})
 
-        if intencao == "AJUDAR" or any(p in texto_low for p in ["ajudar", "ajudo", "suportar"]):
+        if intencao == "AJUDAR" or any(p in texto_low for p in TATICAS_AJUDAR):
             efeitos = list(getattr(jogador, 'status_efeitos', []))
             if "Ajudado" not in efeitos:
                 efeitos.append("Ajudado")
@@ -89,7 +108,7 @@ class ActionResolver:
                 return ActionResult(True, "status", "🤝 Posicionaste-te para dar suporte! O próximo ataque do grupo terá Vantagem.", {})
 
         # Testes Manuais
-        if intencao in ["INTERACAO", "OUTRO", "TESTE"] and any(palavra in texto_low for palavra in ["teste", "rolar", "perceção", "percepção", "história", "arcanismo", "escutar"]):
+        if intencao in ("INTERACAO", "OUTRO", "TESTE") and any(palavra in texto_low for palavra in TESTE_PALAVRAS):
             return await self._resolver_teste(jogador, cena_atual, texto_jogador)
 
         # Fallback narrativo
@@ -157,6 +176,10 @@ class ActionResolver:
         dano_causado = 0
         acertou_ataque = False
         
+        # Otimização: cache de strings lowercase
+        texto_low = texto.lower()
+        alvo_nome_lower_cached = alvo_nome.lower() if alvo_nome else ""
+        
         # Se o inimigo venceu a iniciativa, ele ataca primeiro
         if inimigo_primeiro:
             texto_revide, dano_revide, efeitos_atuais = await self._resolver_revide_inimigo(jogador, campanha, encontro, inimigo, hp_grupo, hp_max_inimigo, efeitos_atuais, is_durnn_furia)
@@ -171,19 +194,11 @@ class ActionResolver:
             dano_extra = 0
             
             # --- REIMPLANTAÇÃO: PALAVRAS-CHAVE DE CLASSE ---
-            _cls_kw = jogador.classe.lower()
-            texto_low_kw = texto.lower()
+            _cls_kw = jogador.classe_lower_cached if hasattr(jogador, 'classe_lower_cached') else jogador.classe.lower()
+            texto_low_kw = texto_low  # Reutiliza o texto_low já calculado
             mod_keyword = {}
             keyword_feature_msg = ""
-            KEYWORDS_POR_CLASSE = {
-                "bárbaro": {"fúria": {}},
-                "artífice": {"explosão arcana": {"bonus_dano": 4}, "infusão": {"bonus_ca": 2}},
-                "guerreiro": {"estocar": {"bonus_ataque": 2}, "defesa total": {"bonus_ca": 4}},
-                "paladino": {"aura": {"bonus_ca": 3}, "abjurar": {"bonus_ca": 5}},
-                "monge": {"flurry": {"ataque_extra": True}, "torrente": {"ataque_extra": True}, "ki": {"bonus_ataque": 2}},
-                "patrulheiro": {"marca": {"bonus_dano": 6}, "marca do caçador": {"bonus_dano": 6}},
-                "bardo": {"zombaria": {"desvantagem_inimigo": True}},
-            }
+            # Usa a constante global em vez de recriar o dict
             kws_classe = KEYWORDS_POR_CLASSE.get(_cls_kw, {})
             for kw_texto, kw_efeitos in kws_classe.items():
                 if kw_texto in texto_low_kw:
@@ -264,8 +279,8 @@ class ActionResolver:
                     dano_extra_furtivo = 0
 
                 # --- VULNERABILIDADE GULTHIAS (ÁRVORE) AO FOGO ---
-                if alvo_nome and ("árvore" in alvo_nome.lower() or "arvore" in alvo_nome.lower() or "gulthias" in alvo_nome.lower()):
-                    if any(p in texto.lower() for p in ["fogo", "ardente", "chamas", "bola"]):
+                if alvo_nome and ("árvore" in alvo_nome_lower_cached or "arvore" in alvo_nome_lower_cached or "gulthias" in alvo_nome_lower_cached):
+                    if any(p in texto_low for p in FOGO_PALAVRAS):
                         dano_causado *= 2
                         narrativa += "🔥 VULNERÁVEL! O fogo causa o dobro do dano!\n"
 
@@ -547,7 +562,8 @@ class ActionResolver:
         encontros_vivos = [e for e in encontros if not estado_campanha.get(f"derrotado_{e.id}")]
         
         texto_low = texto.lower()
-        is_fuga = any(p in texto_low for p in ["fugir", "fujo", "correr", "escapar", "recuar"])
+        FUGA_PALAVRAS = frozenset(["fugir", "fujo", "correr", "escapar", "recuar"])
+        is_fuga = any(p in texto_low for p in FUGA_PALAVRAS)
         narrativa_fuga = ""
 
         if encontros_vivos and campanha.em_combate:
