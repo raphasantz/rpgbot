@@ -7,6 +7,20 @@ import random
 import re
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 
+import hashlib
+
+def gerar_callback_safe(prefixo: str, nome_item: str) -> str:
+    """
+    Gera um callback_data compacto de até 64 caracteres limitados pelo Telegram,
+    usando um hash MD5 dos últimos caracteres para evitar colisões.
+    Ex: buy_pocao_de_cura_maior_a8f1
+    """
+    nome_limpo = nome_item.lower().replace(" ", "_").replace("⚡", "").replace("🧪", "").strip()
+    nome_truncado = nome_limpo[:25]
+    hash_checksum = hashlib.md5(nome_item.encode('utf-8')).hexdigest()[:4]
+    return f"{prefixo}_{nome_truncado}_{hash_checksum}"
+
+
 # ── Tabelas de progressão ──────────────────────────────────────────────────────
 XP_POR_NIVEL = {
     1: 0, 2: 300, 3: 900, 4: 2700, 5: 6500,

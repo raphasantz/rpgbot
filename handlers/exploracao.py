@@ -7,7 +7,7 @@ from aiogram import Router, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 from sqlalchemy import select, delete, func
 
-from database import get_db_session
+from database import get_async_db
 from models import Jogador, Campanha, Cena, Npc, EncontroAleatorio, Interativo, ObjetoDestrutivel, Missao, Encontro, Inimigo
 from ai_engine import interpretar_acao_json, narrar_ambiente, narrar_combate, decidir_atributo_teste, gerar_imagem_sala
 from combat_logic import processar_ataque_fisico, processar_ataque_objeto
@@ -18,7 +18,7 @@ from ui_utils import (
     adicionar_ao_inventario, gerar_loot_bau, gerar_loot_inimigo_comum,
     LOJA_CARVALHAL, BACKGROUND_SKILLS, XP_POR_NIVEL, HP_POR_CLASSE, MAGIAS_POR_CLASSE
 )
-from stats_manager import get_or_create_estatisticas, atualizar_estatistica, registrar_derrota
+from stats_manager import get_or_create_estatisticas_async, atualizar_estatistica_async, registrar_derrota_async
 
 router = Router()
 
@@ -30,7 +30,7 @@ async def skill_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
     skill = callback.data.replace("skill_", "")
     
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador or jogador.slots_magia <= 0:
@@ -68,7 +68,7 @@ async def skill_callback(callback: types.CallbackQuery):
 @router.callback_query(F.data == "ataque_secundario")
 async def ataque_secundario_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador:
@@ -149,7 +149,7 @@ async def acao_handler(message: types.Message):
     processing_users.add(user_id)
     
     try:
-        async with get_db_session() as db:
+        async with get_async_db() as db:
             result_temp = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
             jogador_temp = result_temp.scalars().first()
             party_id = jogador_temp.party_id if jogador_temp else None
@@ -160,7 +160,7 @@ async def acao_handler(message: types.Message):
             lock = party_locks.setdefault(f"solo_{user_id}", asyncio.Lock())
 
         async with lock:
-            async with get_db_session() as db:
+            async with get_async_db() as db:
                 result_jog = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
                 jogador = result_jog.scalars().first()
                 
@@ -224,7 +224,7 @@ async def acao_handler(message: types.Message):
                 json_ia = await interpretar_acao_json(texto_contexto_ia, contexto_objetos)
                 intencao = json_ia.get("intencao", "OUTRO").upper()
                 
-                try: await atualizar_estatistica(db, user_id, 'tempo_jogo_minutos', 1)
+                try: await atualizar_estatistica_async(db, user_id, 'tempo_jogo_minutos', 1)
                 except Exception: pass
 
                 # --- BLINDAGEM DE TURNO ---

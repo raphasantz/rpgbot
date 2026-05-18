@@ -4,16 +4,20 @@ from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from database import get_db_session
+from database import get_async_db
 from models import Jogador, Campanha, Missao
 from ui_utils import (
     obter_inventario_limpo, formatar_inventario_para_display,
     LOJA_CARVALHAL, ARMAS_DB, resumo_status, BACKGROUND_SKILLS, XP_POR_NIVEL
 )
 from stats_manager import (
-    get_or_create_estatisticas, get_rank_jogador, get_ultimas_partidas,
+    get_or_create_estatisticas_async, get_rank_jogador_async, get_ultimas_partidas_async,
     calcular_taxa_sucesso, calcular_taxa_sucesso_testes
 )
+# Aliases para compatibilidade
+get_or_create_estatisticas = get_or_create_estatisticas_async
+get_rank_jogador = get_rank_jogador_async
+get_ultimas_partidas = get_ultimas_partidas_async
 from sqlalchemy import select
 
 router = Router()
@@ -25,7 +29,7 @@ async def equipar_handler(message: types.Message):
         return await message.answer("⚠️ Digita o nome do item que queres equipar. Ex: <code>/equipar Espada Longa</code> ou <code>/equipar Cota de Malha</code>", parse_mode="HTML")
 
     user_id = str(message.from_user.id)
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Cria um personagem primeiro.")
@@ -133,7 +137,7 @@ async def equipar_handler(message: types.Message):
 
 @router.message(Command("loja"))
 async def loja_interativa_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         
@@ -158,30 +162,34 @@ async def loja_interativa_handler(message: types.Message):
         botoes = []
         for k, v in LOJA_CARVALHAL.items():
             preco_final = max(1, math.floor(v['preco'] * fator_preco))
-            item_safe = k[:20].strip()
+            # Usa a função de hash seguro para evitar colisões de callbacks
+            callback_segura = gerar_callback_safe("buy", k)
             icone = "🧪" if v["tipo"] == "pocao" else "⚔️" if v["tipo"] == "arma" else "🛡️"
-            botoes.append([InlineKeyboardButton(text=f"{icone} {k} - {preco_final} PO", callback_data=f"buy_{item_safe}")])
+            botoes.append([InlineKeyboardButton(text=f"{icone} {k} - {preco_final} PO", callback_data=callback_segura)])
 
         teclado = InlineKeyboardMarkup(inline_keyboard=botoes)
         await message.answer(texto, parse_mode="HTML", reply_markup=teclado)
 
 @router.callback_query(F.data.startswith("buy_"))
 async def comprar_callback(callback: types.CallbackQuery):
-    user_id = str(callback.from_user.id)
-    item_nome_parcial = callback.data.replace("buy_", "")
+    from ui_utils import gerar_callback_safe  # Import local para evitar circular
     
-    async with get_db_session() as db:
+    user_id = str(callback.from_user.id)
+    callback_recebida = callback.data
+    
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador: return await callback.answer("⚠️ Erro de jogador.", show_alert=True)
         
+        # Faz o match seguro decodificando o hash gerado pela função gerar_callback_safe
         item_encontrado, nome_oficial = None, None
         for k, v in LOJA_CARVALHAL.items():
-            if item_nome_parcial.lower() in k.lower():
+            if callback_recebida == gerar_callback_safe("buy", k):
                 item_encontrado, nome_oficial = v, k
                 break
                 
-        if not item_encontrado: return await callback.answer("❌ Item não encontrado na loja.", show_alert=True)
+        if not item_encontrado: return await callback.answer("❌ Item não encontrado ou colisão detectada.", show_alert=True)
         
         reputacao = (jogador.reputacao or {}).get("carvalhal", 0)
         fator_preco = 1.0
@@ -201,7 +209,7 @@ async def comprar_callback(callback: types.CallbackQuery):
 
 @router.message(Command("vender"))
 async def vender_interativo_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         
@@ -233,7 +241,7 @@ async def vender_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
     item_nome_parcial = callback.data.replace("sell_", "")
     
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         inv_linhas = obter_inventario_limpo(jogador.inventario)
@@ -253,7 +261,7 @@ async def vender_callback(callback: types.CallbackQuery):
 
 @router.message(Command("inventario"))
 async def inventario_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Cria um personagem primeiro com /criar.")
@@ -292,7 +300,7 @@ async def inventario_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
     comando = callback.data
     
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador: return await callback.answer("⚠️ Personagem não encontrado.", show_alert=True)
@@ -407,7 +415,7 @@ async def inventario_callback(callback: types.CallbackQuery):
 
 @router.message(Command("missoes", "quests"))
 async def missoes_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Missao).filter(Missao.jogador_telefone == str(message.from_user.id)))
         missoes = result.scalars().all()
         if not missoes:
@@ -420,7 +428,7 @@ async def missoes_handler(message: types.Message):
 
 @router.message(Command("perfil", "hp", "ficha"))
 async def perfil_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         if jogador:
@@ -456,7 +464,7 @@ async def perfil_handler(message: types.Message):
 
 @router.message(Command("dashboard", "stats", "estatisticas"))
 async def dashboard_handler(message: types.Message):
-    async with get_db_session() as db:
+    async with get_async_db() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == str(message.from_user.id)))
         jogador = result.scalars().first()
         if not jogador: return await message.answer("⚠️ Use /criar para começar.")
