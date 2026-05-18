@@ -306,14 +306,25 @@ async def acao_handler(message: types.Message):
                     ameacas_vivas = [f"{enc.quantidade}x {enc.nome_inimigo}" for enc in encontros_novos if not estado_campanha.get(f"derrotado_{enc.id}")]
                     alerta = f"\n\n⚠️ <b>AMEAÇAS NA SALA:</b> " + " | ".join(ameacas_vivas) if ameacas_vivas else ""
 
-                    narracao = await narrar_ambiente(jogador.nome, message.text, nova_sala.descricao_visual)
+                    # OTIMIZAÇÃO: Usa a descrição do DB diretamente para movimento simples
+                    # IA só é chamada se houver interação específica ou descrição vazia
+                    if nova_sala.descricao_visual and len(nova_sala.descricao_visual.strip()) > 20:
+                        narracao = nova_sala.descricao_visual
+                    else:
+                        narracao = await narrar_ambiente(jogador.nome, message.text, nova_sala.descricao_visual or "Sala vazia")
 
                     await message.answer(f"👣 {action_result.narrativa_mecanica}\n\n📍 <b>{nova_sala.nome_sala}</b>\n{narracao}{alerta}\n\n{texto_saidas(nova_sala)}\n{resumo_status(jogador)}", parse_mode="HTML", reply_markup=teclado_saidas(nova_sala))
                     return
 
-                # Narrativas genéricas
+                # Narrativas genéricas (manobras, interações, descanso)
                 if action_result.tipo_acao in ["manobra", "interacao", "descanso", "status"]:
-                    narracao = await narrar_ambiente(jogador.nome, message.text, sala_atual.descricao_visual)
+                    # OTIMIZAÇÃO: Para ações simples, usa descrição do DB + resultado mecânico
+                    # IA só é chamada para interações complexas com objetos/NPCs
+                    if action_result.tipo_acao == "interacao" and action_result.dados_extras.get("objeto_interagido"):
+                        narracao = await narrar_ambiente(jogador.nome, message.text, sala_atual.descricao_visual)
+                    else:
+                        narracao = sala_atual.descricao_visual if sala_atual.descricao_visual else ""
+                    
                     await message.answer(f"{narracao}\n\n{action_result.narrativa_mecanica}\n{resumo_status(jogador)}", parse_mode="HTML")
                     return
 
@@ -338,9 +349,11 @@ async def acao_handler(message: types.Message):
                     await message.answer(msg_final, parse_mode="HTML", reply_markup=reply_markup)
                     return
 
-                # Fallback Narrativo
-                narracao = await narrar_ambiente(jogador.nome, message.text, sala_atual.descricao_visual)
-                await message.answer(f"{narracao}\n\n{texto_saidas(sala_atual)}\n{resumo_status(jogador)}", parse_mode="HTML")
+                # Fallback Narrativo (ações livres, conversa, observação)
+                if action_result.tipo_acao == "outro" or True:  # Sempre usa DB como fallback principal
+                    # OTIMIZAÇÃO: Usa descrição do DB para ações narrativas simples
+                    narracao = sala_atual.descricao_visual if sala_atual.descricao_visual else "Você observa o ambiente ao seu redor."
+                    await message.answer(f"{narracao}\n\n{texto_saidas(sala_atual)}\n{resumo_status(jogador)}", parse_mode="HTML")
 
     finally:
         processing_users.discard(user_id)
