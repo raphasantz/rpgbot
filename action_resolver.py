@@ -108,6 +108,8 @@ class ActionResolver:
         if not encontros_vivos:
             return await self._resolver_ataque_objeto(jogador, cena, alvo_nome, texto)
 
+        campanha.em_combate = True
+
         encontro = encontros_vivos[0]
         inimigo = (await self.db.execute(select(Inimigo).filter(Inimigo.nome == encontro.nome_inimigo))).scalars().first()
         if not inimigo:
@@ -164,8 +166,43 @@ class ActionResolver:
         
         # Turno do Jogador (se não morreu no revide)
         if jogador_pode_atacar:
-            resultado_ataque = processar_ataque_fisico(jogador=jogador, inimigo_ca=ca_alvo, defensor_status=[], tipo_ataque="melee")
+            # FIX 1: Passar a vantagem/desvantagem forçada pelo estilo temerário para a engine de combate
+            resultado_ataque = processar_ataque_fisico(jogador=jogador, inimigo_ca=ca_alvo, defensor_status=[], tipo_ataque="melee", vantagem_extra=vantagem, desvantagem_extra=desvantagem)
             dano_extra = 0
+            
+            # --- REIMPLANTAÇÃO: PALAVRAS-CHAVE DE CLASSE ---
+            _cls_kw = jogador.classe.lower()
+            texto_low_kw = texto.lower()
+            mod_keyword = {}
+            keyword_feature_msg = ""
+            KEYWORDS_POR_CLASSE = {
+                "bárbaro": {"fúria": {}},
+                "artífice": {"explosão arcana": {"bonus_dano": 4}, "infusão": {"bonus_ca": 2}},
+                "guerreiro": {"estocar": {"bonus_ataque": 2}, "defesa total": {"bonus_ca": 4}},
+                "paladino": {"aura": {"bonus_ca": 3}, "abjurar": {"bonus_ca": 5}},
+                "monge": {"flurry": {"ataque_extra": True}, "torrente": {"ataque_extra": True}, "ki": {"bonus_ataque": 2}},
+                "patrulheiro": {"marca": {"bonus_dano": 6}, "marca do caçador": {"bonus_dano": 6}},
+                "bardo": {"zombaria": {"desvantagem_inimigo": True}},
+            }
+            kws_classe = KEYWORDS_POR_CLASSE.get(_cls_kw, {})
+            for kw_texto, kw_efeitos in kws_classe.items():
+                if kw_texto in texto_low_kw:
+                    mod_keyword = kw_efeitos
+                    # FIX 2: Adicionar "Fúria" aos status se o jogador usou a palavra-chave
+                    if kw_texto == "fúria" and "Fúria" not in efeitos_atuais:
+                        efeitos_atuais.append("Fúria")
+                        jogador.status_efeitos = efeitos_atuais
+                        
+                    if kw_efeitos.get("bonus_dano"): dano_extra += kw_efeitos["bonus_dano"]
+                    if kw_efeitos.get("bonus_ataque"): jogador.modificador_ataque += kw_efeitos["bonus_ataque"]
+                    if kw_efeitos.get("bonus_ca"): jogador.modificador_defesa += kw_efeitos["bonus_ca"]
+                    if kw_efeitos.get("desvantagem_inimigo"):
+                        estado_kw = dict(campanha.estado_salas or {})
+                        estado_kw["inimigo_debilidade"] = True
+                        campanha.estado_salas = estado_kw
+                    keyword_feature_msg = f"\n⚡ <i>{kw_texto.title()} ativado!</i>"
+                    break
+            # ------------------------------------------------
             
             # Formatação segura dos dados
             detalhes = resultado_ataque.detalhes_d20
@@ -186,10 +223,12 @@ class ActionResolver:
             except Exception:
                 dados_str = f"[{detalhes}]"
 
+            mod_str = f"+{mod_calc}" if isinstance(mod_calc, int) and mod_calc >= 0 else str(mod_calc)
+            str_vant = f" {str_vantagem}" if str_vantagem else ""
+
             if resultado_ataque.acertou:
                 dano_causado = resultado_ataque.dano
                 acertou_ataque = True
-                texto_crit = "💥 ACERTO CRÍTICO!" if resultado_ataque.critico else "✅ Acerto!"
                 
                 # --- CONSUMO DE HABILIDADES (SMITE, FÚRIA, FORMA SELVAGEM) ---
                 efeitos_jogador = list(getattr(jogador, 'status_efeitos', []))
@@ -204,21 +243,25 @@ class ActionResolver:
                     dano_habilidade += sum(random.randint(1, 6) for _ in range(2))
                     efeitos_jogador.remove("Forma Selvagem")
                     
+                texto_furia = ""
                 if "Fúria" in efeitos_jogador:
                     bonus_furia = 2
                     if jogador.nivel >= 16: bonus_furia = 4
                     elif jogador.nivel >= 9: bonus_furia = 3
                     dano_habilidade += bonus_furia
                     # Fúria NÃO é removida aqui, só no fim do combate ou ao mover
+                    texto_furia = f"\n😡 <b>Fúria Bárbaro:</b> +{bonus_furia} de dano e Resistência Ativada!"
 
-                dano_causado += dano_habilidade
+                dano_causado += dano_habilidade + dano_extra
                 jogador.status_efeitos = efeitos_jogador # Salva a limpeza dos status
 
                 # Lógica de Furtivo
                 if estilo == "furtivo" and jogador.classe.lower() == "ladino":
                     dados_furtivo = math.ceil(jogador.nivel / 2)
-                    dano_extra = sum(random.randint(1, 6) for _ in range(dados_furtivo))
-                    dano_causado += dano_extra
+                    dano_extra_furtivo = sum(random.randint(1, 6) for _ in range(dados_furtivo))
+                    dano_causado += dano_extra_furtivo
+                else:
+                    dano_extra_furtivo = 0
 
                 # --- VULNERABILIDADE GULTHIAS (ÁRVORE) AO FOGO ---
                 if alvo_nome and ("árvore" in alvo_nome.lower() or "arvore" in alvo_nome.lower() or "gulthias" in alvo_nome.lower()):
@@ -226,27 +269,36 @@ class ActionResolver:
                         dano_causado *= 2
                         narrativa += "🔥 VULNERÁVEL! O fogo causa o dobro do dano!\n"
 
-                narrativa += f"🎲 Dados: d20={dados_str} {str_vantagem}+{mod_calc}={resultado_ataque.total_ataque} vs CA {ca_alvo} ✅\n"
-                narrativa += f"🗡️ {texto_crit} Causaste {dano_causado} de dano."
-                if dano_extra > 0:
-                    narrativa += f" (Inclui +{dano_extra} Furtivo)"
-                if dano_habilidade > 0:
-                    narrativa += f" (+{dano_habilidade} de Habilidades)"
-                narrativa += "\n"
-
                 vivos_antes = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
                 hp_grupo -= dano_causado
+                vivos_depois = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
+                mortos_turno = vivos_antes - vivos_depois
+
+                texto_crit = "💥 CRÍTICO! Dano: " if resultado_ataque.critico else "💥 Dano: "
+                texto_morte = f" (💀 {mortos_turno} eliminado{'s' if mortos_turno > 1 else ''}!)" if mortos_turno > 0 else ""
+
+                narrativa += f"🎲 Dados: d20={dados_str}{str_vant}{mod_str}={resultado_ataque.total_ataque} vs CA {ca_alvo} ✅\n"
+                narrativa += f"{texto_crit}{dano_causado}{texto_morte}\n"
+                
+                if dano_extra_furtivo > 0:
+                    narrativa += f" (Inclui +{dano_extra_furtivo} Furtivo)\n"
+                if dano_habilidade > 0:
+                    narrativa += f" (+{dano_habilidade} de Habilidades)\n"
+                if dano_extra > 0:
+                    narrativa += f" (+{dano_extra} de Classe)\n"
+                narrativa += f"{texto_furia}{keyword_feature_msg}\n"
+
                 estado[chave_hp] = hp_grupo
 
                 if hp_grupo <= 0:
                     estado[f"derrotado_{encontro.id}"] = True
                     campanha.em_combate = False
-                    narrativa += f"🏆 VITÓRIA! {encontro.quantidade}x {inimigo.nome} derrotados!\n"
+                    narrativa += f"\n🏆 VITÓRIA! O grupo recebe "
                     xp_total = getattr(inimigo, 'xp_recompensa', 50) * encontro.quantidade
                     ouro_total = getattr(inimigo, 'ouro_recompensa', 5) * encontro.quantidade
                     jogador.xp += xp_total
                     jogador.gold += ouro_total
-                    narrativa += f"🌟 +{xp_total} XP, +{ouro_total} PO.\n"
+                    narrativa += f"{xp_total} XP e {ouro_total} PO.\n"
                     
                     # --- GERAÇÃO DE LOOT REIMPLANTADA ---
                     loot_gerado = gerar_loot_inimigo_comum()
@@ -280,33 +332,70 @@ class ActionResolver:
                         narrativa += f"🌟 Subiste para o Nível {jogador.nivel}! HP, Magia e Hit Dice atualizados!\n"
                 else:
                     if is_durnn_furia:
-                        narrativa += "😡 O Boss entrou em Fúria Sanguinária!\n"
+                        narrativa += "\n😡 O Boss entrou em Fúria Sanguinária!\n"
+                        
+                    # --- REIMPLANTAÇÃO: SURTO DE AÇÃO DO GUERREIRO ---
+                    efeitos_jogador = list(getattr(jogador, 'status_efeitos', []))
+                    if "Surto" in efeitos_jogador and hp_grupo > 0:
+                        efeitos_jogador.remove("Surto")
+                        jogador.status_efeitos = efeitos_jogador
+                        
+                        res_surto = processar_ataque_fisico(jogador=jogador, inimigo_ca=ca_alvo, defensor_status=[], tipo_ataque="melee")
+                        dano_surto = res_surto.dano
+                        
+                        if res_surto.acertou:
+                            vivos_antes_surto = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
+                            hp_grupo -= dano_surto
+                            vivos_depois_surto = math.ceil(hp_grupo / hp_max_inimigo) if hp_grupo > 0 else 0
+                            mortos_surto = vivos_antes_surto - vivos_depois_surto
+
+                            estado[chave_hp] = hp_grupo
+                            texto_crit_surto = "💥 CRÍTICO! Dano: " if res_surto.critico else "💥 Dano: "
+                            texto_morte_surto = f" (💀 {mortos_surto} eliminado{'s' if mortos_surto > 1 else ''}!)" if mortos_surto > 0 else ""
+                            narrativa += f"\n⚔️ <b>Surto de Ação!</b> Ataque extra! ✅\n{texto_crit_surto}{dano_surto}{texto_morte_surto}\n"
+                            
+                            if hp_grupo <= 0:
+                                estado[f"derrotado_{encontro.id}"] = True
+                                campanha.em_combate = False
+                                xp_total = getattr(inimigo, 'xp_recompensa', 50) * encontro.quantidade
+                                ouro_total = getattr(inimigo, 'ouro_recompensa', 5) * encontro.quantidade
+                                jogador.xp += xp_total
+                                jogador.gold += ouro_total
+                                narrativa += f"\n🏆 VITÓRIA pelo Surto! O grupo recebe {xp_total} XP e {ouro_total} PO.\n"
+                        else:
+                            narrativa += f"\n⚔️ <b>Surto de Ação!</b> Ataque extra falhou! ❌\n"
+                    # ------------------------------------------------
             else:
                 acertou_ataque = False
-                narrativa += f"🎲 Dados: d20={dados_str} {str_vantagem}+{mod_calc}={resultado_ataque.total_ataque} vs CA {ca_alvo} ❌\n"
+                narrativa += f"🎲 Dados: d20={dados_str}{str_vant}{mod_str}={resultado_ataque.total_ataque} vs CA {ca_alvo} ❌\n"
                 narrativa += "💨 Ataque falhou\n"
                 
             # Se o jogador atacou primeiro e o inimigo sobreviveu, o inimigo ataca agora
             if not inimigo_primeiro and campanha.em_combate and hp_grupo > 0 and jogador.hp_atual > 0:
                 texto_revide, dano_revide, efeitos_atuais = await self._resolver_revide_inimigo(jogador, campanha, encontro, inimigo, hp_grupo, hp_max_inimigo, efeitos_atuais, is_durnn_furia)
-                narrativa += texto_revide
+                narrativa += "\n" + texto_revide
 
         # --- VENENO NO FIM DO TURNO ---
         if "Envenenado" in efeitos_atuais:
             dano_veneno = random.randint(1, 4)
-            jogador.hp_atual -= dano_veneno
+            jogador.hp_atual = max(0, jogador.hp_atual - dano_veneno)
             narrativa += f"🤢 Veneno: Sofres {dano_veneno} de dano direto!\n"
-            if jogador.hp_atual <= 0:
-                narrativa += f"💀 {jogador.nome} sucumbiu ao veneno!\n"
 
         # Limpeza de status e estado
         if "Esquivando" in efeitos_atuais: efeitos_atuais.remove("Esquivando")
         jogador.status_efeitos = efeitos_atuais
         campanha.estado_salas = estado
         
-        narrativa += f"\n❤️ {jogador.nome}: {jogador.hp_atual}/{jogador.hp_maximo} HP"
-        
-        return ActionResult(True, "combate", narrativa, {"dano": dano_causado, "acertou": acertou_ataque})
+        if jogador.hp_atual <= 0:
+            narrativa += "\n💀 Caíste em combate! A Patrulha de Carvalhal resgatou-te, mas perdeste algum ouro..."
+            jogador.hp_atual = jogador.hp_maximo
+            jogador.gold = max(0, jogador.gold - 10)
+            campanha.cena_atual = "carvalhal"
+            jogador.cena_atual = "carvalhal"
+            campanha.em_combate = False
+            jogador.status_efeitos = [] # FIX 3: Limpar todos os status (incluindo Veneno e Fúria) ao morrer
+            
+        return ActionResult(True, "combate", narrativa.strip(), {"dano": dano_causado, "acertou": acertou_ataque})
 
     async def _resolver_revide_inimigo(self, jogador: Jogador, campanha: Campanha, encontro: Encontro, inimigo: Inimigo, hp_grupo: int, hp_max_inimigo: int, efeitos_atuais: list, is_durnn_furia: bool) -> tuple[str, int, list]:
         """Calcula e formata o revide do inimigo. Retorna (narrativa, dano_total, efeitos_atualizados)"""
@@ -324,7 +413,8 @@ class ActionResolver:
             limite_ataques = jogadores_vivos + (getattr(encontro, 'multiplicador_ameaca', 1) or 1)
             atacantes = min(vivos_agora, limite_ataques)
             
-            narrativa += f"⚠️ ATAQUE INIMIGO: {atacantes}x {inimigo.nome} atacam! (De {vivos_agora} vivos)\n"
+            verbo_atacar = "ataca" if atacantes == 1 else "atacam"
+            narrativa += f"⚠️ ATAQUE INIMIGO: {atacantes}x {inimigo.nome} {verbo_atacar}! (De {vivos_agora} vivos)\n"
             acertos_totais = 0
             
             for i in range(atacantes):
@@ -342,11 +432,18 @@ class ActionResolver:
                     narrativa += f"💨 Atk {i+1}: Miss\n"
 
             if acertos_totais > 0:
+                # --- MECÂNICA DE RESISTÊNCIA DA FÚRIA DO BÁRBARO ---
+                if "Fúria" in efeitos_atuais:
+                    dano_original_revide = dano_final_revide
+                    dano_final_revide = max(1, dano_final_revide // 2)
+                    narrativa += f"🛡️ A tua Fúria reduziu o dano sofrido pela metade! (Original: {dano_original_revide})\n"
+                # --------------------------------------------------
+
                 narrativa += f"🩸 Dano total recebido: {dano_final_revide}\n\n"
             else:
                 narrativa += "🛡️ Esquivaste todos os ataques!\n\n"
             
-            jogador.hp_atual -= dano_final_revide
+            jogador.hp_atual = max(0, jogador.hp_atual - dano_final_revide)
 
             # Tentativa de Envenenamento
             if random.randint(1, 100) <= 20 and "Envenenado" not in efeitos_atuais:
@@ -463,10 +560,17 @@ class ActionResolver:
                 dano_fuga = random.randint(1, 6) + 2
                 rolagem_inimigo = random.randint(1, 20)
                 if rolagem_inimigo + 4 >= jogador.modificador_defesa or rolagem_inimigo == 20:
-                    jogador.hp_atual -= dano_fuga
+                    jogador.hp_atual = max(0, jogador.hp_atual - dano_fuga)
                     narrativa_fuga = f"🩸 <b>Fuga Arriscada!</b> Ao virares as costas, {encontro_bloqueio.nome_inimigo} acertou-te um Ataque de Oportunidade! Sofreste {dano_fuga} de dano."
                     if jogador.hp_atual <= 0:
-                        return ActionResult(False, "navegacao", narrativa_fuga, {})
+                        narrativa_fuga += "\n💀 Caíste na fuga! A Patrulha de Carvalhal resgatou-te, mas perdeste algum ouro..."
+                        jogador.hp_atual = jogador.hp_maximo
+                        jogador.gold = max(0, jogador.gold - 10)
+                        campanha.cena_atual = "carvalhal"
+                        jogador.cena_atual = "carvalhal"
+                        campanha.em_combate = False
+                        jogador.status_efeitos = [] # FIX 3: Limpar status
+                        return ActionResult(False, "navegacao", narrativa_fuga, {"nova_cena": "carvalhal"})
                 else:
                     narrativa_fuga = f"💨 <b>Fuga Ágil!</b> Conseguiste desviar-te do ataque de {encontro_bloqueio.nome_inimigo} enquanto recuavas."
                 
@@ -560,17 +664,27 @@ class ActionResolver:
             rolagem = random.randint(1, 20) + mod_jogador
 
             if tipo == "dano_automatico":
-                jogador.hp_atual -= dano_total
+                jogador.hp_atual = max(0, jogador.hp_atual - dano_total)
                 narrativa_hazard += f"\n🔥 <b>{descricao}!</b> Sofreste {dano_total} de dano inevitável na área."
             elif rolagem >= cd:
                 narrativa_hazard += f"\n✅ <b>{descricao}!</b> Desviaste com sucesso (Teste {rolagem} vs CD {cd})."
             else:
-                jogador.hp_atual -= dano_total
+                jogador.hp_atual = max(0, jogador.hp_atual - dano_total)
                 narrativa_hazard += f"\n❌ <b>{descricao}!</b> Foste atingido (Teste {rolagem} vs CD {cd}). Sofreste {dano_total} de dano!"
 
-        texto_final = f"👣 Moveste-te para {direcao if not is_fuga else 'uma área segura'}. O grupo chegou a {nome_sala}."
+        texto_final = f"👣 Segues para {direcao if not is_fuga else 'uma área segura'}."
         if narrativa_fuga: texto_final = f"{narrativa_fuga}\n\n{texto_final}"
         if narrativa_hazard: texto_final = f"{texto_final}\n{narrativa_hazard}"
+
+        if jogador.hp_atual <= 0:
+            texto_final += "\n💀 Sucumbiste aos perigos! A Patrulha de Carvalhal resgatou-te, mas perdeste algum ouro..."
+            jogador.hp_atual = jogador.hp_maximo
+            jogador.gold = max(0, jogador.gold - 10)
+            campanha.cena_atual = "carvalhal"
+            jogador.cena_atual = "carvalhal"
+            campanha.em_combate = False
+            jogador.status_efeitos = [] # FIX 3: Limpar status
+            return ActionResult(False, "navegacao", texto_final.strip(), {"nova_cena": "carvalhal"})
 
         return ActionResult(True, "navegacao", texto_final.strip(), {"nova_cena": alvo_sala})
 
@@ -666,9 +780,20 @@ class ActionResolver:
                     return ActionResult(True, "interacao", f"✅ Sucesso no teste de {obj.atributo_teste} ({total} vs CD {obj.cd_teste}). {obj.nome} manipulado!{msg_extra}", {})
                 else:
                     dano = obj.dano_falha if obj.dano_falha > 0 else 0
-                    if dano > 0: jogador.hp_atual -= dano
+                    if dano > 0: jogador.hp_atual = max(0, jogador.hp_atual - dano)
                     if obj.tipo == "armadilha": obj.ativo = False
-                    return ActionResult(False, "interacao", f"❌ Falha no teste ({total} vs CD {obj.cd_teste}). {obj.nome} resistiu. Dano sofrido: {dano}", {})
+                    
+                    msg_falha = f"❌ Falha no teste ({total} vs CD {obj.cd_teste}). {obj.nome} resistiu. Dano sofrido: {dano}"
+                    if jogador.hp_atual <= 0:
+                        msg_falha += "\n💀 Foste nocauteado pela armadilha! A Patrulha resgatou-te, mas perdeste algum ouro..."
+                        jogador.hp_atual = jogador.hp_maximo
+                        jogador.gold = max(0, jogador.gold - 10)
+                        campanha.cena_atual = "carvalhal"
+                        jogador.cena_atual = "carvalhal"
+                        campanha.em_combate = False
+                        jogador.status_efeitos = [] # FIX 3: Limpar status
+                        
+                    return ActionResult(False, "interacao", msg_falha, {})
 
         return ActionResult(False, "interacao", "Não encontraste nada de útil para interagir diretamente.", {})
 
