@@ -44,3 +44,6 @@ async def get_async_db():
             raise
         finally:
             await session.close()
+
+# Alias para compatibilidade com código legado - aponta para a versão assíncrona
+get_db_session = get_async_db
