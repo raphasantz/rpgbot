@@ -41,7 +41,9 @@ async def skill_callback(callback: types.CallbackQuery):
         msg = ""
         efeitos = list(jogador.status_efeitos or [])
         
+        # FIX 2: Persistir flags de combate no banco de dados
         if skill == "surto":
+            jogador._surto = True
             if "Surto" not in efeitos: efeitos.append("Surto")
             msg = "⚔️ <b>Surto de Ação ativado!</b> Vais realizar um ataque extra neste turno."
         elif skill == "folego":
@@ -49,9 +51,11 @@ async def skill_callback(callback: types.CallbackQuery):
             jogador.hp_atual = min(jogador.hp_maximo, jogador.hp_atual + cura)
             msg = f"❤️ <b>Retomar Fôlego!</b> Recuperaste {cura} HP."
         elif skill == "smite":
+            jogador._smite = True
             if "Smite" not in efeitos: efeitos.append("Smite")
             msg = "✨ <b>Destruição Divina preparada!</b> Teu próximo ataque terá dano radiante extra."
         elif skill == "furia":
+            jogador._furia = True
             if "Fúria" not in efeitos: efeitos.append("Fúria")
             msg = "😡 <b>Fúria ativada!</b> Mais dano e resistência a dano físico até o fim do combate."
         elif skill == "formaselvagem":

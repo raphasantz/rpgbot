@@ -156,11 +156,11 @@ async def loja_interativa_handler(message: types.Message):
         texto += "<i>Clica no item para comprar:</i>\n"
         
         botoes = []
-        for k, v in LOJA_CARVALHAL.items():
+        for idx, (k, v) in enumerate(LOJA_CARVALHAL.items()):
             preco_final = max(1, math.floor(v['preco'] * fator_preco))
-            item_safe = k[:20].strip()
+            # FIX 6: Usar índice numérico para evitar colisão de callbacks
             icone = "🧪" if v["tipo"] == "pocao" else "⚔️" if v["tipo"] == "arma" else "🛡️"
-            botoes.append([InlineKeyboardButton(text=f"{icone} {k} - {preco_final} PO", callback_data=f"buy_{item_safe}")])
+            botoes.append([InlineKeyboardButton(text=f"{icone} {k} - {preco_final} PO", callback_data=f"buy_{idx}")])
 
         teclado = InlineKeyboardMarkup(inline_keyboard=botoes)
         await message.answer(texto, parse_mode="HTML", reply_markup=teclado)
@@ -168,20 +168,22 @@ async def loja_interativa_handler(message: types.Message):
 @router.callback_query(F.data.startswith("buy_"))
 async def comprar_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
-    item_nome_parcial = callback.data.replace("buy_", "")
+    try:
+        item_idx = int(callback.data.replace("buy_", ""))
+    except ValueError:
+        return await callback.answer("❌ Item inválido.", show_alert=True)
     
     async with get_db_session() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         if not jogador: return await callback.answer("⚠️ Erro de jogador.", show_alert=True)
         
-        item_encontrado, nome_oficial = None, None
-        for k, v in LOJA_CARVALHAL.items():
-            if item_nome_parcial.lower() in k.lower():
-                item_encontrado, nome_oficial = v, k
-                break
-                
-        if not item_encontrado: return await callback.answer("❌ Item não encontrado na loja.", show_alert=True)
+        # Buscar item pelo índice
+        itens_loja = list(LOJA_CARVALHAL.items())
+        if item_idx < 0 or item_idx >= len(itens_loja):
+            return await callback.answer("❌ Item não encontrado.", show_alert=True)
+        
+        nome_oficial, item_encontrado = itens_loja[item_idx]
         
         reputacao = (jogador.reputacao or {}).get("carvalhal", 0)
         fator_preco = 1.0
@@ -217,13 +219,13 @@ async def vender_interativo_handler(message: types.Message):
         botoes = []
         itens_unicos = set(inv_linhas)
         
-        for item in itens_unicos:
+        # FIX 6: Usar índice numérico para evitar colisão de callbacks
+        for idx, item in enumerate(itens_unicos):
             preco_base = next((v["preco"] for k, v in LOJA_CARVALHAL.items() if k.lower() in item.lower() or item.lower() in k.lower()), 2)
             valor_venda = max(1, math.floor(preco_base / 2))
             qtd = inv_linhas.count(item)
-            item_safe = item[:20].strip()
             
-            botoes.append([InlineKeyboardButton(text=f"Vender {item} ({qtd}x) - +{valor_venda} PO", callback_data=f"sell_{item_safe}")])
+            botoes.append([InlineKeyboardButton(text=f"Vender {item} ({qtd}x) - +{valor_venda} PO", callback_data=f"sell_{idx}")])
 
         teclado = InlineKeyboardMarkup(inline_keyboard=botoes)
         await message.answer(texto, parse_mode="HTML", reply_markup=teclado)
@@ -231,15 +233,22 @@ async def vender_interativo_handler(message: types.Message):
 @router.callback_query(F.data.startswith("sell_"))
 async def vender_callback(callback: types.CallbackQuery):
     user_id = str(callback.from_user.id)
-    item_nome_parcial = callback.data.replace("sell_", "")
+    try:
+        item_idx = int(callback.data.replace("sell_", ""))
+    except ValueError:
+        return await callback.answer("❌ Item inválido.", show_alert=True)
     
     async with get_db_session() as db:
         result = await db.execute(select(Jogador).filter(Jogador.telefone == user_id))
         jogador = result.scalars().first()
         inv_linhas = obter_inventario_limpo(jogador.inventario)
         
-        item_para_vender = next((i for i in inv_linhas if item_nome_parcial.lower() in i.lower()), None)
-        if not item_para_vender: return await callback.answer("❌ Já não tens este item.", show_alert=True)
+        # Buscar item pelo índice
+        itens_unicos = list(set(inv_linhas))
+        if item_idx < 0 or item_idx >= len(itens_unicos):
+            return await callback.answer("❌ Item não encontrado.", show_alert=True)
+        
+        item_para_vender = itens_unicos[item_idx]
         
         preco_base = next((v["preco"] for k, v in LOJA_CARVALHAL.items() if k.lower() in item_para_vender.lower() or item_para_vender.lower() in k.lower()), 2)
         valor_venda = max(1, math.floor(preco_base / 2))

@@ -66,6 +66,16 @@ class Jogador(Base):
     # Efeitos de Status
     status_efeitos = Column(JSON, default=list) # Ex: ["Envenenado", "Atordoado", "Cobertura", "Agarrado", "Caído"]
 
+    # ── FIX 2: PERSISTÊNCIA DE ESTADO DE COMBATE (Bug da Amnésia Volátil) ──
+    # Flags de habilidades que persistem entre mensagens
+    _furia = Column(Boolean, default=False)
+    _smite = Column(Boolean, default=False)
+    _surto = Column(Boolean, default=False)
+    acao_preparada = Column(JSON, default=lambda: {"alvo": None, "acao": None})
+    
+    # ── FIX 6: REPUTAÇÃO E DESCONTOS ──
+    reputacao = Column(JSON, default=dict)  # Ex: {"carvalhal": 25, "ferreiro": 10}
+
 class Aventura(Base):
     __tablename__ = "aventuras"
     id = Column(String(50), primary_key=True)
