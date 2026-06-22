@@ -1,0 +1,4777 @@
+[
+  {
+    "cod_sala": "cidadela_2",
+    "nome_sala": "Escadas Sinuosas (Área 2)",
+    "descricao_visual": "Lances de escadas escorregadias.",
+    "conexoes": {
+      "subir": "cidadela_1",
+      "descer": "cidadela_3"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "subir",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_3",
+    "nome_sala": "Pátio em Ruínas (Área 3)",
+    "descricao_visual": "Pátio cercado por alvenaria e entulho.",
+    "conexoes": {
+      "subir": "cidadela_2",
+      "oeste": "cidadela_4"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "subir",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_4",
+    "nome_sala": "Torre em Ruínas (Área 4)",
+    "descricao_visual": "Goblins mortos espalhados no granito rachado.",
+    "conexoes": {
+      "leste": "cidadela_3",
+      "norte": "cidadela_15",
+      "oeste": "cidadela_6",
+      "segredo": "cidadela_5"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "norte",
+      "oeste",
+      "segredo"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_5",
+    "nome_sala": "Pequena Câmara Secreta (Área 5)",
+    "descricao_visual": "Esqueletos de antigos arqueiros elfos.",
+    "conexoes": {
+      "segredo": "cidadela_4"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "segredo"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_6",
+    "nome_sala": "Antiga Passagem (Área 6)",
+    "descricao_visual": "Porta de pedra trancada em formato de dragão.",
+    "conexoes": {
+      "leste": "cidadela_4",
+      "oeste": "cidadela_7"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_7",
+    "nome_sala": "Galeria das Notas (Área 7)",
+    "descricao_visual": "Um globo cristalino azul toca uma música ensurdecedora.",
+    "conexoes": {
+      "leste": "cidadela_6",
+      "oeste": "cidadela_8"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_8",
+    "nome_sala": "Placas de Pressão (Área 8)",
+    "descricao_visual": "Corredor com ar rarefeito e poeira.",
+    "conexoes": {
+      "leste": "cidadela_7",
+      "oeste": "cidadela_9"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_9",
+    "nome_sala": "O Enigma do Dragão (Área 9)",
+    "descricao_visual": "Escultura de dragão em mármore que dita enigmas.",
+    "conexoes": {
+      "leste": "cidadela_8",
+      "oeste": "cidadela_10"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_10",
+    "nome_sala": "Guarda de Honra (Área 10)",
+    "descricao_visual": "Poço escuro e cheio de estacas separa o portal.",
+    "conexoes": {
+      "leste": "cidadela_9",
+      "pular": "cidadela_12",
+      "segredo": "cidadela_11"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "pular",
+      "segredo"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_11",
+    "nome_sala": "Sala Secreta (Área 11)",
+    "descricao_visual": "Inscrições sobre o enterro do Sacerdote do Dragão.",
+    "conexoes": {
+      "norte": "cidadela_10",
+      "descer": "cidadela_12"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_12",
+    "nome_sala": "Tumba do Sacerdote (Área 12)",
+    "descricao_visual": "Luz verde ilumina o sarcófago de mármore maciço.",
+    "conexoes": {
+      "pular": "cidadela_10",
+      "subir": "cidadela_11"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "pular",
+      "subir"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_13",
+    "nome_sala": "Câmara Vazia (Área 13)",
+    "descricao_visual": "Câmara vazia repleta de escombros.",
+    "conexoes": {
+      "oeste": "cidadela_15"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_14",
+    "nome_sala": "Fonte Encantada (Área 14)",
+    "descricao_visual": "Um barril de água magicamente preso na sala.",
+    "conexoes": {
+      "leste": "cidadela_15"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_15",
+    "nome_sala": "Fora da Gaiola (Área 15)",
+    "descricao_visual": "Onde o kobold chora ao lado da jaula vazia do dragão.",
+    "conexoes": {
+      "sul": "cidadela_4",
+      "norte": "cidadela_16",
+      "leste": "cidadela_13",
+      "oeste": "cidadela_14"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_16",
+    "nome_sala": "Kobolds Sentinelas (Área 16)",
+    "descricao_visual": "Alojamento das sentinelas de Yusdrayl.",
+    "conexoes": {
+      "sul": "cidadela_15",
+      "norte": "cidadela_19",
+      "leste": "cidadela_17",
+      "oeste": "cidadela_18"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_17",
+    "nome_sala": "Despensa do Dragão (Área 17)",
+    "descricao_visual": "Ratos espremidos em um cercado quebrado.",
+    "conexoes": {
+      "oeste": "cidadela_16"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_18",
+    "nome_sala": "Prisioneiros de Guerra (Área 18)",
+    "descricao_visual": "Goblins acorrentados ao chão implorando ajuda.",
+    "conexoes": {
+      "leste": "cidadela_16",
+      "norte": "cidadela_19"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_19",
+    "nome_sala": "Salão dos Dragões (Área 19)",
+    "descricao_visual": "Colunas enormes esculpidas com dragões entrelaçados.",
+    "conexoes": {
+      "sul": "cidadela_16",
+      "sul_oeste": "cidadela_18",
+      "norte": "cidadela_20",
+      "oeste": "cidadela_24"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "sul_oeste",
+      "norte",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_20",
+    "nome_sala": "Colônia Kobold (Área 20)",
+    "descricao_visual": "Kobolds trabalhando e curtindo couro.",
+    "conexoes": {
+      "sul": "cidadela_19",
+      "norte": "cidadela_21",
+      "leste": "cidadela_22",
+      "oeste": "cidadela_23"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_21",
+    "nome_sala": "O Trono do Dragão (Área 21)",
+    "descricao_visual": "A líder Yusdrayl observa a sala do seu trono esculpido.",
+    "conexoes": {
+      "sul": "cidadela_20"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_22",
+    "nome_sala": "Aposento Vazio (Área 22)",
+    "descricao_visual": "Restos de uma vida antiga.",
+    "conexoes": {
+      "oeste": "cidadela_20"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_23",
+    "nome_sala": "Acesso Subterrâneo (Área 23)",
+    "descricao_visual": "Um buraco escuro que leva ao submundo.",
+    "conexoes": {
+      "leste": "cidadela_20"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_24",
+    "nome_sala": "Corredor Armadilhado (Área 24)",
+    "descricao_visual": "Território de divisa entre Goblins e Kobolds.",
+    "conexoes": {
+      "leste": "cidadela_19",
+      "norte": "cidadela_30",
+      "sul_leste": "cidadela_25",
+      "sul_oeste": "cidadela_26",
+      "norte_oeste": "cidadela_28",
+      "oeste": "cidadela_29"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "norte",
+      "sul_leste",
+      "sul_oeste",
+      "norte_oeste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_25",
+    "nome_sala": "Vazio (Área 25)",
+    "descricao_visual": "Poeira e ecos.",
+    "conexoes": {
+      "norte_oeste": "cidadela_24"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte_oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_26",
+    "nome_sala": "Fonte Seca (Área 26)",
+    "descricao_visual": "A água há muito secou.",
+    "conexoes": {
+      "norte_leste": "cidadela_24",
+      "oeste": "cidadela_27"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte_leste",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_27",
+    "nome_sala": "Santuário (Área 27)",
+    "descricao_visual": "Restos de adoração de elfos passados.",
+    "conexoes": {
+      "leste": "cidadela_26"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_28",
+    "nome_sala": "Celas Infestadas (Área 28)",
+    "descricao_visual": "Fedor horrível exala do chão.",
+    "conexoes": {
+      "sul_leste": "cidadela_24"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul_leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_29",
+    "nome_sala": "Armadilha Desativada (Área 29)",
+    "descricao_visual": "Um fosso inutilizado.",
+    "conexoes": {
+      "leste": "cidadela_24"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_30",
+    "nome_sala": "Parede Goblin (Área 30)",
+    "descricao_visual": "Barricadas e sujeira anunciam o domínio dos goblins.",
+    "conexoes": {
+      "sul": "cidadela_24",
+      "norte": "cidadela_32",
+      "oeste": "cidadela_31"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_31",
+    "nome_sala": "Corredor de Estrepes (Área 31)",
+    "descricao_visual": "Cuidado onde pisa. Estrepes por toda parte.",
+    "conexoes": {
+      "leste": "cidadela_30"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_32",
+    "nome_sala": "Portão Goblin (Área 32)",
+    "descricao_visual": "Goblins brutamontes bloqueiam o corredor de ossos.",
+    "conexoes": {
+      "sul": "cidadela_30",
+      "oeste": "cidadela_34",
+      "norte": "cidadela_33"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_33",
+    "nome_sala": "Treinamento (Área 33)",
+    "descricao_visual": "Alvos esburacados usados por arqueiros goblins.",
+    "conexoes": {
+      "sul": "cidadela_32"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_34",
+    "nome_sala": "Salão do Chefe (Área 34)",
+    "descricao_visual": "Durnn repousa aqui. O chão é coberto de troféus e sujeira.",
+    "conexoes": {
+      "leste": "cidadela_32",
+      "norte": "cidadela_35",
+      "sul": "cidadela_37",
+      "descer": "cidadela_41"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "norte",
+      "sul",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_35",
+    "nome_sala": "Paliçada Goblin (Área 35)",
+    "descricao_visual": "Prisioneiros como o gnomo Erky amarrados nas grades.",
+    "conexoes": {
+      "sul": "cidadela_34",
+      "norte": "cidadela_36"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_36",
+    "nome_sala": "Guarda Goblin (Área 36)",
+    "descricao_visual": "Salas de repouso dos guardas de Durnn.",
+    "conexoes": {
+      "sul": "cidadela_35"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_37",
+    "nome_sala": "Sala de Troféus (Área 37)",
+    "descricao_visual": "O filhote de dragão branco devora ovelhas no gelo.",
+    "conexoes": {
+      "norte": "cidadela_34",
+      "oeste": "cidadela_38"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_38",
+    "nome_sala": "Salão dos Goblins (Área 38)",
+    "descricao_visual": "Uma baderna sem fim de restos e goblins dormindo.",
+    "conexoes": {
+      "leste": "cidadela_37",
+      "norte": "cidadela_39",
+      "oeste": "cidadela_40"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "norte",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_39",
+    "nome_sala": "Despensa Goblin (Área 39)",
+    "descricao_visual": "Carne e cogumelos apodrecendo.",
+    "conexoes": {
+      "sul": "cidadela_38"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_40",
+    "nome_sala": "Salão do Fosso (Área 40)",
+    "descricao_visual": "Um poço escuro ameaça qualquer passo em falso.",
+    "conexoes": {
+      "leste": "cidadela_38"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_41",
+    "nome_sala": "Salão Principal (Área 41)",
+    "descricao_visual": "Grandes escadarias descem em direção às raízes da terra.",
+    "conexoes": {
+      "subir": "cidadela_34",
+      "descer": "cidadela_42"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "subir",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_42",
+    "nome_sala": "Entrada do Bosque (Área 42)",
+    "descricao_visual": "Fungos luminescentes tomam conta das pedras.",
+    "conexoes": {
+      "subir": "cidadela_41",
+      "norte": "cidadela_43"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "subir",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_43",
+    "nome_sala": "Bifurcação (Área 43)",
+    "descricao_visual": "Raízes grossas da Árvore Gulthias cruzam o chão.",
+    "conexoes": {
+      "sul": "cidadela_42",
+      "norte": "cidadela_44"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_44",
+    "nome_sala": "Bosque de Fungos (Área 44)",
+    "descricao_visual": "Fungos gigantes que atacam qualquer movimento.",
+    "conexoes": {
+      "sul": "cidadela_43",
+      "norte": "cidadela_45"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_45",
+    "nome_sala": "O Cultivador (Área 45)",
+    "descricao_visual": "O Acampamento profano onde o Bugbear supervisiona o mato.",
+    "conexoes": {
+      "sul": "cidadela_44",
+      "leste": "cidadela_47",
+      "norte": "cidadela_46"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_46",
+    "nome_sala": "Caverna de Caça (Área 46)",
+    "descricao_visual": "Restos de lobos e ossos quebrados.",
+    "conexoes": {
+      "sul": "cidadela_45"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_47",
+    "nome_sala": "Laboratório (Área 47)",
+    "descricao_visual": "O laboratório alquímico onde Belak conduz experiências.",
+    "conexoes": {
+      "oeste": "cidadela_45",
+      "norte": "cidadela_48"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_48",
+    "nome_sala": "Galeria de Mato (Área 48)",
+    "descricao_visual": "Corredor sufocante. Ramos Secos se movem nas sombras.",
+    "conexoes": {
+      "sul": "cidadela_47",
+      "norte": "cidadela_50",
+      "oeste": "cidadela_49"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_49",
+    "nome_sala": "Aposentos (Área 49)",
+    "descricao_visual": "Câmaras antigas dominadas pelo mato.",
+    "conexoes": {
+      "leste": "cidadela_48"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_50",
+    "nome_sala": "Jardim Sombrio (Área 50)",
+    "descricao_visual": "Plantas venenosas cultivadas cuidadosamente pelo druida.",
+    "conexoes": {
+      "sul": "cidadela_48",
+      "norte": "cidadela_54",
+      "leste": "cidadela_51",
+      "oeste": "cidadela_52",
+      "norte_leste": "cidadela_53"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "leste",
+      "oeste",
+      "norte_leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_51",
+    "nome_sala": "Gruta de Ervas (Área 51)",
+    "descricao_visual": "Ervas curativas misturadas com toxinas letais.",
+    "conexoes": {
+      "oeste": "cidadela_50"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_52",
+    "nome_sala": "Caverna de Esporos (Área 52)",
+    "descricao_visual": "Esporos mortais flutuam em uma névoa amarela.",
+    "conexoes": {
+      "leste": "cidadela_50"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_53",
+    "nome_sala": "Bosque Adormecido (Área 53)",
+    "descricao_visual": "Corpos servindo como fertilizantes para as raízes.",
+    "conexoes": {
+      "sul_oeste": "cidadela_50"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul_oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_54",
+    "nome_sala": "Bosque do Crepúsculo (Área 54)",
+    "descricao_visual": "O coração do jardim. A luz avermelhada não tem fonte visível.",
+    "conexoes": {
+      "sul": "cidadela_50",
+      "norte": "cidadela_56",
+      "oeste": "cidadela_55"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_55",
+    "nome_sala": "Raízes Antigas (Área 55)",
+    "descricao_visual": "Raízes grossas da árvore mãe pulsam com energia negra.",
+    "conexoes": {
+      "leste": "cidadela_54"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_56",
+    "nome_sala": "A Árvore Gulthias (Área 56)",
+    "descricao_visual": "A macabra árvore e o Druida Belak aguardam pelo fim.",
+    "conexoes": {
+      "sul": "cidadela_54"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_0",
+    "nome_sala": "A Ravina Escura (Área 0)",
+    "descricao_visual": "Uma fenda profunda. Há uma corda descendo.",
+    "conexoes": {
+      "sul": "estrada_velha",
+      "descer": "cidadela_1"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-MrOi5yR39Inx8BCr0KjHoizm/user-uUFJI3k6p29w5LlGglOZVu8g/img-zv5bKSC51UqxakdMQ78tR9Pz.png?st=2026-05-10T23%3A48%3A59Z&se=2026-05-11T01%3A48%3A59Z&sp=r&sv=2026-02-06&sr=b&rscd=inline&rsct=image/png&skoid=f1dafa11-a0c2-4092-91d4-10981fbda051&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-05-10T16%3A19%3A00Z&ske=2026-05-11T16%3A19%3A00Z&sks=b&skv=2026-02-06&sig=QgP/6YfL1IQl77bfD7Rhk5ouHT/XmvRGPrOEE0mPV68%3D",
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-MrOi5yR39Inx8BCr0KjHoizm/user-uUFJI3k6p29w5LlGglOZVu8g/img-zv5bKSC51UqxakdMQ78tR9Pz.png?st=2026-05-10T23%3A48%3A59Z&se=2026-05-11T01%3A48%3A59Z&sp=r&sv=2026-02-06&sr=b&rscd=inline&rsct=image/png&skoid=f1dafa11-a0c2-4092-91d4-10981fbda051&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-05-10T16%3A19%3A00Z&ske=2026-05-11T16%3A19%3A00Z&sks=b&skv=2026-02-06&sig=QgP/6YfL1IQl77bfD7Rhk5ouHT/XmvRGPrOEE0mPV68%3D",
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cidadela_1",
+    "nome_sala": "Parapeito (Área 1)",
+    "descricao_visual": "Parapeito de areia no golfo subterrâneo.",
+    "conexoes": {
+      "subir": "cidadela_0",
+      "descer": "cidadela_2"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-MrOi5yR39Inx8BCr0KjHoizm/user-uUFJI3k6p29w5LlGglOZVu8g/img-jckMKiC25UYS31brUVOgx616.png?st=2026-05-10T23%3A49%3A27Z&se=2026-05-11T01%3A49%3A27Z&sp=r&sv=2026-02-06&sr=b&rscd=inline&rsct=image/png&skoid=35890473-cca8-4a54-8305-05a39e0bc9c3&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-05-10T21%3A15%3A26Z&ske=2026-05-11T21%3A15%3A26Z&sks=b&skv=2026-02-06&sig=WT3oyS%2BXCFZH4cqSwEB4EyGeHC2KCKzp6/IgSWtcPbo%3D",
+    "descricao_completa": "",
+    "saidas": [
+      "subir",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-MrOi5yR39Inx8BCr0KjHoizm/user-uUFJI3k6p29w5LlGglOZVu8g/img-jckMKiC25UYS31brUVOgx616.png?st=2026-05-10T23%3A49%3A27Z&se=2026-05-11T01%3A49%3A27Z&sp=r&sv=2026-02-06&sr=b&rscd=inline&rsct=image/png&skoid=35890473-cca8-4a54-8305-05a39e0bc9c3&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-05-10T21%3A15%3A26Z&ske=2026-05-11T21%3A15%3A26Z&sks=b&skv=2026-02-06&sig=WT3oyS%2BXCFZH4cqSwEB4EyGeHC2KCKzp6/IgSWtcPbo%3D",
+    "area": "cidadela",
+    "tipo": "masmorra",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "trilha_triboar",
+    "nome_sala": "Trilha Triboar (A Emboscada)",
+    "descricao_visual": "Estás numa estrada de terra batida. Dois cavalos mortos bloqueiam o caminho. Estão crivados de flechas de penas negras. A floresta ao redor é densa e esconde barrancos íngremes em ambos os lados.",
+    "conexoes": {
+      "oeste": "carvalhal",
+      "norte": "esconderijo_entrada",
+      "leste": "phandalin"
+    },
+    "hazards": [],
+    "loot_fixo": [
+      "Estojo de Mapas Vazio"
+    ],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte",
+      "leste",
+      "oeste"
+    ],
+    "itens": [
+      "Estojo de Mapas Vazio"
+    ],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_entrada",
+    "nome_sala": "1. Entrada da Caverna",
+    "descricao_visual": "Seguindo os rastos dos goblins, chegas a uma grande caverna numa encosta. Um riacho raso flui de dentro da escuridão. Arbustos densos escondem os flancos da entrada.",
+    "conexoes": {
+      "sul": "trilha_triboar",
+      "norte": "esconderijo_passagem"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_passagem",
+    "nome_sala": "2. Passagem dos Goblins",
+    "descricao_visual": "O som da água ecoa pela caverna úmida. O riacho ocupa a maior parte da passagem. O chão é escorregadio e há uma armadilha armada no escuro.",
+    "conexoes": {
+      "sul": "esconderijo_entrada",
+      "leste": "esconderijo_lobos",
+      "norte": "esconderijo_ponte"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_lobos",
+    "nome_sala": "3. Poço dos Lobos",
+    "descricao_visual": "Esta caverna tem uma fissura natural no teto. Lobos rosnantes estão acorrentados a estacas de ferro cravadas no chão. O cheiro a animal molhado e carne podre é intenso.",
+    "conexoes": {
+      "oeste": "esconderijo_passagem",
+      "norte": "esconderijo_fissura"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_fissura",
+    "nome_sala": "4. Passagem Íngreme",
+    "descricao_visual": "Uma fenda estreita no fundo do poço dos lobos leva para cima através de rochas pontiagudas, cheia de entulho. É um atalho direto para a caverna do líder.",
+    "conexoes": {
+      "sul": "esconderijo_lobos",
+      "norte": "esconderijo_klarg"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_ponte",
+    "nome_sala": "5. Passagem Superior",
+    "descricao_visual": "A passagem principal bifurca-se. O riacho corre por aqui. 6 metros acima, uma frágil ponte de madeira cruza a ravina. Uma cascata ruge mais à frente.",
+    "conexoes": {
+      "sul": "esconderijo_passagem",
+      "norte": "esconderijo_fontes",
+      "oeste": "esconderijo_covil"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_covil",
+    "nome_sala": "6. Covil dos Goblins",
+    "descricao_visual": "Esta caverna ampla está dividida em dois níveis por uma escarpa íngreme. O chão está coberto de fogueiras apagadas, sacos de dormir sujos e restos de comida. Há um prisioneiro humano amarrado no nível superior.",
+    "conexoes": {
+      "leste": "esconderijo_ponte"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_fontes",
+    "nome_sala": "7. Caverna das Fontes Gêmeas",
+    "descricao_visual": "A caverna é preenchida por duas piscinas que captam a água de uma fonte subterrânea. A água flui das piscinas formando o riacho. Há barragens rudimentares que podem ser libertadas para inundar a caverna.",
+    "conexoes": {
+      "sul": "esconderijo_ponte",
+      "leste": "esconderijo_klarg"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "esconderijo_klarg",
+    "nome_sala": "8. Caverna de Klarg",
+    "descricao_visual": "A caverna do líder. Fogueiras iluminam o espaço cheio de caixotes roubados e mercadorias. Um trono feito de rochas sobrepõe-se ao ambiente.",
+    "conexoes": {
+      "oeste": "esconderijo_fontes",
+      "sul": "esconderijo_fissura"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "phandalin",
+    "nome_sala": "Vila de Phandalin",
+    "descricao_visual": "Uma vila rústica construída sobre ruínas antigas. Estradas de terra lamacentas separam casas de madeira e pedra. Os moradores olham para ti com desconfiança. No topo da colina a leste, erguem-se as ruínas da Mansão Tresendar.",
+    "conexoes": {
+      "norte": "provisoes_barthen",
+      "sul": "gigante_adormecido",
+      "leste": "mansao_tresendar",
+      "oeste": "trilha_triboar",
+      "estalagem": "estalagem_colina",
+      "cambio": "cambio_mineiros"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte",
+      "sul",
+      "leste",
+      "oeste",
+      "estalagem",
+      "cambio"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "estalagem_colina",
+    "nome_sala": "Estalagem Colina de Pedra",
+    "descricao_visual": "Uma estalagem acolhedora de pedra e madeira. O cheiro de ensopado e cerveja quente enche o ar. É um bom lugar para descansar e ouvir os rumores da cidade.",
+    "conexoes": {
+      "sair": "phandalin"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sair"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "provisoes_barthen",
+    "nome_sala": "Provisões de Barthen",
+    "descricao_visual": "O maior posto de comércio de Phandalin. As prateleiras estão cheias de equipamento de aventura, rações e ferramentas de mineração.",
+    "conexoes": {
+      "sair": "phandalin"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sair"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cambio_mineiros",
+    "nome_sala": "Câmbio dos Mineiros de Phandalin",
+    "descricao_visual": "Um posto comercial bem vigiado onde os mineiros vêm pesar a sua prata e ouro. Atrás do balcão está Halia Thornton.",
+    "conexoes": {
+      "sair": "phandalin"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sair"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "gigante_adormecido",
+    "nome_sala": "Taverna Gigante Adormecido",
+    "descricao_visual": "Uma espelunca em ruínas, frequentada pela pior escória da vila. Um grupo de rufiões com mantos vermelhos está a beber e a arranjar confusão na porta.",
+    "conexoes": {
+      "norte": "phandalin"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "mansao_tresendar",
+    "nome_sala": "Ruínas de Tresendar",
+    "descricao_visual": "As fundações de pedra de uma antiga mansão destruída. Ao vasculhar os destroços, encontras uma escada de pedra oculta que desce para as trevas do porão.",
+    "conexoes": {
+      "oeste": "phandalin",
+      "descer": "marcarrubra_porao"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "marcarrubra_porao",
+    "nome_sala": "1. Porão (Esconderijo Marcarrubra)",
+    "descricao_visual": "O porão da antiga mansão. O cheiro a cerveja velha e sangue seco é forte. Existem cisternas de água e grandes barris.",
+    "conexoes": {
+      "subir": "mansao_tresendar",
+      "norte": "marcarrubra_corredor",
+      "leste": "marcarrubra_fenda"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "subir",
+      "norte",
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "marcarrubra_corredor",
+    "nome_sala": "2. Corredor das Armadilhas",
+    "descricao_visual": "Um longo corredor estreito, poeirento. Há sinais de que as pedras do chão no centro do corredor estão soltas.",
+    "conexoes": {
+      "sul": "marcarrubra_porao",
+      "norte": "marcarrubra_barracas"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "marcarrubra_barracas",
+    "nome_sala": "3. Barracas dos Bandidos",
+    "descricao_visual": "Um quarto com várias camas desarrumadas. Rufiões de manto vermelho estão sentados a jogar dados em cima de barris.",
+    "conexoes": {
+      "sul": "marcarrubra_corredor",
+      "leste": "marcarrubra_criptas"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "marcarrubra_criptas",
+    "nome_sala": "4. Criptas Tresendar",
+    "descricao_visual": "A temperatura cai drasticamente. Sarcófagos de pedra alinham-se nas paredes. Um frio sobrenatural permeia o ar, e ossos mexem-se nas sombras.",
+    "conexoes": {
+      "oeste": "marcarrubra_barracas",
+      "sul": "marcarrubra_prisao"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "marcarrubra_prisao",
+    "nome_sala": "5. Celas dos Escravos",
+    "descricao_visual": "Celas de ferro sujas. Há prisioneiros civis de Phandalin aqui, aterrorizados pelos guardas com mantos vermelhos.",
+    "conexoes": {
+      "norte": "marcarrubra_criptas"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "marcarrubra_fenda",
+    "nome_sala": "8. A Fenda",
+    "descricao_visual": "Uma enorme fissura natural divide a caverna, exalando um cheiro a carne podre. Das sombras da ravina, um olho gigante e grotesco pisca. É um Nothic.",
+    "conexoes": {
+      "oeste": "marcarrubra_porao",
+      "norte": "marcarrubra_glasstaff"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "marcarrubra_glasstaff",
+    "nome_sala": "12. Aposentos de Glasstaff",
+    "descricao_visual": "Um laboratório e quarto luxuoso no meio da masmorra. O líder dos bandidos, usando um cajado de vidro brilhante, prepara-se para lançar magias.",
+    "conexoes": {
+      "sul": "marcarrubra_fenda"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "conyberry",
+    "nome_sala": "Ruínas de Conyberry & Covil de Agatha",
+    "descricao_visual": "A vila abandonada de Conyberry. Uma trilha na floresta leva a uma cabana tecida com galhos mortos e teias de aranha. O ar é gelado e silencioso. Este é o domínio da Banshee Agatha.",
+    "conexoes": {
+      "oeste": "phandalin"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "poco_coruja",
+    "nome_sala": "Poço da Coruja Velha",
+    "descricao_visual": "Ruínas de uma antiga torre de vigia. O cheiro de morte paira no ar. Há uma tenda vermelha montada perto de um poço escuro, e vultos cambaleantes patrulham o local.",
+    "conexoes": {
+      "oeste": "phandalin",
+      "leste": "cume_wyvern"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "cume_wyvern",
+    "nome_sala": "Cume da Wyvern",
+    "descricao_visual": "Uma formação rochosa escarpada. Há uma caverna cujo interior cheira a fumaça, suor e carne assada. Orcs estabeleceram um acampamento aqui.",
+    "conexoes": {
+      "oeste": "poco_coruja"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "arvore_trovao_entrada",
+    "nome_sala": "Ruínas de Árvore Trovão",
+    "descricao_visual": "A antiga vila foi destruída pela erupção do Monte Hotenow. Casas de pedra sem teto estão engolidas por ervas daninhas cinzentas. Um aviso de madeira diz: 'Perigo! Homens-planta e zumbis!'",
+    "conexoes": {
+      "leste": "arvore_trovao_boticario",
+      "norte": "arvore_trovao_torre"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "arvore_trovao_boticario",
+    "nome_sala": "Antiga Loja do Boticário",
+    "descricao_visual": "Uma casa arruinada com prateleiras apodrecidas. O teto desabou e há aranhas gigantes a tecer teias espessas entre os destroços.",
+    "conexoes": {
+      "oeste": "arvore_trovao_entrada"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "arvore_trovao_torre",
+    "nome_sala": "A Torre do Dragão",
+    "descricao_visual": "Uma torre de pedra que milagrosamente resistiu à destruição. Um cheiro ácido de cloro e morte emana de dentro. Uma criatura colossal de escamas verdes dorme sobre um tesouro.",
+    "conexoes": {
+      "sul": "arvore_trovao_entrada"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "castelo_entrada",
+    "nome_sala": "Castelo Dentefino (Portões)",
+    "descricao_visual": "Um castelo em ruínas escondido na floresta. Possui sete torres danificadas. As pesadas portas de bronze estão entreabertas, revelando uma escuridão espessa no saguão.",
+    "conexoes": {
+      "sul": "trilha_triboar",
+      "norte": "castelo_saguao"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "castelo_saguao",
+    "nome_sala": "1. Saguão do Castelo",
+    "descricao_visual": "O salão de entrada. Há portas a norte e a leste. Entulho bloqueia a passagem oeste. Goblins montam guarda nas sombras.",
+    "conexoes": {
+      "sul": "castelo_entrada",
+      "leste": "castelo_refeitorio",
+      "norte": "castelo_santuario"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "castelo_refeitorio",
+    "nome_sala": "2. Refeitório Goblinóide",
+    "descricao_visual": "O cheiro de sujeira e carne velha é avassalador. Mesas compridas estão montadas. Uma criatura medonha com tentáculos (Grick) esconde-se no teto, enquanto hobgoblins comem.",
+    "conexoes": {
+      "oeste": "castelo_saguao",
+      "norte": "castelo_torre_urso"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "castelo_torre_urso",
+    "nome_sala": "3. Torre Destruída",
+    "descricao_visual": "A porta desta sala está trancada por fora com uma barra pesada de madeira. Lá dentro, algo grande e furioso ruge e arranha as paredes.",
+    "conexoes": {
+      "sul": "castelo_refeitorio",
+      "oeste": "castelo_santuario"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "castelo_santuario",
+    "nome_sala": "4. O Santuário Profanado",
+    "descricao_visual": "Um antigo templo divino agora manchado de sangue. Estátuas sem cabeça adornam o altar. Goblins e Hobgoblins veneram divindades sombrias aqui.",
+    "conexoes": {
+      "sul": "castelo_saguao",
+      "leste": "castelo_torre_urso",
+      "norte": "castelo_aposentos"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "castelo_aposentos",
+    "nome_sala": "5. Aposentos do Rei Grol",
+    "descricao_visual": "O quarto do chefe. O grande Rei Grol, um Bugbear envelhecido, discute com uma figura misteriosa (o Doppleganger). O anão Gundren Rockseeker jaz inconsciente no chão.",
+    "conexoes": {
+      "sul": "castelo_santuario"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_entrada",
+    "nome_sala": "1. Entrada da Caverna Onda Eco",
+    "descricao_visual": "Uma caverna profunda e escura, onde o som rítmico de ondas a bater (o 'Onda Eco') ecoa de longe a cada poucos minutos. Um acampamento anão em ruínas jaz perto de um poço escuro. O corpo de Tharden Rockseeker está no chão.",
+    "conexoes": {
+      "oeste": "phandalin",
+      "norte": "onda_eco_tuneis"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_tuneis",
+    "nome_sala": "Túneis da Mina",
+    "descricao_visual": "Túneis labirínticos suportados por vigas de madeira apodrecidas. O som das ondas é mais forte aqui. Esqueletos de antigas batalhas forram o chão poeirento.",
+    "conexoes": {
+      "sul": "onda_eco_entrada",
+      "leste": "onda_eco_grande_caverna",
+      "norte": "onda_eco_fungos"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_fungos",
+    "nome_sala": "Caverna dos Fungos",
+    "descricao_visual": "O ar é espesso e tóxico. Cogumelos gigantes e tapetes de musgo luminescente verde cobrem o chão e as paredes.",
+    "conexoes": {
+      "sul": "onda_eco_tuneis"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_grande_caverna",
+    "nome_sala": "9. A Grande Caverna",
+    "descricao_visual": "Um salão imenso, ladeado por escarpas. Dezenas de cadáveres antigos estão espalhados pelo chão. O cheiro de morte atrai criaturas devoradoras de carne (Carniçais).",
+    "conexoes": {
+      "oeste": "onda_eco_tuneis",
+      "norte": "onda_eco_fornalha",
+      "leste": "onda_eco_piscina"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte",
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_fornalha",
+    "nome_sala": "12. Caverna da Fornalha",
+    "descricao_visual": "Uma enorme fornalha de fundição de adamantium domina o salão. Um crânio humano flutuante, envolto em chamas verdes, patrulha a sala, acompanhado de mortos-vivos.",
+    "conexoes": {
+      "sul": "onda_eco_grande_caverna",
+      "leste": "onda_eco_aposentos"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_aposentos",
+    "nome_sala": "14. Aposentos dos Magos",
+    "descricao_visual": "O que restou dos aposentos de luxo dos magos humanos de outrora. Uma aparição sombria (Mormesk) ergue-se do chão, sussurrando maldições antigas.",
+    "conexoes": {
+      "oeste": "onda_eco_fornalha",
+      "norte": "onda_eco_forja"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_21",
+    "nome_sala": "Área 21: Trono Kobold",
+    "descricao_visual": "O grande salão do trono. A líder kobold, Yusdrayl, majestosa e ameaçadora, governa o seu clã sentada num trono construído com blocos de altar roubados e ossos polidos.",
+    "conexoes": {
+      "oeste": "sala_07",
+      "norte": "sala_26"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_forja",
+    "nome_sala": "15. A Forja das Magias",
+    "descricao_visual": "O lendário coração da mina! Uma fornalha crepita com fogo esmeralda que não consome combustível. Um monstro flutuante com um grande olho central (Observador) guarda a sala, insano pelo tempo.",
+    "conexoes": {
+      "sul": "onda_eco_aposentos"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_piscina",
+    "nome_sala": "10. Piscina Escura",
+    "descricao_visual": "Uma lagoa profunda preenche esta caverna. A água recua violentamente e depois retorna com estrondo, causando o som que dá nome à caverna.",
+    "conexoes": {
+      "oeste": "onda_eco_grande_caverna",
+      "norte": "onda_eco_templo"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "onda_eco_templo",
+    "nome_sala": "19. Templo de Dumathoin",
+    "descricao_visual": "O confronto final! Um templo anão impressionante com pilares esculpidos. A escuridão parece viva aqui. O Aranha Negra (Nezznar) examina a sala, ladeado por aranhas gigantes.",
+    "conexoes": {
+      "sul": "onda_eco_piscina"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_13",
+    "nome_sala": "Área 13: Câmara Secundária",
+    "descricao_visual": "Um corredor estreito e escuro. As paredes de granito estão cobertas de fungos cinzentos que parecem pulsar levemente quando você se aproxima.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "carvalhal",
+    "nome_sala": "Vila de Carvalhal",
+    "descricao_visual": "A Vila de Carvalhal pulsa com uma tensão silenciosa. Aldeões olham desconfiados através de janelas de madeira húmida, enquanto a fumaça das chaminés se mistura com a névoa perpétua. A Taverna do Velho Javali é o único lugar que parece oferecer algum calor real.",
+    "conexoes": {
+      "norte": "estrada_velha",
+      "leste": "esconderijo_entrada",
+      "taverna": "taverna"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-MrOi5yR39Inx8BCr0KjHoizm/user-uUFJI3k6p29w5LlGglOZVu8g/img-6k4S2xxF1BKWIdwHONiz03K6.png?st=2026-05-10T23%3A48%3A33Z&se=2026-05-11T01%3A48%3A33Z&sp=r&sv=2026-02-06&sr=b&rscd=inline&rsct=image/png&skoid=13da7400-b3f7-4f8c-9cba-908fecbd114c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-05-10T17%3A33%3A05Z&ske=2026-05-11T17%3A33%3A05Z&sks=b&skv=2026-02-06&sig=UcWC96Id6BBvag3JhR/kFsERgUTsugr4ep%2B1uy4yXpk%3D",
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "norte",
+      "taverna"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-MrOi5yR39Inx8BCr0KjHoizm/user-uUFJI3k6p29w5LlGglOZVu8g/img-6k4S2xxF1BKWIdwHONiz03K6.png?st=2026-05-10T23%3A48%3A33Z&se=2026-05-11T01%3A48%3A33Z&sp=r&sv=2026-02-06&sr=b&rscd=inline&rsct=image/png&skoid=13da7400-b3f7-4f8c-9cba-908fecbd114c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-05-10T17%3A33%3A05Z&ske=2026-05-11T17%3A33%3A05Z&sks=b&skv=2026-02-06&sig=UcWC96Id6BBvag3JhR/kFsERgUTsugr4ep%2B1uy4yXpk%3D",
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "estrada_velha",
+    "nome_sala": "Estrada Velha",
+    "descricao_visual": "Uma trilha desolada e esquecida. Árvores retorcidas de galhos secos como garras observam o seu avanço. O vento aqui não canta, ele apenas sibila entre os troncos podres, cheirando a abandono e folhas mortas.",
+    "conexoes": {
+      "sul": "carvalhal",
+      "norte": "cidadela_0"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "ravina_escura",
+    "nome_sala": "Área 0: Ravina",
+    "descricao_visual": "A terra abre-se numa fenda monumental, como se o mundo tivesse sido partido ao meio. Uma corda grossa, ancorada a um pilar de pedra rachada, desce rumo às profundezas onde a luz do sol não ousa entrar.",
+    "conexoes": {
+      "sul": "estrada_velha",
+      "descer": "sala_01"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "descer"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_01",
+    "nome_sala": "Área 1: Parapeito",
+    "descricao_visual": "Você aterra num parapeito estreito. O ar é gélido, cheirando a pó e pedra molhada. Nas sombras, o som de garras arranhando a rocha ecoa suavemente, anunciando que você não está sozinho.",
+    "conexoes": {
+      "oeste": "sala_02"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "subir",
+      "oeste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_02",
+    "nome_sala": "Área 2: Escadas Sinuosas",
+    "descricao_visual": "Uma escadaria de pedra em zigue-zague desce ainda mais para a escuridão. Os degraus estão irregulares e perigosos, cobertos por um musgo escorregadio e poças de água negra.",
+    "conexoes": {
+      "leste": "sala_01",
+      "baixo": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste",
+      "baixo"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_03",
+    "nome_sala": "Área 3: Pátio em Ruínas",
+    "descricao_visual": "O pátio de um antigo castelo que se afundou na terra. Paredes de granito destroçadas formam um anel ao redor de escombros. Estátuas sem cabeça de heróis do passado permanecem como sentinelas tristes no escuro.",
+    "conexoes": {
+      "cima": "sala_02",
+      "oeste": "sala_04",
+      "norte": "sala_07"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "cima",
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_04",
+    "nome_sala": "Área 4: Torre em Ruínas",
+    "descricao_visual": "Uma torre circular em ruínas. O teto desabou há séculos. No chão, quatro corpos de goblins em decomposição jazem espalhados; um deles está bizarramente empalado contra a parede oeste por uma lança ferrugenta.",
+    "conexoes": {
+      "leste": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_05",
+    "nome_sala": "Área 5: Corredor de Entrada",
+    "descricao_visual": "Uma pequena câmara secreta, abafada e com cheiro a ar preso há séculos. Teias de aranha grossas como cordas pendem do teto, escondendo cantos obscuros.",
+    "conexoes": {
+      "norte": "sala_07"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_06",
+    "nome_sala": "Área 6: Antessala Velha",
+    "descricao_visual": "Uma antessala fria com portas de pedra pesada. O silêncio aqui é perturbador, quebrado apenas pelo som da sua própria respiração e pelo gotejar distante de água.",
+    "conexoes": {
+      "leste": "sala_07"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_07",
+    "nome_sala": "Área 7: Galeria das Estátuas",
+    "descricao_visual": "A Galeria das Estátuas. Um longo corredor flanqueado por colunas esculpidas com a forma de dragões em voo. O chão está coberto por uma poeira espessa, ocultando perigos antigos.",
+    "conexoes": {
+      "sul": "sala_03",
+      "leste": "sala_21",
+      "oeste": "sala_06",
+      "norte": "sala_08"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste",
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_08",
+    "nome_sala": "Área 8: Sala de Pressão",
+    "descricao_visual": "O corredor afunila. Há manchas escuras no chão de pedra que lembram sangue seco. Uma placa de pressão ligeiramente elevada no centro da sala sugere uma armadilha mecânica adormecida.",
+    "conexoes": {
+      "sul": "sala_07",
+      "norte": "sala_09"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_09",
+    "nome_sala": "Área 9: Sala da Serpente",
+    "descricao_visual": "A Câmara da Serpente. Uma porta de pedra maciça bloqueia o caminho, entalhada com o formato de dragão enrolado. Há um enigma dracónico desgastado gravado na base da porta.",
+    "conexoes": {
+      "sul": "sala_08",
+      "leste": "sala_10"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_10",
+    "nome_sala": "Área 10: Corredor Estrito",
+    "descricao_visual": "O Corredor da Guarda de Honra. Nichos nas paredes contêm armaduras enferrujadas e vazias, de pé em posição de sentido. Elas parecem observar quem quer que passe por ali.",
+    "conexoes": {
+      "oeste": "sala_09",
+      "norte": "sala_12"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_11",
+    "nome_sala": "Área 11: Câmara Secundária",
+    "descricao_visual": "Uma câmara secundária esquecida. Caixotes apodrecidos e barris desfeitos em lascas espalham-se pelo chão. O ar aqui tem o gosto amargo de bolor.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_12",
+    "nome_sala": "Área 12: Tumba de Honorável",
+    "descricao_visual": "A Tumba do Sacerdote Dragão. Uma câmara silenciosa com um sarcófago de mármore liso no centro. Inscrições antigas em dracónico alertam severamente sobre a maldição dos violadores de tumbas.",
+    "conexoes": {
+      "sul": "sala_10"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_14",
+    "nome_sala": "Área 14: Câmara Secundária",
+    "descricao_visual": "A câmara está parcialmente inundada com uma água escura e fétida, na altura dos tornozelos. O som de respingos ecoa, como se algo escorregadio nadasse nas sombras aquáticas.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_15",
+    "nome_sala": "Área 15: Câmara Secundária",
+    "descricao_visual": "O posto de guarda Kobold. Fogueiras pequenas iluminam o rosto de criaturas reptilianas encolhidas em cantos, segurando lanças afiadas. O cheiro de carne queimada é forte.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_16",
+    "nome_sala": "Área 16: Câmara Secundária",
+    "descricao_visual": "A Sala das Correntes. Uma cela reforçada onde enormes anéis de ferro pendem das paredes. O ar é incrivelmente frio aqui, e as paredes estão cobertas por uma fina camada de gelo.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_17",
+    "nome_sala": "Área 17: Câmara Secundária",
+    "descricao_visual": "Um salão de transição longo. Peles de animais manchadas de sangue cobrem algumas passagens. O som de vozes esganiçadas e risadas cruéis reverbera mais adiante.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_18",
+    "nome_sala": "Área 18: Câmara Secundária",
+    "descricao_visual": "Um cruzamento de corredores guardado por barricadas improvisadas com mesas quebradas. Kobolds nervosos patrulham a área, mantendo as armas em punho.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_19",
+    "nome_sala": "Área 19: Câmara Secundária",
+    "descricao_visual": "Os quarteirões da tribo Kobold. Dezenas de ninhos de palha e tecido rasgado espalham-se pelo chão. O ruído constante de resmungos e dentes a ranger enche o ambiente.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_20",
+    "nome_sala": "Área 20: Câmara Secundária",
+    "descricao_visual": "A antessala real. Cortinas rasgadas de veludo vermelho tentam, sem sucesso, dar um ar de nobreza a esta caverna fria.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_22",
+    "nome_sala": "Área 22: Câmara Secundária",
+    "descricao_visual": "A antiga prisão. As grades de ferro estão tortas, algumas arrancadas das dobradiças. Restos de esqueletos humanoides jazem esquecidos nas celas mais escuras.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_23",
+    "nome_sala": "Área 23: Câmara Secundária",
+    "descricao_visual": "Um santuário menor desconsagrado. O altar de pedra foi vandalizado com sangue goblin, e símbolos de crueldade foram pintados sobre os relevos sagrados originais.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_24",
+    "nome_sala": "Área 24: Câmara Secundária",
+    "descricao_visual": "Um laboratório alquímico destruído. Vidros quebrados, cinzas e manchas químicas coloridas decoram o chão. Um odor metálico irrita a garganta.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_25",
+    "nome_sala": "Área 25: Câmara Secundária",
+    "descricao_visual": "A antiga armaria. Prateleiras de madeira podre alinham as paredes. Quase tudo de valor já foi saqueado, restando apenas lanças partidas e escudos rachados.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_26",
+    "nome_sala": "Área 26: Fronteira Goblin",
+    "descricao_visual": "Uma fonte circular de pedra, completamente seca. No centro, a estátua de um dragão com a boca aberta serve de poleiro para estranhos morcegos sem olhos.",
+    "conexoes": {
+      "sul": "sala_21",
+      "norte": "sala_33"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_27",
+    "nome_sala": "Área 27: Câmara Secundária",
+    "descricao_visual": "Uma sala de descanso em ruínas. Bancos de pedra estão virados e marcados por garras profundas. O chão é uma cama de poeira inexplorada.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_28",
+    "nome_sala": "Área 28: Câmara Secundária",
+    "descricao_visual": "O Corredor das Gárgulas. Figuras monstruosas de pedra observam do alto das paredes. A sensação de estar sendo vigiado é angustiante.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_29",
+    "nome_sala": "Área 29: Câmara Secundária",
+    "descricao_visual": "Um fosso seco corta o caminho. Uma tábua de madeira bamba e podre serve como única ponte para o lado goblin da cidadela.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_30",
+    "nome_sala": "Área 30: Câmara Secundária",
+    "descricao_visual": "Um posto avançado Goblin. Ossos de pequenos animais formam decorações macabras penduradas no teto. O fedor de goblin não lavado é esmagador.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_31",
+    "nome_sala": "Área 31: Câmara Secundária",
+    "descricao_visual": "Um corredor estreito e traiçoeiro. Existem frestas suspeitas nas paredes de pedra, um clássico indício de armadilhas com flechas prontas a disparar.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_32",
+    "nome_sala": "Área 32: Câmara Secundária",
+    "descricao_visual": "A Câmara dos Espinhos. O chão cede para um buraco escuro cheio de lanças e galhos afiados. É preciso cuidado extremo para navegar por aqui.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_33",
+    "nome_sala": "Área 33: Quartéis Goblin",
+    "descricao_visual": "O Quartel General Goblin. O cheiro é insuportável. Camas de palha imunda e lixo espalhado mostram que dezenas de goblins vivem, comem e lutam neste salão caótico.",
+    "conexoes": {
+      "sul": "sala_26",
+      "norte": "sala_41"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_34",
+    "nome_sala": "Área 34: Câmara Secundária",
+    "descricao_visual": "A cozinha imunda dos goblins. Caldeirões fervem com carnes não identificáveis. O vapor engordurado mancha as paredes de preto.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_35",
+    "nome_sala": "Área 35: Câmara Secundária",
+    "descricao_visual": "A despensa dos horrores. Barris quebrados e sacos roídos por ratos alinham as prateleiras. Pequenos vermes movem-se na penumbra.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_36",
+    "nome_sala": "Área 36: Câmara Secundária",
+    "descricao_visual": "A prisão goblin. Cordas e correntes estão presas a argolas no chão. Marcas de desespero nas paredes mostram onde prisioneiros tentaram, em vão, escapar.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_37",
+    "nome_sala": "Área 37: Câmara Secundária",
+    "descricao_visual": "A sala de troféus. Crânios de diversas criaturas, incluindo alguns anões e elfos, estão empalados em estacas. O ambiente exala brutalidade selvagem.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_38",
+    "nome_sala": "Área 38: Câmara Secundária",
+    "descricao_visual": "O salão da guarda de elite. Goblins com armaduras mais limpas (ou menos sujas) montam guarda aqui. A disciplina entre eles é mantida pelo medo.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_39",
+    "nome_sala": "Área 39: Câmara Secundária",
+    "descricao_visual": "Câmara de interrogatório. Ferramentas cruéis pendem das paredes. No centro, uma mesa de pedra está impregnada de escuridão e manchas inquietantes.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_40",
+    "nome_sala": "Área 40: Câmara Secundária",
+    "descricao_visual": "O Santuário de Maglubiyet. Ídolos macabros de barro e sangue adornam a parede. Uma fumaça de incenso nauseabundo queima lentamente num braseiro enferrujado.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_41",
+    "nome_sala": "Área 41: Trono de Durnn",
+    "descricao_visual": "O covil de Durnn, o cruel Chefe Goblin. Troféus de heróis caídos estão amontoados. No fundo da sala, um poço perfeitamente cilíndrico mergulha nas profundezas escuras da terra.",
+    "conexoes": {
+      "sul": "sala_33",
+      "baixo": "sala_42"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "baixo"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_42",
+    "nome_sala": "Área 42: Pilares Enraizados",
+    "descricao_visual": "Você chega ao Nível do Bosque Inferior. O teto aqui é sustentado por pilares que parecem árvores petrificadas, envoltas em raízes cinzentas que parecem vivas e pulsantes.",
+    "conexoes": {
+      "cima": "sala_41",
+      "norte": "sala_43"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "cima",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_43",
+    "nome_sala": "Área 43: Corredor de Musgo",
+    "descricao_visual": "Um corredor coberto de fungos fosforescentes. A luz verde pálida ilumina esporos que dançam no ar frio, dando uma sensação de irrealidade ao ambiente.",
+    "conexoes": {
+      "sul": "sala_42",
+      "norte": "sala_49"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_44",
+    "nome_sala": "Área 44: Câmara Secundária",
+    "descricao_visual": "A caverna dos insetos. O chão está coberto de exoesqueletos esmagados e terra remexida. Zumbidos graves podem ser ouvidos vindos de fissuras nas rochas.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_45",
+    "nome_sala": "Área 45: Câmara Secundária",
+    "descricao_visual": "O início do Bosque das Sombras. Árvores retorcidas crescem na escuridão subterrânea sem precisar de sol, alimentando-se apenas da energia mágica do local.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_46",
+    "nome_sala": "Área 46: Câmara Secundária",
+    "descricao_visual": "Um santuário engolido por vinhas espinhosas. Restos de uma divindade silvestre jazem quebrados sob uma cama de mato grosso e hostil.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_47",
+    "nome_sala": "Área 47: Câmara Secundária",
+    "descricao_visual": "A Passagem Entrelaçada. Raízes grossas como troncos bloqueiam metade do caminho, forçando-o a espremer-se entre a casca áspera que parece sangrar seiva vermelha.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_48",
+    "nome_sala": "Área 48: Câmara Secundária",
+    "descricao_visual": "A caverna do musgo gigante. Tapetes de musgo amarelo e púrpura cobrem tudo, macios como almofadas, mas exalam um gás com cheiro a podridão doce.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_49",
+    "nome_sala": "Área 49: Jardim Crepuscular",
+    "descricao_visual": "O Jardim Crepuscular. Uma área agrícola bizarra. O solo foi arado, mas as plantas que aqui crescem são pálidas, venenosas e cheias de espinhos. Arbustos secos tremem sem vento.",
+    "conexoes": {
+      "sul": "sala_43",
+      "oeste": "sala_53",
+      "norte": "sala_56"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul",
+      "oeste",
+      "norte"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_50",
+    "nome_sala": "Área 50: Câmara Secundária",
+    "descricao_visual": "A estufa macabra. Parede de pedras desabadas formam um canto escuro onde mudas de plantas trepadeiras parecem esticar as folhas em direção ao calor do seu corpo.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_51",
+    "nome_sala": "Área 51: Câmara Secundária",
+    "descricao_visual": "A biblioteca em ruínas de Belak. Pilhas de livros apodrecidos e pergaminhos esfarelados sobre rituais druídicos sombrios forram o chão úmido.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_52",
+    "nome_sala": "Área 52: Câmara Secundária",
+    "descricao_visual": "Os aposentos espartanos do Druida. Uma cama de folhas secas, uma bacia de pedra com água estagnada e símbolos de pura obsessão rúnica desenhados nas paredes.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_53",
+    "nome_sala": "Área 53: Lab de Belak",
+    "descricao_visual": "O laboratório botânico profano. Mesas de madeira vergadas sob o peso de frascos esguios, ervas trituradas e anotações frenéticas sobre enxertos de sangue e raízes vampíricas.",
+    "conexoes": {
+      "leste": "sala_49"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "leste"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_54",
+    "nome_sala": "Área 54: Câmara Secundária",
+    "descricao_visual": "A Gruta Lamacenta. O chão transforma-se num pântano subterrâneo profundo e nojento. O coaxar baixo e gutural de anfíbios gigantes ressoa nas paredes da caverna.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_55",
+    "nome_sala": "Área 55: Câmara Secundária",
+    "descricao_visual": "A Clareira Inferior. O ar aqui é sufocante e pesado com o cheiro de seiva mágica. O ambiente é tenso, como se o próprio chão estivesse a prender a respiração para o que está à frente.",
+    "conexoes": {
+      "voltar": "sala_03"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "sala_56",
+    "nome_sala": "Área 56: Árvore de Gulthias",
+    "descricao_visual": "O Coração do Mal. No centro da clareira final, ergue-se a colossal Árvore de Gulthias — uma abominação de madeira negra que bebe sangue em vez de água. Belak, o Proscrito, aguarda nas suas sombras.",
+    "conexoes": {
+      "sul": "sala_49"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sul"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "outro",
+    "tipo": "cidade",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": []
+  },
+  {
+    "cod_sala": "taverna",
+    "nome_sala": "A Taverna do Dragao Descansado",
+    "descricao_visual": "Uma taverna acolhedora com lareira acesa, mesas de madeira rustica, e o aroma de estufado no ar. Um letreiro de ferro curvado pendurado acima da barra mostra um dragao adormecido. A taverna esta cheia de aventureiros e viajantes de todas as racas.",
+    "conexoes": {
+      "sair": "carvalhal",
+      "rua": "carvalhal",
+      "quarto": "taverna_quarto",
+      "descanso": "taverna_quarto"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "sair",
+      "rua",
+      "quarto",
+      "descanso"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [
+      "Garrick Cervaspetra",
+      "Melodia Silvaluz",
+      "O Estranho de Capuz"
+    ],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "vila",
+    "tipo": "taverna",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": [
+      "lobby",
+      "descanso",
+      "npcs"
+    ]
+  },
+  {
+    "cod_sala": "taverna_quarto",
+    "nome_sala": "Quarto da Taverna",
+    "descricao_visual": "Um quarto simples com uma cama de palha, uma bacia de agua, e uma vela que queima suavemente. O silencio e reconfortante.",
+    "conexoes": {
+      "voltar": "taverna",
+      "taverna": "taverna"
+    },
+    "hazards": [],
+    "loot_fixo": [],
+    "imagem_url": null,
+    "descricao_completa": "",
+    "saidas": [
+      "voltar",
+      "taverna"
+    ],
+    "itens": [],
+    "interativos": [],
+    "npcs": [],
+    "inimigos": [],
+    "encontro_aleatorio": null,
+    "objetos_destrutiveis": [],
+    "missao": null,
+    "foto": null,
+    "area": "vila",
+    "tipo": "quarto",
+    "dificuldade": 1,
+    "nivel_minimo": 1,
+    "tags": [
+      "descanso",
+      "recuperacao"
+    ]
+  }
+]

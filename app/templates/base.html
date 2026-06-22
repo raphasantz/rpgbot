@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MezzaRPG{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    
+    <!-- Resource hints for faster CDN loading -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TycxEPq+U4R5vxxB5Kp8xJiDvqRk1lYyJb1" crossorigin="anonymous"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-parchment text-ink" x-data="app()">
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container header-inner">
+            <a href="/game/lobby" class="logo" aria-label="MezzaRPG - Início">
+                <span class="logo-icon">🎲</span>
+                <span class="logo-text">MEZZARPG</span>
+            </a>
+            
+            <nav class="nav-main" role="navigation" aria-label="Navegação principal">
+                {% if user %}
+                <a href="/game/lobby" class="nav-link">🏠 Lobby</a>
+                <a href="/game/character/create" class="nav-link">🎭 Personagem</a>
+                <a href="/auth/me" class="nav-link">👤 Perfil</a>
+                <form action="/auth/logout" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link btn-logout">🚪 Sair</button>
+                </form>
+                {% else %}
+                <a href="/auth/login" class="nav-link">🔐 Entrar</a>
+                <a href="/auth/register" class="nav-link btn-primary">📝 Cadastrar</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main id="main-content" class="main-content" role="main">
+        <div class="container">
+            <!-- Flash messages -->
+            {% if error %}
+            <div class="alert alert-error" role="alert" x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-out duration-300" x-init="setTimeout(() => show = false, 5000)">
+                <span class="alert-icon">⚠️</span>
+                <span>{{ error }}</span>
+                <button class="alert-close" @click="show = false" aria-label="Fechar">×</button>
+            </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container footer-inner">
+            <p class="footer-text">
+                <span class="footer-icon">🎲</span>
+                MezzaRPG — Campanhas Online
+            </p>
+            <p class="footer-version">v1.0.0</p>
+        </div>
+    </footer>
+    
+    <!-- Alpine.js app data -->
+    <script>
+    function app() {
+        return {
+            ws: null,
+            partyId: null,
+            combatLog: [],
+            connected: false,
+            
+            initWebSocket(partyId) {
+                this.partyId = partyId;
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws/${partyId}`;
+                
+                this.ws = new WebSocket(wsUrl);
+                
+                this.ws.onopen = () => {
+                    this.connected = true;
+                    console.log('WebSocket connected to', partyId);
+                };
+                
+                this.ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        this.handleWSMessage(data);
+                    } catch (e) {
+                        console.error('WS parse error', e);
+                    }
+                };
+                
+                this.ws.onclose = () => {
+                    this.connected = false;
+                    console.log('WebSocket disconnected');
+                    // Reconnect after 3s
+                    setTimeout(() => this.initWebSocket(this.partyId), 3000);
+                };
+                
+                this.ws.onerror = (error) => {
+                    console.error('WebSocket error', error);
+                };
+            },
+            
+            handleWSMessage(data) {
+                switch (data.tipo) {
+                    case 'combate_log':
+                        this.combatLog.push(...data.dados.logs);
+                        this.$dispatch('combat-log-update', { logs: data.dados.logs });
+                        break;
+                    case 'hp_update':
+                        this.$dispatch('hp-update', data.dados);
+                        break;
+                    case 'iniciativa':
+                        this.$dispatch('iniciativa-update', data.dados);
+                        break;
+                    case 'cena_change':
+                        this.$dispatch('cena-change', data.dados);
+                        break;
+                    case 'party_update':
+                        this.$dispatch('party-update', data.dados);
+                        break;
+                }
+            },
+            
+            sendWSMessage(tipo, dados) {
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({ tipo, dados }));
+                }
+            },
+            
+            formatDiceRoll(rolls) {
+                if (!rolls || rolls.length === 0) return '—';
+                return rolls.join(', ');
+            },
+            
+            getHPColor(current, max) {
+                const pct = (current / max) * 100;
+                if (pct <= 0) return 'text-hp-dead';
+                if (pct <= 25) return 'text-hp-critical';
+                if (pct <= 50) return 'text-hp-wounded';
+                return 'text-hp-healthy';
+            },
+        };
+    }
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

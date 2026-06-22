@@ -1,0 +1,1127 @@
+{% extends "base.html" %}
+
+{% block title %}Jogando — {{ campanha.cena_nome }} — MezzaRPG{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ============================================================================
+   GAME SCREEN — Compact Dark Mode Layout (referência: screenshot do Rafael)
+   ============================================================================ */
+
+:root {
+  --bg: #0d0d14;
+  --bg-panel: #14141f;
+  --bg-elevated: #1a1a28;
+  --border: #2a2a3e;
+  --border-light: #3a3a50;
+  --ink: #e8e8f0;
+  --ink-dim: #9a9ab0;
+  --ink-muted: #6a6a7a;
+  --gold: #c9a84c;
+  --gold-dim: #a8883c;
+  --green: #2ecc71;
+  --blue: #3498db;
+  --purple: #9b59b6;
+  --red: #e74c3c;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --gap: 0.75rem;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--gap);
+  height: calc(100vh - 72px); /* header height */
+  max-height: calc(100vh - 72px);
+  background: var(--bg);
+  padding: var(--gap);
+}
+
+/* ---- LEFT COLUMN ---- */
+.game-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto; /* scroll the whole left column if needed */
+}
+
+.scene-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 0 0 auto; /* don't force fill, let content dictate height */
+}
+
+.scene-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.scene-icon {
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.scene-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.scene-location {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+}
+
+.scene-description {
+  color: var(--ink-dim);
+  line-height: 1.7;
+  font-size: 0.9rem;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Exits / NPCs sections */
+.section {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.section-title i { color: var(--gold); }
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.nav-btn:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--bg);
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-btn .dir-label { flex: 1; }
+.nav-btn .dir-arrow { color: var(--ink-muted); font-size: 0.75rem; }
+
+.npc-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.npc-btn:hover {
+  background: linear-gradient(90deg, rgba(46,204,113,0.15), transparent);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.npc-btn .npc-icon { font-size: 1.1rem; }
+
+/* Enemy / Combat Section */
+.enemy-section { border-top: 1px solid rgba(220,53,69,0.3); }
+.enemy-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.enemy-card {
+  background: rgba(220,53,69,0.08);
+  border: 1px solid rgba(220,53,69,0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+}
+.enemy-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.35rem;
+}
+.enemy-name { font-weight: 600; color: #e87474; font-size: 0.95rem; }
+.enemy-ca { font-size: 0.8rem; color: var(--ink-muted); }
+.enemy-hp-bar {
+  position: relative; height: 18px; border-radius: 4px;
+  background: rgba(0,0,0,0.3); overflow: hidden; margin-bottom: 0.4rem;
+}
+.enemy-hp-fill {
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: linear-gradient(90deg, #c0392b, #e74c3c);
+  transition: width 0.4s ease;
+}
+.enemy-hp-text {
+  position: relative; z-index: 1; font-size: 0.75rem; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.attack-btn {
+  width: 100%; padding: 0.4rem 0.75rem;
+  background: linear-gradient(90deg, #c0392b, #a93226);
+  border: none; border-radius: var(--radius-sm);
+  color: #fff; font-weight: 600; cursor: pointer;
+  transition: filter 0.2s;
+}
+.attack-btn:hover:not(:disabled) { filter: brightness(1.2); }
+.attack-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.attack-btn i { margin-right: 0.3rem; }
+
+/* Combat action buttons */
+.combat-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+.action-btn-small {
+  padding: 0.4rem 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.action-btn-small:hover {
+  background: rgba(46,204,113,0.1);
+  border-color: var(--green);
+  color: var(--green);
+}
+.action-btn-small i { margin-right: 0.2rem; }
+
+/* Command Input */
+.cmd-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  flex-shrink: 0; /* never shrink */
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.cmd-input {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.cmd-input::placeholder { color: var(--ink-muted); }
+
+.cmd-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.2);
+}
+
+.cmd-send {
+  padding: 0.625rem 1rem;
+  background: var(--purple);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cmd-send:hover { background: #8a4ab0; transform: translateY(-1px); }
+.cmd-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Scene Image */
+.scene-image-wrap {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  text-align: center;
+  width: 100%; /* ensure full width container */
+}
+.scene-image {
+  max-width: 85%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: inline-block;
+}
+
+
+/* ---- RIGHT COLUMN ---- */
+.game-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.log-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+}
+
+.log-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.log-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.log-entry {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  font-size: 0.825rem;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  z-index: 1001;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.modal-header h3 { color: var(--gold); font-size: 1rem; margin: 0; }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--ink-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.modal-close:hover { color: var(--gold); }
+.modal-body { padding: 1.25rem; overflow-y: auto; color: var(--ink-dim); line-height: 1.7; }
+.stat-row { display: flex; justify-content: space-between; padding: 0.375rem 0; border-bottom: 1px solid var(--border); }
+.stat-row:last-child { border-bottom: none; }
+.stat-row strong { color: var(--ink); }
+
+.log-entry .log-time {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  margin-right: 0.5rem;
+}
+
+.log-entry .log-highlight { color: var(--gold); font-weight: 600; }
+
+/* Quick Actions Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.875rem 0.75rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.action-btn i { font-size: 1.25rem; }
+
+.action-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.action-btn.primary { border-color: var(--gold); color: var(--gold); }
+.action-btn.primary:hover { background: rgba(201, 168, 76, 0.1); }
+
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 1024px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .game-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+  }
+  .log-card { grid-column: 1 / -1; }
+  .actions-grid { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 640px) {
+  /* Mobile: iOS Safari safe viewport + flexbox layout (more reliable than grid) */
+  .game-layout {
+    display: flex !important;
+    flex-direction: column;
+    height: calc(100vh - 72px - 80px);
+    height: -webkit-fill-available;
+    max-height: calc(100vh - 72px - 80px);
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  .game-left {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+  }
+  .game-right {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 0;
+  }
+  .log-card { 
+    flex: 0 0 auto;
+    max-height: 250px; 
+  }
+  .log-content { max-height: 200px; overflow-y: auto; }
+  .actions-grid { 
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 0.5rem;
+  }
+  .scene-header { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+  .scene-location { margin-left: 0; }
+  .scene-image { max-width: 100%; height: auto; }
+  .action-btn { 
+    padding: 1rem 0.75rem; 
+    font-size: 0.875rem; 
+    min-height: 48px; 
+  }
+  .cmd-input { 
+    padding: 1rem; 
+    font-size: 1rem; /* prevents iOS zoom on focus */
+  }
+  .cmd-send { padding: 1rem 1.25rem; }
+  .modal-content { 
+    width: 95%; 
+    max-width: none; 
+    max-height: 90vh;
+  }
+}
+[x-cloak] { display: none !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-screen" x-data="gameScreen()" x-init="init('{{ party_id }}')">
+  <div class="game-layout">
+    
+    <!-- LEFT COLUMN -->
+    <div class="game-left">
+      <!-- Scene Card -->
+      <div class="scene-card">
+        <div class="scene-header">
+          <i class="fa-solid fa-map-marked-alt scene-icon"></i>
+          <h2 class="scene-title" x-text="campanha.cena_nome"></h2>
+          <span class="scene-location" x-text="campanha.area || 'Masmmorra'"></span>
+        </div>
+        
+        <div class="scene-description" x-html="campanha.cena_descricao"></div>
+        
+        <!-- Scene Image -->
+        <div class="scene-image-wrap" x-show="campanha.cena_imagem">
+          <img class="scene-image" 
+            :src="campanha.cena_imagem" 
+            :alt="campanha.cena_nome"
+            loading="lazy"
+            decoding="async">
+        </div>
+        
+        <!-- Exits -->
+        <div class="section" x-show="campanha.conexoes && Object.keys(campanha.conexoes).length > 0">
+          <div class="section-title"><i class="fa-solid fa-door-open"></i> Saídas</div>
+          <div class="btn-group">
+            <template x-for="[direcao, destino] in Object.entries(campanha.conexoes)" :key="direcao">
+              <button class="nav-btn"
+                @click="doAction('movimento', '', {direcao: direcao})"
+                :disabled="moving">
+                <span class="dir-label"><i class="fa-solid fa-arrow-right"></i> <span x-text="direcao.charAt(0).toUpperCase() + direcao.slice(1)"></span></span>
+                <span class="dir-arrow" x-show="!moving">→</span>
+                <span class="dir-arrow" x-show="moving"><i class="fa-solid fa-spinner fa-spin"></i></span>
+              </button>
+            </template>
+          </div>
+        </div>
+
+        <!-- Combat Actions -->
+        <div class="section" x-show="enemies.length > 0">
+          <div class="section-title"><i class="fa-solid fa-shield-halved"></i> Ações de Combate</div>
+          <div class="btn-group combat-actions">
+            <button class="action-btn-small" @click="enviarComandoTexto('esquivar')" title="Esquivar — inimigos têm desvantagem">
+              <i class="fa-solid fa-shield"></i> Esquivar
+            </button>
+            <button class="action-btn-small" @click="enviarComandoTexto('cobertura')" title="Cobertura — +2 CA">
+              <i class="fa-solid fa-shield-halved"></i> Cobertura
+            </button>
+            <button class="action-btn-small" @click="enviarComandoTexto('ajudar')" title="Ajudar — próximo aliado tem vantagem">
+              <i class="fa-solid fa-handshake-angle"></i> Ajudar
+            </button>
+            <button class="action-btn-small" @click="enviarComandoTexto('fugir')" title="Fugir — risco de ataque de oportunidade">
+              <i class="fa-solid fa-person-running"></i> Fugir
+            </button>
+            <button class="action-btn-small" @click="enviarComandoTexto('magia')" title="Lançar magia">
+              <i class="fa-solid fa-wand-sparkles"></i> Magia
+            </button>
+            <button class="action-btn-small" @click="enviarComandoTexto('vasculhar')" title="Vasculhar sala por loot">
+              <i class="fa-solid fa-magnifying-glass"></i> Vasculhar
+            </button>
+          </div>
+        </div>
+
+        <!-- NPCs -->
+        <div class="section" x-show="npcs.length > 0">
+          <div class="section-title"><i class="fa-solid fa-user-tie"></i> NPCs</div>
+          <div class="btn-group">
+            <template x-for="npc in npcs" :key="npc.id">
+              <button class="npc-btn" @click="interactNPC(npc.id, 'dialogo')">
+                <span class="npc-icon">💬</span>
+                <span x-text="npc.nome"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+        
+        <!-- Enemies / Combat -->
+        <div class="section enemy-section" x-show="enemies.length > 0">
+          <div class="section-title"><i class="fa-solid fa-skull-crossbones"></i> Inimigos</div>
+          <div class="enemy-list">
+            <template x-for="(enemy, idx) in enemies" :key="idx">
+              <div class="enemy-card">
+                <div class="enemy-header">
+                  <span class="enemy-name" x-text="enemy.nome + (enemy.quantidade > 1 ? ' x' + enemy.quantidade : '')"></span>
+                  <span class="enemy-ca">CA <span x-text="enemy.ca"></span></span>
+                </div>
+                <div class="enemy-hp-bar">
+                  <div class="enemy-hp-fill" :style="'width:' + Math.max(0, Math.round(enemy.hp_atual / enemy.hp_max * 100)) + '%'"></div>
+                  <span class="enemy-hp-text" x-text="enemy.hp_atual + ' / ' + enemy.hp_max + ' HP'"></span>
+                </div>
+                <button class="attack-btn" @click="doAction('ataque', enemy.nome)" :disabled="!canAttack()">
+                  <i class="fa-solid fa-khanda"></i> Atacar
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+        
+        <!-- Command Input -->
+        <div class="cmd-input-row">
+          <input type="text"
+            class="cmd-input"
+            x-model="cmdInput"
+            placeholder="Digite uma direção, /comando ou ação..."
+            @keydown.enter="enviarComando"
+            ref="cmdInputEl"
+            autocomplete="off">
+          <button class="cmd-send" @click="enviarComando" :disabled="sendingCmd">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RIGHT COLUMN -->
+    <div class="game-right">
+      <!-- Game Log (Registro) -->
+      <div class="log-card">
+        <div class="log-header">
+          <span class="log-title"><i class="fa-solid fa-comment-dots"></i> Registro</span>
+          <span style="font-size: 0.7rem; color: var(--ink-muted);" x-text="'Turno ' + campanha.turno_atual"></span>
+        </div>
+        <div class="log-content" ref="logContainer">
+          <template x-for="entry in logEntries" :key="entry.id">
+            <div class="log-entry">
+              <span class="log-time" x-text="entry.time"></span>
+              <span x-html="entry.html"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="actions-grid">
+        <button class="action-btn" @click="abrirFicha" title="Ficha do Personagem">
+          <i class="fa-solid fa-user"></i> <span>Ficha</span>
+        </button>
+        <button class="action-btn" @click="abrirInventario" title="Inventário">
+          <i class="fa-solid fa-backpack"></i> <span>Inventário</span>
+        </button>
+        <a href="/game/shop" class="action-btn primary" title="Loja do Carvalhal">
+          <i class="fa-solid fa-coins"></i> <span>Loja</span>
+        </a>
+        <button class="action-btn" @click="abrirMissoes" title="Missões">
+          <i class="fa-solid fa-scroll"></i> <span>Missões</span>
+        </button>
+        <button class="action-btn" @click="abrirDashboard" title="Dashboard da Party">
+          <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>
+        </button>
+        <button class="action-btn" @click="descansar" title="Descansar Curto/Longo">
+          <i class="fa-solid fa-moon"></i> <span>Descansar</span>
+        </button>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+function getCsrfToken() {
+  const match = document.cookie.match(/csrf_token=([^;]+)/);
+  return match ? match[1] : '';
+}
+function gameScreen() {
+  return {
+    partyId: '',
+    userTelefone: '{{ user.telefone }}',
+    user: {{ user | tojson }},
+    campanha: {{ campanha | tojson }},
+    npcs: {{ npcs | tojson }},
+    enemies: {{ inimigos | tojson }},
+    partyMembers: {{ membros | tojson }},
+    moving: false,
+    
+    // Command input
+    cmdInput: '',
+    sendingCmd: false,
+    
+    // Log
+    logEntries: [],
+    logId: 0,
+    
+    init(partyId) {
+      this.partyId = partyId;
+      this.connectWebSocket();
+      window.addEventListener('cena-change', (e) => this.changeScene(e.detail.nova_cena));
+      window.addEventListener('combat-log-update', (e) => e.detail.logs.forEach(log => this.addLogEntry(log, 'system')));
+      window.addEventListener('hp-update', (e) => this.updateHP(e.detail));
+      window.addEventListener('party-update', (e) => this.updateParty(e.detail));
+      this.addLogEntry(`Bem-vindo à <strong>${this.campanha.cena_nome}</strong>. Que os dados rolem a seu favor!`, 'system');
+      this.scrollLog();
+    },
+    
+    connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/${this.partyId}`;
+      this.ws = new WebSocket(wsUrl);
+      this.ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          window.dispatchEvent(new CustomEvent(data.tipo.replace('_', '-'), { detail: data.dados }));
+        } catch (e) { console.error('WS parse error', e); }
+      };
+      this.ws.onclose = () => setTimeout(() => this.connectWebSocket(), 3000);
+    },
+    
+    addLogEntry(text, type = 'system') {
+      this.logEntries.push({
+        id: ++this.logId,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        html: text
+      });
+      if (this.logEntries.length > 100) this.logEntries.shift();
+      this.$nextTick(() => this.scrollLog());
+    },
+    
+    scrollLog() {
+      this.$nextTick(() => {
+        const c = this.$refs.logContainer;
+        if (c) c.scrollTop = c.scrollHeight;
+      });
+    },
+    
+    updateHP(data) {
+      if (data.telefone === this.userTelefone) this.user.hp_atual = data.hp_atual;
+      this.partyMembers = this.partyMembers.map(m => 
+        m.telefone === data.telefone ? { ...m, hp_atual: data.hp_atual } : m
+      );
+    },
+    
+    changeScene(novaCena) {
+      this.campanha.cena_atual = novaCena;
+      this.addLogEntry(`A party move-se para <strong>${novaCena}</strong>!`, 'system');
+      setTimeout(() => window.location.href = `/game/jogar/${this.partyId}`, 400);
+    },
+    
+    updateParty(data) {
+      if (data.membros) this.partyMembers = data.membros;
+    },
+    
+    async doAction(tipo, alvoId = '', extraDados = null) {
+      if (tipo === 'movimento') {
+        if (this.moving) return;
+        this.moving = true;
+      }
+      if (this.user.hp_atual <= 0 && tipo !== 'movimento') {
+        this.addLogEntry('Você está inconsciente e não pode agir!', 'enemy');
+        return;
+      }
+      const dados = extraDados || {};
+      if (tipo === 'ataque' && !alvoId && this.enemies.length > 0) alvoId = this.enemies[0].nome;
+      try {
+        const formData = new FormData();
+        formData.append('party_id', this.partyId);
+        formData.append('tipo', tipo);
+        formData.append('alvo_id', alvoId || '');
+        formData.append('dados', JSON.stringify(dados));
+        const response = await fetch('/game/api/acao', { method: 'POST', credentials: 'same-origin', headers: {'X-CSRF-Token': getCsrfToken()}, body: formData });
+        const redirectUrl = response.headers.get('HX-Redirect');
+        let result = null;
+        try { result = await response.json(); } catch (e) {}
+        if (redirectUrl || (result && result.redirect)) {
+          const url = redirectUrl || result.redirect;
+          this.addLogEntry(`🚶 Movendo-se para uma nova área...`, 'system');
+          if (result && result.log_combate) result.log_combate.forEach(log => this.addLogEntry(log, 'system'));
+          setTimeout(() => window.location.href = url, 400);
+          return;
+        }
+        if (response.redirected) { window.location.href = response.url; return; }
+        if (!result) { this.addLogEntry('Erro ao processar ação.', 'enemy'); return; }
+        if (result.log_combate && result.log_combate.length > 0) {
+          result.log_combate.forEach(log => {
+            const type = log.includes('erra') ? 'enemy' : log.includes('derrotado') ? 'critical' : 'player';
+            this.addLogEntry(log, type);
+          });
+
+          // Detectar críticos e gerar imagem
+          if (result.dados_extras && result.dados_extras.contexto_critico) {
+            const contexto = result.dados_extras.contexto_critico;
+            if (contexto.tipo === 'critico_acerto' || contexto.tipo === 'critico_falha') {
+              this.gerarImagemCritica(contexto);
+            }
+          }
+        }
+        if (result.estado_atualizado) this.updateState(result.estado_atualizado);
+      } catch (err) {
+        console.error('Action error:', err);
+        this.addLogEntry('Erro ao processar ação.', 'enemy');
+      } finally {
+        if (tipo === 'movimento') this.moving = false;
+      }
+    },
+    
+    updateState(state) {
+      if (state.inimigos) this.enemies = state.inimigos;
+      if (state.hp_atual !== undefined) this.user.hp_atual = state.hp_atual;
+      if (state.cena_atual) this.campanha.cena_atual = state.cena_atual;
+    },
+    
+    interactNPC(npcId, tipo) {
+      const npc = this.npcs.find(n => n.id === npcId);
+      const npcNome = npc?.nome || 'NPC';
+      
+      if (tipo === 'dialogo') {
+        // Open a prompt for what to say
+        const mensagem = prompt(`O que você diz para ${npcNome}?`);
+        if (!mensagem) return;
+        
+        this.addLogEntry(`Você para ${npcNome}: "${mensagem}"`, 'player');
+        this.falarComNPC(npcNome, mensagem);
+      } else if (tipo === 'comercio') {
+        this.addLogEntry(`${npcNome}: "O que deseja comprar ou vender?"`, 'npc');
+        // Could open shop modal here
+      }
+    },
+
+    async falarComNPC(npcNome, mensagem) {
+      try {
+        const formData = new FormData();
+        formData.append('mensagem', mensagem);
+        formData.append('party_id', this.partyId);
+        formData.append('npc_nome', npcNome);
+        
+        const response = await fetch('/game/api/taverna/chat', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {'X-CSRF-Token': getCsrfToken()},
+          body: formData
+        });
+        
+        const result = await response.json();
+        if (result.resposta) {
+          this.addLogEntry(`${npcNome}: "${result.resposta}"`, 'npc');
+        }
+      } catch (err) {
+        console.error('NPC chat error:', err);
+        this.addLogEntry('Erro ao falar com NPC.', 'enemy');
+      }
+    },
+
+    async gerarImagemCritica(contexto) {
+      try {
+        const formData = new FormData();
+        formData.append('party_id', this.partyId);
+        formData.append('contexto_critico', JSON.stringify(contexto));
+        
+        this.addLogEntry('🎨 Gerando imagem crítica...', 'system');
+        
+        const response = await fetch('/game/api/gerar-imagem-critica', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {'X-CSRF-Token': getCsrfToken()},
+          body: formData
+        });
+        
+        const result = await response.json();
+        if (result.success && result.imagem_url) {
+          // Exibe a imagem crítica
+          this.addLogEntry(`🖼️ Imagem crítica gerada!`, 'critical');
+          
+          // Cria elemento de imagem no log
+          const logContainer = this.$refs.logContainer;
+          if (logContainer) {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'log-entry critical';
+            imgDiv.innerHTML = `
+              <div style="text-align: center; margin: 10px 0;">
+                <img src="${result.imagem_url}" alt="Crítico!" 
+                     style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
+                     onerror="this.style.display='none'">
+                <div style="color: #ffd700; font-weight: bold; margin-top: 5px;">
+                  ${result.tipo === 'critico_acerto' ? '💥 ACERTO CRÍTICO!' : '💥 FALHA CRÍTICA!'}
+                </div>
+              </div>
+            `;
+            logContainer.appendChild(imgDiv);
+            logContainer.scrollTop = logContainer.scrollHeight;
+          }
+        }
+      } catch (err) {
+        console.error('Critical image error:', err);
+        // Silencioso - não mostra erro ao jogador
+      }
+    },
+    
+    async enviarComando() {
+      const texto = this.cmdInput.trim();
+      if (!texto || this.sendingCmd) return;
+      this.sendingCmd = true;
+      this.addLogEntry(`> ${texto}`, 'player');
+      this.cmdInput = '';
+      try {
+        const formData = new FormData();
+        formData.append('texto', texto);
+        formData.append('party_id', this.partyId);
+        const response = await fetch('/game/api/acao/interpretar', { method: 'POST', credentials: 'same-origin', headers: {'X-CSRF-Token': getCsrfToken()}, body: formData });
+        const result = await response.json();
+        if (result.json_extraido) {
+          const j = result.json_extraido;
+          await this.doAction(j.intencao?.toLowerCase() || 'outro', j.alvo || '', j);
+        }
+      } catch (err) {
+        console.error('Comando error:', err);
+        this.addLogEntry('Erro ao processar comando.', 'enemy');
+      } finally {
+        this.sendingCmd = false;
+      }
+    },
+    
+    async enviarComandoTexto(texto) {
+      if (!texto || this.sendingCmd) return;
+      this.sendingCmd = true;
+      this.addLogEntry(`> ${texto}`, 'player');
+      try {
+        const formData = new FormData();
+        formData.append('texto', texto);
+        formData.append('party_id', this.partyId);
+        const response = await fetch('/game/api/acao/interpretar', { method: 'POST', credentials: 'same-origin', headers: {'X-CSRF-Token': getCsrfToken()}, body: formData });
+        const result = await response.json();
+        if (result.json_extraido) {
+          const j = result.json_extraido;
+          await this.doAction(j.intencao?.toLowerCase() || 'outro', j.alvo || '', j);
+        }
+      } catch (err) {
+        console.error('Comando error:', err);
+        this.addLogEntry('Erro ao processar comando.', 'enemy');
+      } finally {
+        this.sendingCmd = false;
+      }
+    },
+    
+    async descansar() {
+      this.addLogEntry('Iniciando descanso...', 'system');
+      await this.doAction('descanso');
+    },
+
+    // Modal helpers
+    showModal(title, html) {
+      // Remove existing modal
+      const existing = document.getElementById('action-modal');
+      if (existing) existing.remove();
+      
+      const modal = document.createElement('div');
+      modal.id = 'action-modal';
+      modal.innerHTML = `
+        <div class="modal-backdrop" @click="closeModal"></div>
+        <div class="modal-content" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+          <div class="modal-header">
+            <h3>${title}</h3>
+            <button class="modal-close" @click="closeModal">&times;</button>
+          </div>
+          <div class="modal-body">${html}</div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      // Alpine will handle @click on the backdrop
+      this.$nextTick(() => {
+        const backdrop = modal.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.addEventListener('click', () => this.closeModal());
+        const closeBtn = modal.querySelector('.modal-close');
+        if (closeBtn) closeBtn.addEventListener('click', () => this.closeModal());
+      });
+    },
+
+    closeModal() {
+      const modal = document.getElementById('action-modal');
+      if (modal) modal.remove();
+    },
+
+    async abrirFicha() {
+      try {
+        const resp = await fetch('/game/api/status', { credentials: 'same-origin' });
+        const data = await resp.json();
+        let html = `
+          <div class="stat-row"><strong>Nome:</strong> ${data.nome}</div>
+          <div class="stat-row"><strong>Raça/Classe:</strong> ${data.raca} / ${data.classe} (Nv. ${data.nivel})</div>
+          <div class="stat-row"><strong>HP:</strong> ${data.hp_atual} / ${data.hp_maximo}</div>
+          <div class="stat-row"><strong>CA:</strong> ${data.modificador_defesa}</div>
+          <div class="stat-row"><strong>Ataque:</strong> +${data.modificador_ataque} (${data.dano_dado}+${data.mod_dano})</div>
+          <div class="stat-row"><strong>PO:</strong> ${data.gold}</div>
+          <div class="stat-row"><strong>Slots Magia:</strong> ${data.slots_magia}/${data.slots_magia_max}</div>
+          <hr style="border-color: var(--border); margin: 0.75rem 0;">
+          <strong>Atributos:</strong>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+            <div>FOR ${data.atributos.STR} (${data.modificadores.STR >= 0 ? '+' : ''}${data.modificadores.STR})</div>
+            <div>DES ${data.atributos.DEX} (${data.modificadores.DEX >= 0 ? '+' : ''}${data.modificadores.DEX})</div>
+            <div>CON ${data.atributos.CON} (${data.modificadores.CON >= 0 ? '+' : ''}${data.modificadores.CON})</div>
+            <div>INT ${data.atributos.INT} (${data.modificadores.INT >= 0 ? '+' : ''}${data.modificadores.INT})</div>
+            <div>SAB ${data.atributos.WIS} (${data.modificadores.WIS >= 0 ? '+' : ''}${data.modificadores.WIS})</div>
+            <div>CAR ${data.atributos.CHA} (${data.modificadores.CHA >= 0 ? '+' : ''}${data.modificadores.CHA})</div>
+          </div>
+          <hr style="border-color: var(--border); margin: 0.75rem 0;">
+          <strong>Equipado:</strong>
+          <div>Arma: ${data.arma_equipada}</div>
+          <div>Armadura: ${data.armadura_equipada}</div>
+        `;
+        this.showModal('📜 Ficha do Personagem', html);
+      } catch (e) {
+        this.addLogEntry('Erro ao carregar ficha.', 'enemy');
+      }
+    },
+
+    async abrirInventario() {
+      try {
+        const resp = await fetch('/game/api/inventario', { credentials: 'same-origin' });
+        const data = await resp.json();
+        let html = `<strong>Ouro:</strong> ${data.gold} PO<br><br>`;
+        if (data.inventario_limpo && Object.keys(data.inventario_limpo).length > 0) {
+          html += '<strong>Itens:</strong><ul style="margin: 0.5rem 0; padding-left: 1.25rem;">';
+          for (const [item, qtd] of Object.entries(data.inventario_limpo)) {
+            html += `<li>${item} ${qtd > 1 ? `x${qtd}` : ''}</li>`;
+          }
+          html += '</ul>';
+        } else {
+          html += '<em>Inventário vazio</em>';
+        }
+        html += `<br><strong>Arma:</strong> ${data.arma_equipada}<br><strong>Armadura:</strong> ${data.armadura_equipada}`;
+        this.showModal('🎒 Inventário', html);
+      } catch (e) {
+        this.addLogEntry('Erro ao carregar inventário.', 'enemy');
+      }
+    },
+
+    async abrirMissoes() {
+      try {
+        const resp = await fetch('/game/api/missoes', { credentials: 'same-origin' });
+        const data = await resp.json();
+        let html = '';
+        if (data.missoes && data.missoes.length > 0) {
+          for (const m of data.missoes) {
+            html += `
+              <div style="border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem;">
+                <strong>${m.titulo}</strong> <span style="color: var(--gold); font-size: 0.8rem;">[${m.tipo}]</span><br>
+                <small style="color: var(--ink-dim);">${m.descricao}</small><br>
+                <span style="color: var(--ink-muted);">Progresso: ${m.progresso}/${m.objetivo_quantidade}</span>
+              </div>
+            `;
+          }
+        } else {
+          html = '<em>Nenhuma missão ativa.</em>';
+        }
+        this.showModal('📜 Missões', html);
+      } catch (e) {
+        this.addLogEntry('Erro ao carregar missões.', 'enemy');
+      }
+    },
+
+    async abrirDashboard() {
+      try {
+        const resp = await fetch('/game/api/stats', { credentials: 'same-origin' });
+        const data = await resp.json();
+        let html = `
+          <div class="stat-row"><strong>XP Total:</strong> ${data.xp_total || data.xp || 0}</div>
+          <div class="stat-row"><strong>Inimigos Derrotados:</strong> ${data.inimigos_derrotados || 0}</div>
+          <div class="stat-row"><strong>Dano Causado:</strong> ${data.dano_causado || 0}</div>
+          <div class="stat-row"><strong>Dano Recebido:</strong> ${data.dano_recebido || 0}</div>
+          <div class="stat-row"><strong>Itens Encontrados:</strong> ${data.itens_encontrados || 0}</div>
+          <div class="stat-row"><strong>PO Ganhos:</strong> ${data.ouro_ganho || 0}</div>
+          <hr style="border-color: var(--border); margin: 0.75rem 0;">
+          <strong>Party:</strong>
+          <div style="margin-top: 0.5rem; font-size: 0.85rem;">
+        `;
+        for (const m of this.partyMembers) {
+          html += `<div>${m.nome} (${m.classe} Nv.${m.nivel}) — HP ${m.hp_atual}/${m.hp_maximo}</div>`;
+        }
+        html += '</div>';
+        this.showModal('📊 Dashboard da Party', html);
+      } catch (e) {
+        this.addLogEntry('Erro ao carregar dashboard.', 'enemy');
+      }
+    },
+
+    hasValidTarget() {
+      return this.enemies.length > 0 && this.user.hp_atual > 0;
+    }
+  };
+}
+</script>
+{% endblock %}

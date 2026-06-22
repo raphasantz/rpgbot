@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja do Carvalhal — MezzaRPG</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    
+    <!-- Resource hints for faster CDN loading -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TycxEPq+U4R5vxxB5Kp8xJiDvqRk1lYyJb1" crossorigin="anonymous"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+
+<style>
+/* Shop specific styles */
+.shop-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--parchment-dark), var(--parchment));
+    border-radius: 16px;
+    border: 2px solid var(--gold);
+}
+
+.shop-title {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 2rem;
+    color: var(--gold-dark);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.shop-subtitle {
+    color: var(--ink-light);
+    font-size: 1.1rem;
+}
+
+.gold-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(201, 168, 76, 0.15);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    border: 2px solid var(--gold);
+    margin-top: 1rem;
+}
+
+.gold-icon {
+    font-size: 1.5rem;
+}
+
+.gold-amount {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold-dark);
+}
+
+.shop-category {
+    margin-bottom: 2rem;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--parchment-dark);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--gold);
+}
+
+.category-icon {
+    font-size: 1.5rem;
+}
+
+.category-title {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--gold-dark);
+    text-transform: capitalize;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .item-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.item-card {
+    background: var(--parchment);
+    border: 2px solid var(--parchment-dark);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.item-name {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.item-desc {
+    color: var(--ink-light);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    flex: 1;
+}
+
+.item-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+}
+
+.stat-tag {
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold-dark);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--parchment-dark);
+}
+
+.item-price {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gold-dark);
+}
+
+.buy-btn {
+    padding: 0.5rem 1rem;
+    background: var(--gold);
+    color: var(--parchment);
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.buy-btn:hover:not(:disabled) {
+    background: var(--gold-dark);
+    transform: translateY(-1px);
+}
+
+.buy-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast.success {
+    background: #2E7D32;
+    color: white;
+    border: 2px solid #4CAF50;
+}
+
+.toast.error {
+    background: #C62828;
+    color: white;
+    border: 2px solid #EF5350;
+}
+
+.empty-shop {
+    text-align: center;
+    padding: 3rem;
+    color: var(--ink-light);
+}
+
+.empty-shop i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--parchment-dark);
+}
+</style>
+
+</head>
+<body class="bg-parchment text-ink" x-data="app()">
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container header-inner">
+            <a href="/game/lobby" class="logo" aria-label="MezzaRPG - Início">
+                <span class="logo-icon">🎲</span>
+                <span class="logo-text">MEZZARPG</span>
+            </a>
+            
+            <nav class="nav-main" role="navigation" aria-label="Navegação principal">
+                
+                <a href="/game/lobby" class="nav-link">🏠 Lobby</a>
+                <a href="/game/character/create" class="nav-link">🎭 Personagem</a>
+                <a href="/auth/me" class="nav-link">👤 Perfil</a>
+                <form action="/auth/logout" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link btn-logout">🚪 Sair</button>
+                </form>
+                
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main id="main-content" class="main-content" role="main">
+        <div class="container">
+            <!-- Flash messages -->
+            
+            
+            
+<div class="shop-screen" x-data="shopScreen()">
+    <div class="shop-header">
+        <h1 class="shop-title"><i class="fa-solid fa-store"></i> Loja do Carvalhal</h1>
+        <p class="shop-subtitle">O melhor comércio da vila para aventureiros preparados</p>
+        <div class="gold-display">
+            <span class="gold-icon">💰</span>
+            <span class="gold-amount" x-text="gold"></span> PO
+        </div>
+    </div>
+    
+    <template x-if="tipos_ordenados.length === 0">
+        <div class="empty-shop">
+            <i class="fa-solid fa-box-open"></i>
+            <h3>Loja vazia</h3>
+            <p>Nenhum item disponível no momento.</p>
+        </div>
+    </template>
+    
+    <template x-for="(tipo, itens) in tipos_ordenados" :key="tipo">
+        <div class="shop-category">
+            <div class="category-header">
+                <span class="category-icon" x-text="getCategoryIcon(tipo)"></span>
+                <span class="category-title" x-text="tipo"></span>
+                <span style="margin-left: auto; color: var(--ink-light); font-size: 0.875rem;" x-text="itens.length + ' itens'"></span>
+            </div>
+            
+            <div class="item-grid">
+                <template x-for="item in itens" :key="item.nome">
+                    <div class="item-card">
+                        <h3 class="item-name" x-text="item.nome"></h3>
+                        <p class="item-desc" x-text="item.descricao"></p>
+                        
+                        <div class="item-stats">
+                            <template x-if="item.tipo">
+                                <span class="stat-tag" x-text="item.tipo"></span>
+                            </template>
+                            <template x-if="item.subtipo">
+                                <span class="stat-tag" x-text="item.subtipo"></span>
+                            </template>
+                            <template x-if="item.dano">
+                                <span class="stat-tag"><i class="fa-solid fa-dice-d20"></i> <span x-text="item.dano"></span></span>
+                            </template>
+                            <template x-if="item.ca_base">
+                                <span class="stat-tag"><i class="fa-solid fa-shield"></i> CA <span x-text="item.ca_base"></span></span>
+                            </template>
+                        </div>
+                        
+                        <div class="item-footer">
+                            <span class="item-price"><i class="fa-solid fa-coins"></i> <span x-text="item.preco"></span> PO</span>
+                            <button class="buy-btn"
+                                    @click="buyItem(item.nome)"
+                                    :disabled="gold < item.preco || buying">
+                                <template x-if="!buying"><i class="fa-solid fa-cart-plus"></i> Comprar</template>
+                                <template x-if="buying"><i class="fa-solid fa-spinner fa-spin"></i> Comprando...</template>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" :class="{ 'show': showToast, 'success': toastType === 'success', 'error': toastType === 'error' }" x-cloak>
+    <template x-if="toastType === 'success'"><i class="fa-solid fa-check-circle"></i></template>
+    <template x-if="toastType === 'error'"><i class="fa-solid fa-times-circle"></i></template>
+    <span x-text="toastMessage"></span>
+</div>
+
+<script>
+function getCsrfToken() {
+  const match = document.cookie.match(/csrf_token=([^;]+)/);
+  return match ? match[1] : '';
+}
+function shopScreen() {
+    return {
+        gold: {{ gold }},
+        tipos_ordenados: {{ tipos_ordenados | tojson }},
+        buying: false,
+        showToast: false,
+        toastType: 'success',
+        toastMessage: '',
+        
+        getCategoryIcon(tipo) {
+            const icons = {
+                'pocao': '🧪',
+                'arma': '⚔️',
+                'armadura': '🛡️',
+                'equipamento': '🎒',
+                'outros': '📦'
+            };
+            return icons[tipo] || '📦';
+        },
+        
+        async buyItem(itemNome) {
+            if (this.buying) return;
+            this.buying = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('item_nome', itemNome);
+                formData.append('quantidade', 1);
+                
+                const response = await fetch('/game/shop/buy', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'X-CSRF-Token': getCsrfToken()},
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    this.gold = result.gold;
+                    this.showToastMessage('success', result.message);
+                } else {
+                    this.showToastMessage('error', result.detail || 'Erro ao comprar item');
+                }
+            } catch (err) {
+                console.error('Buy error:', err);
+                this.showToastMessage('error', 'Erro ao processar compra');
+            } finally {
+                this.buying = false;
+            }
+        },
+        
+        showToastMessage(type, message) {
+            this.toastType = type;
+            this.toastMessage = message;
+            this.showToast = true;
+            
+            setTimeout(() => {
+                this.showToast = false;
+            }, 3000);
+        },
+    };
+}
+</script>
+
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container footer-inner">
+            <p class="footer-text">
+                <span class="footer-icon">🎲</span>
+                MezzaRPG — Campanhas Online
+            </p>
+            <p class="footer-version">v1.0.0</p>
+        </div>
+    </footer>
+    
+    <!-- Alpine.js app data -->
+    <script>
+    function app() {
+        return {
+            ws: null,
+            partyId: null,
+            combatLog: [],
+            connected: false,
+            
+            initWebSocket(partyId) {
+                this.partyId = partyId;
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws/${partyId}`;
+                
+                this.ws = new WebSocket(wsUrl);
+                
+                this.ws.onopen = () => {
+                    this.connected = true;
+                    console.log('WebSocket connected to', partyId);
+                };
+                
+                this.ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        this.handleWSMessage(data);
+                    } catch (e) {
+                        console.error('WS parse error', e);
+                    }
+                };
+                
+                this.ws.onclose = () => {
+                    this.connected = false;
+                    console.log('WebSocket disconnected');
+                    setTimeout(() => this.initWebSocket(this.partyId), 3000);
+                };
+                
+                this.ws.onerror = (error) => {
+                    console.error('WebSocket error', error);
+                };
+            },
+            
+            handleWSMessage(data) {
+                switch (data.tipo) {
+                    case 'combate_log':
+                        this.combatLog.push(...data.dados.logs);
+                        this.$dispatch('combat-log-update', { logs: data.dados.logs });
+                        break;
+                    case 'hp_update':
+                        this.$dispatch('hp-update', data.dados);
+                        break;
+                    case 'iniciativa':
+                        this.$dispatch('iniciativa-update', data.dados);
+                        break;
+                    case 'cena_change':
+                        this.$dispatch('cena-change', data.dados);
+                        break;
+                    case 'party_update':
+                        this.$dispatch('party-update', data.dados);
+                        break;
+                }
+            },
+            
+            sendWSMessage(tipo, dados) {
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({ tipo, dados }));
+                }
+            },
+            
+            formatDiceRoll(rolls) {
+                if (!rolls || rolls.length === 0) return '—';
+                return rolls.join(', ');
+            },
+            
+            getHPColor(current, max) {
+                const pct = (current / max) * 100;
+                if (pct <= 0) return 'text-hp-dead';
+                if (pct <= 25) return 'text-hp-critical';
+                if (pct <= 50) return 'text-hp-wounded';
+                return 'text-hp-healthy';
+            },
+        };
+    }
+    </script>
+    
+</body>
+</html>

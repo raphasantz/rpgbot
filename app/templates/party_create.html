@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Partida — MezzaRPG{% endblock %}
+
+{% block content %}
+<div class="page-login">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🎲</div>
+            <h1 class="login-title">CRIAR PARTIDA</h1>
+            <p class="login-subtitle">Lidere uma nova aventura e convide seus amigos</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/auth/party/create" method="post" class="login-form" novalidate>
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fa-solid fa-users"></i> Sua party será criada no modo <strong>Carvalhal</strong> (início da campanha)
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fa-solid fa-dice-d20"></i> Criar Nova Partida
+            </button>
+        </form>
+
+        <div class="login-divider">
+            <span>ou</span>
+        </div>
+
+        <div class="login-actions">
+            <a href="/auth/party/join" class="btn btn-secondary btn-block">
+                <i class="fa-solid fa-key"></i> Entrar numa Partida Existente
+            </a>
+
+            {% if user.party_id %}
+            <form action="/auth/party/leave" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-outline btn-block" style="background: #C62828; border-color: #C62828; color: white;">
+                    <i class="fa-solid fa-door-open"></i> Sair da Party Atual ({{ user.party_id }})
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="login-footer">
+            <p><a href="/game/lobby">← Voltar ao Lobby</a></p>
+        </div>
+    </div>
+
+    <div class="login-bg-decoration">
+        <div class="bg-die bg-die-1"></div>
+        <div class="bg-die bg-die-2"></div>
+        <div class="bg-die bg-die-3"></div>
+    </div>
+</div>
+{% endblock %}

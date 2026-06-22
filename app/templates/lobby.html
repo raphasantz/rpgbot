@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Lobby — MezzaRPG{% endblock %}
+
+{% block content %}
+<div class="page-lobby">
+    <div class="lobby-header">
+        <h1 class="lobby-title">🏠 Lobby</h1>
+        <p class="lobby-subtitle">Bem-vindo, <strong>{{ user.nome }}</strong> ({{ user.classe }} Nível {{ user.nivel }})</p>
+    </div>
+    
+    <!-- Character Summary -->
+    <div class="card character-summary" x-data="{ showDetails: false }">
+        <div class="character-header" @click="showDetails = !showDetails" style="cursor: pointer;">
+            <div class="character-avatar">
+                <span class="character-icon">{{ user.classe|class_icon }}</span>
+            </div>
+            <div class="character-info">
+                <h2 class="character-name">{{ user.nome }}</h2>
+                <div class="character-meta">
+                    <span class="badge badge-class">{{ user.classe }}</span>
+                    <span class="badge badge-race">{{ user.raca }}</span>
+                    <span class="badge badge-level">Nível {{ user.nivel }}</span>
+                </div>
+            </div>
+            <div class="character-stats">
+                <div class="stat">
+                    <span class="stat-value">{{ user.hp_atual }}/{{ user.hp_maximo }}</span>
+                    <span class="stat-label">HP</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ user.modificador_defesa }}</span>
+                    <span class="stat-label">CA</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ user.gold }}</span>
+                    <span class="stat-label">PO</span>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-down toggle-icon" :class="{ 'rotated': showDetails }"></i>
+        </div>
+        
+        <div class="character-details" x-show="showDetails" x-transition>
+            <div class="detail-row">
+                <span class="detail-label">XP:</span>
+                <span class="detail-value">{{ user.xp }} / {% if xp_por_nivel %}{{ xp_por_nivel.get(user.nivel + 1, '—') }}{% else %}—{% endif %}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Atributos:</span>
+                <span class="detail-value">
+                    FOR {{ user.str_val }} ({% if user.mod_str >= 0 %}+{% endif %}{{ user.mod_str }})
+                    DES {{ user.dex_val }} ({% if user.mod_dex >= 0 %}+{% endif %}{{ user.mod_dex }})
+                    CON {{ user.con_val }} ({% if user.mod_con >= 0 %}+{% endif %}{{ user.mod_con }})
+                    INT {{ user.int_val }} ({% if user.mod_int >= 0 %}+{% endif %}{{ user.mod_int }})
+                    SAB {{ user.wis_val }} ({% if user.mod_wis >= 0 %}+{% endif %}{{ user.mod_wis }})
+                    CAR {{ user.cha_val }} ({% if user.mod_cha >= 0 %}+{% endif %}{{ user.mod_cha }})
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Inventário:</span>
+                <span class="detail-value">{{ user.inventario|length }} itens</span>
+            </div>
+            {% if user.party_id %}
+            <div class="detail-row">
+                <span class="detail-label">Party:</span>
+                <span class="detail-value badge badge-party">{{ user.party_id }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Action Cards -->
+    <div class="lobby-grid">
+        <!-- Card: Jogar / Entrar na Party -->
+        <a href="{% if user.party_id %}/game/jogar/{{ user.party_id }}{% else %}#{% endif %}" 
+           class="card lobby-card {% if not user.party_id %}disabled{% endif %}" 
+           {% if not user.party_id %}onclick="return false;"{% endif %}>
+            <div class="lobby-card-icon" {% if user.party_id %}style="background: linear-gradient(135deg, var(--gold), var(--gold-dark));"{% else %}style="opacity: 0.5;"{% endif %}>
+                <i class="fa-solid {% if user.party_id %}fa-dice-d20{% else %}fa-lock{% endif %}"></i>
+            </div>
+            <div class="lobby-card-content">
+                <h3 class="lobby-card-title">{% if user.party_id %}CONTINUAR AVENTURA{% else %}ENTRAR NA PARTIDA{% endif %}</h3>
+                <p class="lobby-card-desc">
+                    {% if user.party_id %}
+                    Sua party <strong>{{ user.party_id }}</strong> está te esperando na cena <strong>{% if campanha %}{{ campanha.cena_nome }}{% else %}Carvalhal{% endif %}</strong>.
+                    {% else %}
+                    Você não está em nenhuma party. Crie uma ou entre com um código PTY-XXXXX.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="lobby-card-action">
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
+        </a>
+        
+        <!-- Card: Criar Party -->
+        <a href="/auth/party/create" class="card lobby-card">
+            <div class="lobby-card-icon" style="background: linear-gradient(135deg, #2E7D32, #1B5E20);">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="lobby-card-content">
+                <h3 class="lobby-card-title">CRIAR PARTIDA</h3>
+                <p class="lobby-card-desc">Seja o líder de uma nova aventura. Gere um código de party e convide até 4 amigos.</p>
+            </div>
+            <div class="lobby-card-action">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+        </a>
+        
+        <!-- Card: Entrar na Party -->
+        <a href="/auth/party/join" class="card lobby-card">
+            <div class="lobby-card-icon" style="background: linear-gradient(135deg, #6A1B9A, #4A148C);">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <div class="lobby-card-content">
+                <h3 class="lobby-card-title">ENTRAR NA PARTIDA</h3>
+                <p class="lobby-card-desc">Tem um código de party? Digite PTY-XXXXX e junte-se aos seus amigos na masmorra.</p>
+            </div>
+            <div class="lobby-card-action">
+                <i class="fa-solid fa-sign-in-alt"></i>
+            </div>
+        </a>
+        
+        <!-- Card: Criar Personagem -->
+        <a href="/game/character/create" class="card lobby-card">
+            <div class="lobby-card-icon" style="background: linear-gradient(135deg, #1565C0, #0D47A1);">
+                <i class="fa-solid fa-user-fantasy"></i>
+            </div>
+            <div class="lobby-card-content">
+                <h3 class="lobby-card-title">NOVO PERSONAGEM</h3>
+                <p class="lobby-card-desc">Crie um novo herói: escolha raça, classe, background e role seus atributos.</p>
+            </div>
+            <div class="lobby-card-action">
+                <i class="fa-solid fa-magic"></i>
+            </div>
+        </a>
+        
+        <!-- Card: Loja do Carvalhal -->
+        <a href="/game/shop" class="card lobby-card">
+            <div class="lobby-card-icon" style="background: linear-gradient(135deg, var(--gold), #B8860B);">
+                <i class="fa-solid fa-store"></i>
+            </div>
+            <div class="lobby-card-content">
+                <h3 class="lobby-card-title">LOJA DO CARVALHAL</h3>
+                <p class="lobby-card-desc">Compre poções, armas, armaduras e equipamentos. {{ user.gold }} PO disponíveis.</p>
+            </div>
+            <div class="lobby-card-action">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+        </a>
+        
+        <!-- Card: Configurações -->
+        <a href="/auth/me" class="card lobby-card">
+            <div class="lobby-card-icon" style="background: linear-gradient(135deg, #757575, #424242);">
+                <i class="fa-solid fa-gear"></i>
+            </div>
+            <div class="lobby-card-content">
+                <h3 class="lobby-card-title">CONFIGURAÇÕES</h3>
+                <p class="lobby-card-desc">Gerencie sua conta, altere senha, veja estatísticas e histórico de partidas.</p>
+            </div>
+            <div class="lobby-card-action">
+                <i class="fa-solid fa-cog"></i>
+            </div>
+        </a>
+    </div>
+    
+    <!-- Quick Stats Bar -->
+    <div class="quick-stats">
+        <div class="stat-item">
+            <i class="fa-solid fa-heart"></i>
+            <span>{{ user.hp_atual }}/{{ user.hp_maximo }} HP</span>
+        </div>
+        <div class="stat-item">
+            <i class="fa-solid fa-shield"></i>
+            <span>CA {{ user.modificador_defesa }}</span>
+        </div>
+        <div class="stat-item">
+            <i class="fa-solid fa-coins"></i>
+            <span>{{ user.gold }} PO</span>
+        </div>
+        <div class="stat-item">
+            <i class="fa-solid fa-dice-d20"></i>
+            <span>Atk +{{ user.modificador_ataque }}</span>
+        </div>
+    </div>
+</div>
+
+<script>
+function getClassIcon(classe) {
+    const icons = {
+        'Guerreiro': '⚔️', 'Mago': '☄️', 'Ladino': '🗡️', 'Clérigo': '✨',
+        'Bárbaro': '😡', 'Bardo': '🎵', 'Bruxo': '🟣', 'Druida': '🌿',
+        'Feiticeiro': '🔮', 'Monge': '🥋', 'Paladino': '⚔️✨', 'Patrulheiro': '🏹',
+        'Artífice': '⚙️', 'Aventureiro': '🎭'
+    };
+    return icons[classe] || '🎲';
+}
+</script>
+{% endblock %}

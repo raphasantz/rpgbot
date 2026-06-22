@@ -1,0 +1,63 @@
+[
+  {
+    "party_id": "PTY-2SJNJ",
+    "host_id": "5326646936",
+    "aventura_ativa": "cidadela",
+    "cena_atual": "sala_03",
+    "estado_salas": {
+      "_visitadas": [
+        "carvalhal",
+        "estrada_velha",
+        "ravina_escura",
+        "sala_12",
+        "sala_32",
+        "sala_25",
+        "sala_23"
+      ]
+    },
+    "momento": "inicio",
+    "tensao": 0,
+    "turno_atual": 1,
+    "em_combate": false,
+    "fila_iniciativa": [],
+    "indice_turno": 0,
+    "bolsa_da_party": {
+      "ouro": 0,
+      "itens": []
+    }
+  },
+  {
+    "party_id": "PTY-C8S3T",
+    "host_id": "local-testesync2",
+    "aventura_ativa": "cidadela",
+    "cena_atual": "carvalhal",
+    "estado_salas": {},
+    "momento": "inicio",
+    "tensao": 0,
+    "turno_atual": 1,
+    "em_combate": false,
+    "fila_iniciativa": [],
+    "indice_turno": 0,
+    "bolsa_da_party": {
+      "ouro": 0,
+      "itens": []
+    }
+  },
+  {
+    "party_id": "PTY-06KGG",
+    "host_id": "local-testesync5",
+    "aventura_ativa": "cidadela",
+    "cena_atual": "carvalhal",
+    "estado_salas": {},
+    "momento": "inicio",
+    "tensao": 0,
+    "turno_atual": 1,
+    "em_combate": false,
+    "fila_iniciativa": [],
+    "indice_turno": 0,
+    "bolsa_da_party": {
+      "ouro": 0,
+      "itens": []
+    }
+  }
+]

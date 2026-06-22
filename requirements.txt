@@ -1,0 +1,6 @@
+python-dotenv
+sqlalchemy
+asyncpg
+aiosqlite
+customtkinter
+pillow

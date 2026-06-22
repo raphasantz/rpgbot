@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Login — Mesanerd Web{% endblock %}
+
+{% block content %}
+<div class="page-login">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🎲</div>
+            <h1 class="login-title">MEZZARPG</h1>
+            <p class="login-subtitle">Campanhas Online</p>
+        </div>
+        
+        <form action="/auth/login" method="post" class="login-form" novalidate>
+            <div class="form-group">
+                <label for="email" class="form-label">
+                    <i class="fa-solid fa-envelope"></i> Email
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-input" 
+                    placeholder="seu@email.com"
+                    required
+                    autocomplete="email"
+                    autofocus
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fa-solid fa-lock"></i> Senha
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-input" 
+                    placeholder="••••••••"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+            
+            <div class="form-group form-checkbox">
+                <input type="checkbox" id="remember_me" name="remember_me">
+                <label for="remember_me">Lembrar-me por 30 dias</label>
+            </div>
+
+            <div class="form-group form-forgot">
+                <a href="/auth/forgot" class="forgot-link">
+                    <i class="fa-solid fa-key"></i> Esqueci minha senha
+                </a>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fa-solid fa-right-to-bracket"></i> Entrar
+            </button>
+        </form>
+        
+        {% include 'partials/google_login_button.html' %}
+        
+        <div class="login-actions">
+            <a href="/auth/register" class="btn btn-secondary btn-block">
+                <i class="fa-solid fa-user-plus"></i> Criar conta
+            </a>
+            
+            <button 
+                type="button" 
+                class="btn btn-outline btn-block" 
+                hx-get="/auth/guest" 
+                hx-target="body" 
+                hx-swap="outerHTML"
+            >
+                <i class="fa-solid fa-mask"></i> Entrar como Convidado (Demo)
+            </button>
+        </div>
+        
+        <div class="login-footer">
+            <p>Novo por aqui? <a href="/auth/register">Crie sua conta</a> e comece sua aventura!</p>
+        </div>
+    </div>
+    
+    <!-- Background decoration -->
+    <div class="login-bg-decoration">
+        <div class="bg-die bg-die-1"></div>
+        <div class="bg-die bg-die-2"></div>
+        <div class="bg-die bg-die-3"></div>
+    </div>
+</div>
+{% endblock %}

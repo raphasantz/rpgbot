@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Esqueci a Senha — MezzaRPG{% endblock %}
+
+{% block content %}
+<div class="page-login">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🔑</div>
+            <h1 class="login-title">ESQUECI MINHA SENHA</h1>
+            <p class="login-subtitle">Digite seu email para receber instruções de recuperação</p>
+        </div>
+
+        {% if success %}
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check"></i>
+            {{ success|safe }}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/auth/forgot" method="post" class="login-form" novalidate>
+            <div class="form-group">
+                <label for="email" class="form-label">
+                    <i class="fa-solid fa-envelope"></i> Email
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-input" 
+                    placeholder="seu@email.com"
+                    required
+                    autocomplete="email"
+                    autofocus
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fa-solid fa-paper-plane"></i> Enviar link de recuperação
+            </button>
+        </form>
+
+        <div class="login-divider">
+            <span>ou</span>
+        </div>
+
+        <div class="login-actions">
+            <a href="/auth/login" class="btn btn-secondary btn-block">
+                <i class="fa-solid fa-arrow-left"></i> Voltar para Login
+            </a>
+            
+            <a href="/auth/register" class="btn btn-outline btn-block">
+                <i class="fa-solid fa-user-plus"></i> Criar conta
+            </a>
+        </div>
+    </div>
+
+    <div class="login-bg-decoration">
+        <div class="bg-die bg-die-1"></div>
+        <div class="bg-die bg-die-2"></div>
+        <div class="bg-die bg-die-3"></div>
+    </div>
+</div>
+{% endblock %}

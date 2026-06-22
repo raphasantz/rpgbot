@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Redefinir Senha — MezzaRPG{% endblock %}
+
+{% block content %}
+<div class="page-login">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🔐</div>
+            <h1 class="login-title">REDEFINIR SENHA</h1>
+            <p class="login-subtitle">Digite sua nova senha abaixo</p>
+        </div>
+
+        {% if success %}
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check"></i>
+            {{ success|safe }}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if token %}
+        <form action="/auth/reset" method="post" class="login-form" novalidate>
+            <input type="hidden" name="token" value="{{ token }}">
+            
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fa-solid fa-lock"></i> Nova Senha
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-input" 
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                    minlength="6"
+                    autocomplete="new-password"
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirm" class="form-label">
+                    <i class="fa-solid fa-lock"></i> Confirmar Nova Senha
+                </label>
+                <input 
+                    type="password" 
+                    id="password_confirm" 
+                    name="password_confirm" 
+                    class="form-input" 
+                    placeholder="Repita a nova senha"
+                    required
+                    minlength="6"
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fa-solid fa-key"></i> Redefinir Senha
+            </button>
+        </form>
+        {% endif %}
+
+        <div class="login-divider">
+            <span>ou</span>
+        </div>
+
+        <div class="login-actions">
+            <a href="/auth/login" class="btn btn-secondary btn-block">
+                <i class="fa-solid fa-arrow-left"></i> Voltar para Login
+            </a>
+            
+            <a href="/auth/forgot" class="btn btn-outline btn-block">
+                <i class="fa-solid fa-envelope"></i> Solicitar novo link
+            </a>
+        </div>
+    </div>
+
+    <div class="login-bg-decoration">
+        <div class="bg-die bg-die-1"></div>
+        <div class="bg-die bg-die-2"></div>
+        <div class="bg-die bg-die-3"></div>
+    </div>
+</div>
+{% endblock %}

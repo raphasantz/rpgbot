@@ -1,0 +1,10 @@
+[
+  {
+    "id": "cidadela_sem_sol",
+    "nome": "Cidadela Sem Sol",
+    "descricao": "Aventura introdutória de D&D 5e",
+    "cena_inicial": "carvalhal",
+    "nivel_minimo": 1,
+    "nivel_maximo": 3
+  }
+]

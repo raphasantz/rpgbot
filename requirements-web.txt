@@ -1,0 +1,30 @@
+# Core web framework
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+jinja2==3.1.4
+
+# Auth & security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+authlib>=1.3.0
+
+# Database (existing)
+sqlalchemy==2.0.36
+asyncpg==0.29.0
+aiosqlite==0.20.0
+python-dotenv==1.0.1
+
+# HTTP client
+httpx==0.27.2
+
+# WebSocket
+websockets==13.1
+
+# Existing game deps
+customtkinter==5.2.2
+pillow==10.4.0
+
+# Dev
+pytest==8.3.3
+pytest-asyncio==0.23.7

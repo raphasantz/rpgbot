@@ -1,0 +1,98 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+env/
+.env
+.env.local
+.env.*
+requirements.txt.bak
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Logs
+*.log
+*.log.*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing
+.coverage
+coverage/
+htmlcov/
+.nyc_output
+coverage-final.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.spec
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# PyTest
+.pytest_cache/
+
+# Coverage
+.coverage*
+
+# PyInstaller
+build/
+dist/
+
+# Mesanerd (jogo desktop)
+.cache_imagens/
+saves/jogador_atual.json
+saves/backup_*.json
+version_info.txt
+
+# Scripts de teste / debug temporários
+_test_*.py
+_*.py
+!update_check.py
+
+# Arquivo env duplicado (temo o .env com ponto)
+env
+
+# Diffs antigos
+_diff_reports/
+# PDFs de aventura (documentos de referência)
+*.pdf
+
+# Saves de teste
+saves/*.json

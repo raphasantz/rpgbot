@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar na Partida — MezzaRPG{% endblock %}
+
+{% block content %}
+<div class="page-login">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🔑</div>
+            <h1 class="login-title">ENTRAR NA PARTIDA</h1>
+            <p class="login-subtitle">Digite o código da party para se juntar aos seus amigos</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/auth/party/join" method="post" class="login-form" novalidate>
+            <div class="form-group">
+                <label for="party_id" class="form-label">
+                    <i class="fa-solid fa-key"></i> Código da Party
+                </label>
+                <input 
+                    type="text" 
+                    id="party_id" 
+                    name="party_id" 
+                    class="form-input text-uppercase" 
+                    placeholder="PTY-XXXXX" 
+                    required
+                    maxlength="9"
+                    autocomplete="off"
+                    autofocus
+                    style="letter-spacing: 0.1em;"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fa-solid fa-sign-in-alt"></i> Entrar na Partida
+            </button>
+        </form>
+
+        <div class="login-divider">
+            <span>ou</span>
+        </div>
+
+        <div class="login-actions">
+            <a href="/auth/party/create" class="btn btn-secondary btn-block">
+                <i class="fa-solid fa-users"></i> Criar Nova Partida
+            </a>
+        </div>
+
+        <div class="login-footer">
+            <p><a href="/game/lobby">← Voltar ao Lobby</a></p>
+        </div>
+    </div>
+
+    <div class="login-bg-decoration">
+        <div class="bg-die bg-die-1"></div>
+        <div class="bg-die bg-die-2"></div>
+        <div class="bg-die bg-die-3"></div>
+    </div>
+</div>
+{% endblock %}

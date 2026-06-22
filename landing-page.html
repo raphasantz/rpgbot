@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPG Bot — Cidadela Sem Sol | Desktop Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS — Dark Fantasy / Sunless Citadel Theme
+       ========================================================================== */
+    :root {
+      /* Colors */
+      --ink: #f5efe6;
+      --ink-muted: #b8afa0;
+      --ink-dim: #8a7f6d;
+      --parchment: #1a1612;
+      --parchment-elevated: #231d17;
+      --parchment-hover: #2d251d;
+      --border: #3d3328;
+      --border-bright: #5a4d3a;
+      --gold: #c9a84c;
+      --gold-dim: #9d8238;
+      --gold-bright: #e8c86d;
+      --ember: #c05a2a;
+      --ember-bright: #e87a3a;
+      --blood: #8b2e2e;
+      --blood-dim: #5c1f1f;
+      --moss: #4a6b3a;
+      --moss-bright: #6b9e4f;
+      --shadow: rgba(0,0,0,0.6);
+      --fog: rgba(20,16,12,0.85);
+      --fog-light: rgba(30,24,18,0.6);
+
+      /* Typography */
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Cormorant Garamond', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+
+      /* Scale */
+      --step--2: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --step--1: clamp(0.875rem, 0.8rem + 0.4vw, 1rem);
+      --step-0: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+      --step-1: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+      --step-2: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+      --step-3: clamp(2rem, 1.7rem + 1.5vw, 3rem);
+      --step-4: clamp(3rem, 2.5rem + 2.5vw, 5rem);
+
+      /* Spacing */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.5rem;
+      --space-6: 2rem;
+      --space-8: 3rem;
+      --space-10: 4rem;
+      --space-12: 6rem;
+
+      /* Radii */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px var(--shadow);
+      --shadow-md: 0 4px 12px var(--shadow);
+      --shadow-lg: 0 8px 24px var(--shadow);
+      --shadow-glow: 0 0 20px rgba(201,168,76,0.15);
+
+      /* Transitions */
+      --transition-fast: 120ms ease;
+      --transition-base: 200ms ease;
+      --transition-slow: 350ms ease;
+
+      /* Layout */
+      --max-width: 1200px;
+      --header-height: 80px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ==========================================================================
+       RESET & BASE
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: var(--step-0);
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--parchment);
+      overflow-x: hidden;
+    }
+
+    /* Background texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,0.03) 0%, transparent 70%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 400px;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Fog overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60%;
+      background: linear-gradient(180deg, rgba(20,16,12,0.9) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    a {
+      color: var(--gold);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+    a:hover { color: var(--gold-bright); }
+
+    img { max-width: 100%; height: auto; display: block; }
+
+    /* ==========================================================================
+       TYPOGRAPHY
+       ========================================================================== */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    h1 { font-size: var(--step-4); letter-spacing: 0.02em; }
+    h2 { font-size: var(--step-3); letter-spacing: 0.01em; }
+    h3 { font-size: var(--step-2); font-weight: 600; }
+    h4 { font-size: var(--step-1); font-weight: 600; }
+    h5 { font-size: var(--step-0); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
+
+    p { font-size: var(--step-0); color: var(--ink-muted); }
+    .lead { font-size: var(--step-1); color: var(--ink); line-height: 1.6; }
+
+    .kbd {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--parchment-elevated);
+      border: 1px solid var(--border);
+      padding: 0.15em 0.5em;
+      border-radius: var(--radius-sm);
+      color: var(--gold-dim);
+    }
+
+    /* ==========================================================================
+       LAYOUT UTILITIES
+       ========================================================================== */
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--space-5);
+      position: relative;
+      z-index: 2;
+    }
+
+    .section {
+      padding: var(--space-12) 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: var(--space-8) 0;
+    }
+
+    .grid { display: grid; gap: var(--space-6); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+    @media (max-width: 900px) {
+      .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* ==========================================================================
+       BUTTONS
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-family: var(--font-display);
+      font-size: var(--step--1);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+    .btn:hover::before { opacity: 1; }
+
+    .btn-primary {
+      background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dim) 100%);
+      color: var(--parchment);
+      box-shadow: var(--shadow-md), var(--shadow-glow);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg), var(--shadow-glow);
+    }
+
+    .btn-secondary {
+      background: var(--parchment-elevated);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--parchment-hover);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-muted);
+      border: 1px solid transparent;
+    }
+    .btn-ghost:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    /* ==========================================================================
+       CARDS
+       ========================================================================== */
+    .card {
+      background: var(--parchment-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+    .card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--parchment) 0%, var(--parchment-elevated) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+      color: var(--gold);
+      font-size: 1.5rem;
+    }
+
+    /* ==========================================================================
+       HEADER / NAV
+       ========================================================================== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      background: rgba(26,22,18,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-family: var(--font-display);
+      font-size: var(--step-1);
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--parchment);
+      box-shadow: var(--shadow-glow);
+    }
+    .nav { display: flex; align-items: center; gap: var(--space-2); }
+    .nav-link {
+      font-family: var(--font-display);
+      font-size: var(--step--2);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--gold);
+      background: rgba(201,168,76,0.1);
+    }
+
+    /* Mobile menu */
+    .menu-toggle { display: none; }
+    @media (max-width: 768px) {
+      .menu-toggle { display: flex; }
+      .nav {
+        position: absolute;
+        top: var(--header-height);
+        left: 0; right: 0;
+        background: rgba(26,22,18,0.98);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        padding: var(--space-4);
+        gap: var(--space-1);
+        display: none;
+      }
+      .nav.open { display: flex; }
+    }
+
+    /* ==========================================================================
+       HERO
+       ========================================================================== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-top: var(--header-height);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 100% 80% at 50% 20%, rgba(201,168,76,0.05) 0%, transparent 60%),
+        linear-gradient(180deg, var(--parchment) 0%, var(--parchment-elevated) 100%);
+      z-index: -1;
+    }
+    .hero-content {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: var(--space-10);
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; text-align: center; }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-family: var(--font-display);
+      font-size: var(--step--2);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      background: rgba(201,168,76,0.1);
+      border: 1px solid var(--gold);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-5);
+      width: fit-content;
+    }
+
+    .hero-title {
+      margin-bottom: var(--space-4);
+      line-height: 1.1;
+    }
+    .hero-title .accent { color: var(--gold); }
+
+    .hero-desc {
+      font-size: var(--step-1);
+      color: var(--ink-muted);
+      margin-bottom: var(--space-6);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    .hero-actions { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+    @media (max-width: 600px) {
+      .hero-actions { justify-content: center; }
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-8);
+      padding: var(--space-6);
+      background: var(--parchment-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+    @media (max-width: 600px) {
+      .hero-stats { grid-template-columns: 1fr; }
+    }
+    .stat { text-align: center; }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: var(--step-3);
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: var(--step--2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-dim);
+      margin-top: var(--space-1);
+    }
+
+    /* Hero illustration placeholder */
+    .hero-illustration {
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, var(--parchment-elevated) 0%, var(--parchment) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-illustration::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c9a84c' stop-opacity='0.05'/%3E%3Cstop offset='100%25' stop-color='%231a1612' stop-opacity='0.1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g)' width='400' height='300'/%3E%3Ctext x='200' y='140' font-family='Georgia' font-size='18' fill='%235a4d3a' text-anchor='middle' opacity='0.4'%3E🏰 Cidadela Sem Sol%3C/text%3E%3Ctext x='200' y='170' font-family='Georgia' font-size='12' fill='%233d3328' text-anchor='middle' opacity='0.3'%3EProtótipo Desktop · CustomTkinter%3C/text%3E%3C/svg%3E") center/cover no-repeat;
+      opacity: 0.6;
+    }
+    .hero-illustration-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      color: var(--ink-dim);
+    }
+    .hero-illustration-icon { font-size: 4rem; margin-bottom: var(--space-3); opacity: 0.3; }
+
+    /* ==========================================================================
+       FEATURES
+       ========================================================================== */
+    .features-header { text-align: center; margin-bottom: var(--space-10); }
+    .features-grid { margin-top: var(--space-4); }
+
+    .feature-card .card-icon { background: linear-gradient(135deg, rgba(201,168,76,0.1) 0%, var(--parchment-elevated) 100%); }
+    .feature-card h3 { margin-bottom: var(--space-2); }
+    .feature-card p { margin-bottom: var(--space-4); font-size: var(--step-0); }
+
+    .feature-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .tag {
+      font-family: var(--font-mono);
+      font-size: var(--step--2);
+      background: var(--parchment);
+      border: 1px solid var(--border);
+      color: var(--ink-dim);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+    .tag:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ==========================================================================
+       ARCHITECTURE
+       ========================================================================== */
+    .arch-diagram {
+      background: var(--parchment-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      overflow-x: auto;
+    }
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      justify-content: center;
+      min-width: max-content;
+    }
+    .arch-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-5) var(--space-6);
+      background: var(--parchment);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      min-width: 160px;
+      text-align: center;
+      transition: all var(--transition-base);
+    }
+    .arch-node:hover {
+      border-color: var(--gold);
+      box-shadow: var(--shadow-md), var(--shadow-glow);
+    }
+    .arch-node.primary { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+    .arch-node-icon {
+      font-size: 2rem;
+      margin-bottom: var(--space-2);
+    }
+    .arch-node-label {
+      font-family: var(--font-display);
+      font-size: var(--step--1);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+    }
+    .arch-node-sub { font-size: var(--step--2); color: var(--ink-dim); margin-top: var(--space-1); }
+    .arch-arrow {
+      color: var(--gold);
+      font-size: 1.5rem;
+      opacity: 0.6;
+    }
+    .arch-layer {
+      margin-top: var(--space-6);
+      padding-top: var(--space-6);
+      border-top: 1px dashed var(--border);
+    }
+    .arch-layer-title {
+      font-family: var(--font-display);
+      font-size: var(--step--1);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin-bottom: var(--space-4);
+      text-align: center;
+    }
+
+    /* ==========================================================================
+       SCREENSHOTS / DEMO
+       ========================================================================== */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-6);
+    }
+    .demo-card {
+      background: var(--parchment-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all var(--transition-base);
+    }
+    .demo-card:hover { border-color: var(--gold); box-shadow: var(--shadow-lg), var(--shadow-glow); }
+    .demo-image {
+      aspect-ratio: 16/10;
+      background: linear-gradient(135deg, var(--parchment) 0%, var(--parchment-elevated) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 800 500' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%231a1612' width='800' height='500'/%3E%3Crect x='50' y='50' width='700' height='400' fill='none' stroke='%233d3328' stroke-width='2' rx='8'/%3E%3Ctext x='400' y='200' font-family='Cinzel' font-size='24' fill='%235a4d3a' text-anchor='middle' opacity='0.5'%3EScreenshot Placeholder%3C/text%3E%3C/svg%3E") center/cover no-repeat;
+      opacity: 0.4;
+    }
+    .demo-caption { padding: var(--space-4); }
+    .demo-caption h4 { margin-bottom: var(--space-1); }
+    .demo-caption p { font-size: var(--step--1); color: var(--ink-dim); }
+
+    /* ==========================================================================
+       TECH STACK
+       ========================================================================== */
+    .tech-grid { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; }
+    .tech-item {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-family: var(--font-mono);
+      font-size: var(--step--1);
+      background: var(--parchment-elevated);
+      border: 1px solid var(--border);
+      color: var(--ink-muted);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+    .tech-item:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+    .tech-item.primary { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+
+    /* ==========================================================================
+       FOOTER
+       ========================================================================== */
+    .footer {
+      padding: var(--space-10) 0 var(--space-6);
+      border-top: 1px solid var(--border);
+      background: var(--parchment-elevated);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+    @media (max-width: 768px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+    .footer-brand { max-width: 320px; }
+    .footer-logo { margin-bottom: var(--space-4); }
+    .footer-desc { font-size: var(--step--1); color: var(--ink-dim); line-height: 1.7; }
+    .footer-column h5 { margin-bottom: var(--space-4); }
+    .footer-links { display: flex; flex-direction: column; gap: var(--space-2); }
+    .footer-links a { font-size: var(--step--1); color: var(--ink-dim); transition: color var(--transition-fast); }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-bottom {
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      font-size: var(--step--2);
+      color: var(--ink-dim);
+    }
+    .footer-social { display: flex; gap: var(--space-4); }
+    .footer-social a { color: var(--ink-dim); font-size: 1.25rem; transition: color var(--transition-fast); }
+    .footer-social a:hover { color: var(--gold); }
+
+    /* ==========================================================================
+       ANIMATIONS
+       ========================================================================== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .animate-in {
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards;
+    }
+    .hero-title { animation-delay: 0.1s; }
+    .hero-desc { animation-delay: 0.2s; }
+    .hero-actions { animation-delay: 0.3s; }
+    .hero-stats { animation-delay: 0.4s; }
+    .hero-illustration { animation: fadeIn 1s ease 0.2s forwards; opacity: 0; }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-in { animation: none; opacity: 1; }
+      .hero-illustration { animation: none; opacity: 1; }
+    }
+
+    /* ==========================================================================
+       SCROLLBAR
+       ========================================================================== */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--parchment); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid var(--parchment); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+    /* ==========================================================================
+       SELECTION
+       ========================================================================== */
+    ::selection { background: rgba(201,168,76,0.3); color: var(--ink); }
+  </style>
+</head>
+<body>
+  <!-- ==========================================================================
+       HEADER
+       ========================================================================== -->
+  <header class="header" role="banner">
+    <div class="container header-inner">
+      <a href="#" class="logo" aria-label="RPG Bot - Cidadela Sem Sol">
+        <span class="logo-mark">R</span>
+        <span>RPG Bot</span>
+      </a>
+      <nav class="nav" id="nav" role="navigation" aria-label="Navegação principal">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#architecture" class="nav-link">Arquitetura</a>
+        <a href="#demo" class="nav-link">Demo</a>
+        <a href="#tech" class="nav-link">Tech Stack</a>
+        <a href="https://github.com" class="btn btn-ghost" style="margin-left: var(--space-2);">GitHub</a>
+      </nav>
+      <button class="menu-toggle btn btn-ghost" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       HERO
+       ========================================================================== -->
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-text">
+            <div class="hero-badge">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              Protótipo Desktop • v0.9
+            </div>
+            <h1 id="hero-title" class="hero-title animate-in">
+              RPG Bot — <span class="accent">Cidadela Sem Sol</span>
+            </h1>
+            <p class="hero-desc animate-in">
+              Um cliente desktop imersivo para D&D 5e, construído com Python + CustomTkinter.
+              Jogabilidade offline-first com persistência PostgreSQL, motor de combate fiel às regras,
+              narrador IA (OpenAI) e parser local de linguagem natural — tudo em uma interface dark-fantasy.
+            </p>
+            <div class="hero-actions animate-in">
+              <a href="#features" class="btn btn-primary">Explorar Features</a>
+              <a href="#architecture" class="btn btn-secondary">Ver Arquitetura</a>
+            </div>
+            <div class="hero-stats animate-in">
+              <div class="stat">
+                <div class="stat-value">159</div>
+                <div class="stat-label">Cenas Mapeadas</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">43</div>
+                <div class="stat-label">Monstros no Bestiário</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">12</div>
+                <div class="stat-label">NPCs com Diálogo</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-illustration" aria-hidden="true">
+            <div class="hero-illustration-content">
+              <div class="hero-illustration-icon">🏰</div>
+              <p style="font-family: var(--font-display); font-size: var(--step-1); margin-bottom: var(--space-1);">Vila de Carvalhal</p>
+              <p style="font-size: var(--step--1);">Sala inicial • Norte → Estrada Velha</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       FEATURES
+       ========================================================================== -->
+    <section id="features" class="section" aria-labelledby="features-title">
+      <div class="container">
+        <header class="features-header">
+          <h5>Feature Overview</h5>
+          <h2 id="features-title">Tudo que você precisa para mestrar e jogar</h2>
+          <p class="lead" style="max-width: 600px; margin: var(--space-4) auto 0;">
+            Do parser de linguagem natural ao motor de combate D&D 5e, passando por persistência híbrida
+            e narrador IA — cada peça foi pensada para desaparecer e deixar só a história.
+          </p>
+        </header>
+
+        <div class="grid grid-3 features-grid">
+          <!-- Feature 1 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">🎮</div>
+            <h3>Interface Desktop Nativa</h3>
+            <p>CustomTkinter com tema dark-fantasy responsivo. Painéis redimensionáveis: imagem atmosférica no topo, Diário de Bordo com scroll, Caminhos e Ações em botões adaptativos, entrada de comando livre com placeholder contextual.</p>
+            <div class="feature-tags">
+              <span class="tag">CustomTkinter</span>
+              <span class="tag">Responsive Layout</span>
+              <span class="tag">Dark Theme</span>
+            </div>
+          </article>
+
+          <!-- Feature 2 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">⚔️</div>
+            <h3>Motor de Combate D&D 5e</h3>
+            <p>Implementação fiel: rolagem d20 com vantagem/desvantagem, CA calculada (armadura + DEX + escudo), tipos de dano (cortante/perfurante/contundente/elemental), resistências/vulnerabilidades/imunidades, crítico (nat 20 = dano dobrado), salvaguardas de morte.</p>
+            <div class="feature-tags">
+              <span class="tag">D&D 5e Rules</span>
+              <span class="tag">Advantage/Disadvantage</span>
+              <span class="tag">Damage Types</span>
+            </div>
+          </article>
+
+          <!-- Feature 3 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">🤖</div>
+            <h3>Narrador IA (OpenAI) + Fallback Local</h3>
+            <p>Thread assíncrona chama <kbd>gpt-4o-mini</kbd> para interpretar intenção (COMBATE, NAVEGAR, INTERACAO, MAGIA, MANOBRA, DESCANSAR, OUTRO) e narrar o resultado. Se a API falha, narrador local com templates atmosféricos assume transparente.</p>
+            <div class="feature-tags">
+              <span class="tag">OpenAI API</span>
+              <span class="tag">Async Thread</span>
+              <span class="tag">Graceful Fallback</span>
+            </div>
+          </article>
+
+          <!-- Feature 4 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">🗣️</div>
+            <h3>Parser Local de Linguagem Natural</h3>
+            <p>Entende comandos livres antes de ir pra IA: <kbd>"vou pro norte"</kbd>, <kbd>"examino o pedestal"</kbd>, <kbd>"falo com o taverneiro"</kbd>, <kbd>"abro o baú"</kbd>, <kbd>"pego a espada"</kbd>, <kbd>"ajudar o gnomo"</kbd>. Regex portátil, zero latência, offline-first.</p>
+            <div class="feature-tags">
+              <span class="tag">Regex Parser</span>
+              <span class="tag">Zero Latency</span>
+              <span class="tag">PT-BR</span>
+            </div>
+          </article>
+
+          <!-- Feature 5 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">💾</div>
+            <h3>Persistência Híbrida (Local + PostgreSQL)</h3>
+            <p>SQLAlchemy async com <kbd>asyncpg</kbd>. Salva local (JSON em <kbd>saves/</kbd>) e no PostgreSQL remoto. Sincronização automática: cria personagem, atualiza HP/XP/inventário, salva estado de salas, party ID compartilhado. Reconexão resiliente.</p>
+            <div class="feature-tags">
+              <span class="tag">SQLAlchemy</span>
+              <span class="tag">asyncpg</span>
+              <span class="tag">JSON + SQL</span>
+            </div>
+          </article>
+
+          <!-- Feature 6 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">🗺️</div>
+            <h3>Mundo Carregado do Banco (159 salas)</h3>
+            <p>Export JSONs do PostgreSQL → <kbd>db_export/</kbd>: aventura_cidadela.json (cenas com conexões, hazards, loot, NPCs), bestiario_cidadela.json (43 monstros com stats completos), aliados_e_npcs.json (12 NPCs com diálogos), campanhas.json, aventuras.json. Load instantâneo em memória.</p>
+            <div class="feature-tags">
+              <span class="tag">159 Salas</span>
+              <span class="tag">43 Monstros</span>
+              <span class="tag">12 NPCs</span>
+            </div>
+          </article>
+
+          <!-- Feature 7 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">💬</div>
+            <h3>Sistema de Diálogo com NPCs</h3>
+            <p>NPCs por sala (localização exata + fallback por keywords + genérico para Carvalhal). Opções de diálogo como botões de ação: <kbd>Pedir bebida</kbd> (cura +2 HP, 2 PO), <kbd>Perguntar rumores</kbd> (desbloqueia lore), <kbd>Alugar quarto</kbd> (restaura tudo, 5 PO), <kbd>Comida</kbd> (1d8+2 HP, 3 PO).</p>
+            <div class="feature-tags">
+              <span class="tag">Dialogue Trees</span>
+              <span class="tag">Economy</span>
+              <span class="tag">Rest Mechanics</span>
+            </div>
+          </article>
+
+          <!-- Feature 8 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">🎒</div>
+            <h3>Inventário, Loja & Progressão</h3>
+            <p>Inventário por classe (Guerreiro: Cota de Malha + Espada Longa + Escudo + Besta Leve). Loja da Vila (poções, antídotos). Level up (HP por classe, slots de magia, proficiência). Ouro, XP, Hit Dice, descanso curto/longo.</p>
+            <div class="feature-tags">
+              <span class="tag">Class-based Loadout</span>
+              <span class="tag">Shop System</span>
+              <span class="tag">Level Up</span>
+            </div>
+          </article>
+
+          <!-- Feature 9 -->
+          <article class="card feature-card animate-in">
+            <div class="card-icon">🖼️</div>
+            <h3>Cache de Imagens Inteligente</h3>
+            <p>URLs no <kbd>imagens_config.py</kbd> (Imgur/CDN). Download assíncrono com cache em disco (<kbd>.cache_imagens/</kbd>) — primeira vez baixa, depois usa arquivo local. Placeholder procedural (Pillow) se falhar. Redimensiona responsivo no resize da janela.</p>
+            <div class="feature-tags">
+              <span class="tag">Async Download</span>
+              <span class="tag">Disk Cache</span>
+              <span class="tag">Pillow Fallback</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       ARCHITECTURE
+       ========================================================================== -->
+    <section id="architecture" class="section" aria-labelledby="arch-title">
+      <div class="container">
+        <header class="features-header">
+          <h5>Architecture</h5>
+          <h2 id="arch-title">Arquitetura Modular &amp; Desacoplada</h2>
+          <p class="lead" style="max-width: 600px; margin: var(--space-4) auto 0;">
+            Separação clara: UI (CustomTkinter) → Lógica de Jogo (Python puro) → Persistência (SQLAlchemy) → Dados (JSON/SQL).
+            Cada módulo testável isoladamente.
+          </p>
+        </header>
+
+        <div class="arch-diagram">
+          <!-- Camada 1: UI -->
+          <div class="arch-layer">
+            <div class="arch-layer-title">Camada de Apresentação</div>
+            <div class="arch-flow">
+              <div class="arch-node primary">
+                <div class="arch-node-icon">🖥️</div>
+                <div class="arch-node-label">pygame_ui.py</div>
+                <div class="arch-node-sub">CustomTkinter App<br>Event Loop + Threads</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">🧩</div>
+                <div class="arch-node-label">ResponsiveButtonFrame</div>
+                <div class="arch-node-sub">Grid Auto-Flow<br>Mobile-First</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">🖼️</div>
+                <div class="arch-node-label">Image Loader</div>
+                <div class="arch-node-sub">Async + Cache<br>Pillow Placeholder</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Camada 2: Game Logic -->
+          <div class="arch-layer">
+            <div class="arch-layer-title">Lógica de Jogo (Pure Python — Zero Deps Externas)</div>
+            <div class="arch-flow">
+              <div class="arch-node">
+                <div class="arch-node-icon">⚔️</div>
+                <div class="arch-node-label">combat_logic.py</div>
+                <div class="arch-node-sub">Attack Resolution<br>Damage Types<br>Conditions</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">📜</div>
+                <div class="arch-node-label">dnd_5e_rules.py</div>
+                <div class="arch-node-sub">CONDICOES_DND_5E<br>Saving Throws<br>Modificadores</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">🎲</div>
+                <div class="arch-node-label">game_helpers.py</div>
+                <div class="arch-node-sub">Dice Parser<br>Level Up<br>Death Save<br>Rest Mechanics</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">🛒</div>
+                <div class="arch-node-label">ui_utils.py</div>
+                <div class="arch-node-sub">CA Calc<br>Shop/Inventory<br>Proficiências</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Camada 3: Data -->
+          <div class="arch-layer">
+            <div class="arch-layer-title">Camada de Dados</div>
+            <div class="arch-flow">
+              <div class="arch-node">
+                <div class="arch-node-icon">📦</div>
+                <div class="arch-node-label">db_loader.py</div>
+                <div class="arch-node-sub">JSON → Memory<br>CENAS, INIMIGOS, NPCS<br>get_cena(), get_inimigo()</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">🗄️</div>
+                <div class="arch-node-label">db_desktop.py</div>
+                <div class="arch-node-sub">SQLAlchemy Async<br>CRUD Jogador/Campanha<br>Sync Local + Remote</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">📐</div>
+                <div class="arch-node-label">models.py</div>
+                <div class="arch-node-sub">SQLAlchemy ORM<br>Jogador, Campanha,<br>Cena, Inimigo, NPC</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">🔗</div>
+                <div class="arch-node-label">database.py</div>
+                <div class="arch-node-sub">Async Engine<br>Session Manager<br>PostgreSQL + asyncpg</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Camada 4: IA -->
+          <div class="arch-layer">
+            <div class="arch-layer-title">Camada de IA (Opcional)</div>
+            <div class="arch-flow">
+              <div class="arch-node">
+                <div class="arch-node-icon">🤖</div>
+                <div class="arch-node-label">ai_engine.py</div>
+                <div class="arch-node-sub">AsyncOpenAI Client<br>GPT-4o-mini<br>JSON Response Format</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">💾</div>
+                <div class="arch-node-label">TTL Cache</div>
+                <div class="arch-node-sub">cachetools<br>1h TTL<br>1000 entries</div>
+              </div>
+              <span class="arch-arrow">→</span>
+              <div class="arch-node">
+                <div class="arch-node-icon">🔄</div>
+                <div class="arch-node-label">Fallback Local</div>
+                <div class="arch-node-sub">Templates por intenção<br>Zero API calls<br>Sempre disponível</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-top: var(--space-8);">
+          <div class="card">
+            <h3>Fluxo de Comando do Jogador</h3>
+            <ol style="margin-top: var(--space-4); padding-left: var(--space-6); line-height: 2; color: var(--ink-muted);">
+              <li>Digite no chat ou clique botão</li>
+              <li><strong>Parser Local</strong> tenta match (regex)</li>
+              <li>Se entende → executa mecânica direto</li>
+              <li>Se não → Thread IA (<kbd>_interpretar_com_ia</kbd>)</li>
+              <li>OpenAI retorna <kbd>{intencao, alvo, estilo...}</kbd></li>
+              <li><strong>_processar_ia_resultado</strong> executa mecânica</li>
+              <li>Narrador (IA ou local) gera texto</li>
+              <li>Log atualiza + auto-save</li>
+            </ol>
+          </div>
+          <div class="card">
+            <h3>Estrutura de Pastas</h3>
+            <pre style="margin-top: var(--space-4); font-family: var(--font-mono); font-size: var(--step--1); color: var(--ink-muted); overflow-x: auto;"><code>rpgbot-mezzarpg/
+├── pygame_ui.py          # App principal (125 KB)
+├── combat_logic.py       # Motor de combate
+├── dnd_5e_rules.py       # Regras D&D 5e
+├── game_helpers.py       # Helpers mecânicos
+├── ui_utils.py           # Utils UI/Loja/CA
+├── db_loader.py          # JSON → Memory
+├── db_desktop.py         # SQLAlchemy Sync
+├── models.py             # ORM Models
+├── database.py           # Async Engine
+├── ai_engine.py          # OpenAI Client
+├── imagens_config.py     # URLs de imagens
+├── db_export/            # 159 cenas + bestiário
+├── saves/                # JSON saves locais
+├── .cache_imagens/       # Cache imagens
+└── .env                  # DATABASE_URL + OPENAI_KEY</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       DEMO / SCREENSHOTS
+       ========================================================================== -->
+    <section id="demo" class="section" aria-labelledby="demo-title">
+      <div class="container">
+        <header class="features-header">
+          <h5>Demo</h5>
+          <h2 id="demo-title">A Interface em Ação</h2>
+          <p class="lead" style="max-width: 600px; margin: var(--space-4) auto 0;">
+            Capturas do protótipo rodando no Windows 11. Tema dark-fantasy, imagem atmosférica da Vila de Carvalhal,
+            log narrativo com scroll, botões de navegação e ações contextuais.
+          </p>
+        </header>
+
+        <div class="demo-grid">
+          <article class="demo-card">
+            <div class="demo-image" aria-hidden="true"></div>
+            <div class="demo-caption">
+              <h4>Tela Inicial — Vila de Carvalhal</h4>
+              <p>Imagem atmosférica da taverna "Velho Javali". Diário de Bordo mostra descrição da sala. Botão "Norte" para Estrada Velha.</p>
+            </div>
+          </article>
+          <article class="demo-card">
+            <div class="demo-image" aria-hidden="true"></div>
+            <div class="demo-caption">
+              <h4>Diálogo com Taverneiro</h4>
+              <p>Botões de opção: Pedir bebida, Perguntar rumores, Alugar quarto, Sair. Ouro e HP atualizados em tempo real.</p>
+            </div>
+          </article>
+          <article class="demo-card">
+            <div class="demo-image" aria-hidden="true"></div>
+            <div class="demo-caption">
+              <h4>Combate — Kobold Sentinela</h4>
+              <p>Bloco de iniciativa, rolagem d20 com vantagem, cálculo de dano com tipo (perfurante), HP do grupo inimigo.</p>
+            </div>
+          </article>
+          <article class="demo-card">
+            <div class="demo-image" aria-hidden="true"></div>
+            <div class="demo-caption">
+              <h4>Inventário &amp; Loja</h4>
+              <p>Aba Comprar/Vender com preços, gold do jogador, itens por classe. Popup modal responsivo.</p>
+            </div>
+          </article>
+        </div>
+
+        <div style="text-align: center; margin-top: var(--space-8);">
+          <a href="#" class="btn btn-secondary">Rodar Localmente <kbd>python pygame_ui.py</kbd></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       TECH STACK
+       ========================================================================== -->
+    <section id="tech" class="section" aria-labelledby="tech-title">
+      <div class="container">
+        <header class="features-header">
+          <h5>Tech Stack</h5>
+          <h2 id="tech-title">Ferramentas Escolhidas a Dedo</h2>
+        </header>
+        <div class="tech-grid">
+          <span class="tech-item primary">Python 3.11+</span>
+          <span class="tech-item">CustomTkinter</span>
+          <span class="tech-item">SQLAlchemy 2.0</span>
+          <span class="tech-item">asyncpg</span>
+          <span class="tech-item">OpenAI API</span>
+          <span class="tech-item">Pillow</span>
+          <span class="tech-item">cachetools</span>
+          <span class="tech-item">python-dotenv</span>
+          <span class="tech-item">PostgreSQL</span>
+          <span class="tech-item">UV (package mgr)</span>
+          <span class="tech-item">Git Bash / MSYS2</span>
+        </div>
+
+        <div class="grid grid-3" style="margin-top: var(--space-10);">
+          <div class="card">
+            <h3>Por que CustomTkinter?</h3>
+            <ul style="margin-top: var(--space-4); padding-left: var(--space-6); line-height: 2; color: var(--ink-muted);">
+              <li>Tema dark nativo + customização CSS-like</li>
+              <li>Widgets modernos (CTkButton, CTkTextbox, CTkScrollableFrame)</li>
+              <li>Leve — sem Chromium/Electron overhead</li>
+              <li>Binário nativo Windows via <kbd>pyinstaller</kbd></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Por que SQLAlchemy Async?</h3>
+            <ul style="margin-top: var(--space-4); padding-left: var(--space-6); line-height: 2; color: var(--ink-muted);">
+              <li>Async/await nativo — não bloqueia UI</li>
+              <li>ORM tipado com <kbd>Mapped</kbd>/<kbd>mapped_column</kbd></li>
+              <li>JSONB nativo do PostgreSQL para inventário/estado</li>
+              <li>Migrações via Alembic quando necessário</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Por que JSON + SQL Híbrido?</h3>
+            <ul style="margin-top: var(--space-4); padding-left: var(--space-6); line-height: 2; color: var(--ink-muted);">
+              <li>UI desktop roda offline (JSON em memória)</li>
+              <li>Bot Telegram usa SQL (persistência real)</li>
+              <li><kbd>db_loader.py</kbd> abstrai a fonte</li>
+              <li>Export/Import via scripts simples</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       GETTING STARTED
+       ========================================================================== -->
+    <section class="section" style="background: linear-gradient(180deg, transparent, rgba(201,168,76,0.03));" aria-labelledby="start-title">
+      <div class="container">
+        <div class="card" style="background: linear-gradient(135deg, rgba(201,168,76,0.05) 0%, var(--parchment-elevated) 100%); border-color: var(--gold);">
+          <header class="features-header">
+            <h5>Getting Started</h5>
+            <h2 id="start-title">Rode em 3 Passos</h2>
+          </header>
+          <div class="grid grid-3" style="margin-top: var(--space-6);">
+            <div style="text-align: center; padding: var(--space-4);">
+              <div style="width: 64px; height: 64px; margin: 0 auto var(--space-4); background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: var(--step-2); font-weight: 700; color: var(--parchment); box-shadow: var(--shadow-glow);">1</div>
+              <h4>Clone &amp; Configure</h4>
+              <pre style="margin-top: var(--space-3); text-align: left; font-family: var(--font-mono); font-size: var(--step--2); background: var(--parchment); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); color: var(--ink-muted); overflow-x: auto;"><code>git clone &lt;repo&gt;
+cd rpgbot-mezzarpg
+cp .env.example .env
+# Edite DATABASE_URL e OPENAI_API_KEY</code></pre>
+            </div>
+            <div style="text-align: center; padding: var(--space-4);">
+              <div style="width: 64px; height: 64px; margin: 0 auto var(--space-4); background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: var(--step-2); font-weight: 700; color: var(--parchment); box-shadow: var(--shadow-glow);">2</div>
+              <h4>Instale Dependências</h4>
+              <pre style="margin-top: var(--space-3); text-align: left; font-family: var(--font-mono); font-size: var(--step--2); background: var(--parchment); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); color: var(--ink-muted); overflow-x: auto;"><code>uv sync
+# ou: pip install -r requirements.txt
+# pygame: uv pip install pygame</code></pre>
+            </div>
+            <div style="text-align: center; padding: var(--space-4);">
+              <div style="width: 64px; height: 64px; margin: 0 auto var(--space-4); background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: var(--step-2); font-weight: 700; color: var(--parchment); box-shadow: var(--shadow-glow);">3</div>
+              <h4>Rode o Protótipo</h4>
+              <pre style="margin-top: var(--space-3); text-align: left; font-family: var(--font-mono); font-size: var(--step--2); background: var(--parchment); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); color: var(--ink-muted); overflow-x: auto;"><code>python pygame_ui.py
+# Janela abre em ~2s
+# Save "grok" já existe para testar</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+    <footer class="footer" role="contentinfo">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a href="#" class="footer-logo logo">
+              <span class="logo-mark">R</span>
+              <span>RPG Bot</span>
+            </a>
+            <p class="footer-desc">
+              Protótipo desktop para D&D 5e — Cidadela Sem Sol.
+              Construído com Python, CustomTkinter, PostgreSQL e OpenAI.
+              Offline-first, IA quando disponível, narrativa sempre.
+            </p>
+          </div>
+          <div class="footer-column">
+            <h5>Projeto</h5>
+            <nav class="footer-links">
+              <a href="#features">Features</a>
+              <a href="#architecture">Arquitetura</a>
+              <a href="#demo">Demo</a>
+              <a href="#tech">Tech Stack</a>
+            </nav>
+          </div>
+          <div class="footer-column">
+            <h5>Módulos Principais</h5>
+            <nav class="footer-links">
+              <a href="#">pygame_ui.py</a>
+              <a href="#">combat_logic.py</a>
+              <a href="#">ai_engine.py</a>
+              <a href="#">db_desktop.py</a>
+            </nav>
+          </div>
+          <div class="footer-column">
+            <h5>Dados</h5>
+            <nav class="footer-links">
+              <a href="#">159 Cenas</a>
+              <a href="#">43 Monstros</a>
+              <a href="#">12 NPCs</a>
+              <a href="#">3 Campanhas</a>
+            </nav>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 RPG Bot — Cidadela Sem Sol. Protótipo não-oficial D&D 5e.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="GitHub"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a>
+            <a href="#" aria-label="Discord"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.675 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.083.083 0 0 0 .031.057 19.9 19.9 0 0 0 5.992 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-.062.076.076 0 0 0 .077-.078c.051-.264.188-.682.359-1.018a12.164 12.164 0 0 0 2.314 0c.179.358.306.775.365 1.021.077.055.177.109.307.109.129 0 .237-.05.314-.11a13.925 13.925 0 0 0 1.234.068.078.078 0 0 0 .078-.078c.051-.28.18-.708.348-1.022a12.312 12.312 0 0 0 2.312 0c.167.336.296.75.355 1.012a.076.076 0 0 0 .085.035 19.839 19.839 0 0 0 6.085-3.204.077.077 0 0 0 .023-.057c.422-4.566-.362-9.173-3.545-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333 1.007-2.419 2.157-2.419 1.163 0 2.157 1.09 2.157 2.42 0 1.334-1.01 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333 1.007-2.419 2.157-2.419 1.163 0 2.171 1.09 2.157 2.42 0 1.334-1.009 2.419-2.157 2.419z"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ==========================================================================
+       JS: Interactions
+       ========================================================================== -->
+  <script>
+    // Mobile menu toggle
+    const menuToggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('.nav');
+    if (menuToggle && nav) {
+      menuToggle.addEventListener('click', () => {
+        const open = nav.classList.toggle('open');
+        menuToggle.setAttribute('aria-expanded', open);
+      });
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        const target = document.querySelector(targetId);
+        if (target) {
+          e.preventDefault();
+          const headerHeight = document.querySelector('.header').offsetHeight;
+          const targetPos = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+          window.scrollTo({ top: targetPos, behavior: 'smooth' });
+          if (nav.classList.contains('open')) {
+            nav.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+          }
+        }
+      });
+    });
+
+    // IntersectionObserver for scroll animations
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+    // Parallax hero illustration (subtle)
+    const heroIllustration = document.querySelector('.hero-illustration');
+    if (heroIllustration) {
+      window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        const hero = document.querySelector('.hero');
+        if (hero && scrolled < hero.offsetHeight) {
+          heroIllustration.style.transform = `translateY(${scrolled * 0.15}px)`;
+        }
+      }, { passive: true });
+    }
+
+    // Active nav link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { threshold: 0.3, rootMargin: '-80px 0px -60% 0px' });
+    sections.forEach(s => sectionObserver.observe(s));
+
+    // Console easter egg
+    console.log('%c🏰 RPG Bot — Cidadela Sem Sol', 'font-family: Cinzel; font-size: 20px; color: #c9a84c; text-shadow: 0 0 10px rgba(201,168,76,0.5);');
+    console.log('%c"Bem-vindo à Taverna do Velho Javali. O que vai ser?"', 'font-family: Cormorant Garamond; font-size: 14px; color: #b8afa0; font-style: italic;');
+    console.log('%cTente: python pygame_ui.py', 'font-family: "IBM Plex Mono"; font-size: 12px; color: #5a4d3a;');
+  </script>
+</body>
+</html>
