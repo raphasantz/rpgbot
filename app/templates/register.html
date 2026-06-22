@@ -5,6 +5,19 @@
 {% block content %}
 <div class="page-login">
     <div class="login-card">
+        <!-- HP Bar temática -->
+        <div class="hp-bar-container">
+            <div class="hp-bar-label">
+                <span class="hp-icon">❤️</span>
+                <span class="hp-text">HP</span>
+                <span class="hp-value">100 / 100</span>
+            </div>
+            <div class="hp-bar-track">
+                <div class="hp-bar-fill" style="width: 100%"></div>
+                <div class="hp-bar-shine"></div>
+            </div>
+        </div>
+
         <div class="login-header">
             <div class="login-icon">🎲</div>
             <h1 class="login-title">CRIAR CONTA</h1>
@@ -54,7 +67,7 @@
                     id="password" 
                     name="password" 
                     class="form-input" 
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     required
                     minlength="6"
                     autocomplete="new-password"
